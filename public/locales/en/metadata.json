@@ -1,0 +1,16 @@
+{
+  "global": {
+    "title": "Next.js Template",
+    "description": "A Next.js project template with TypeScript, Next-Intl, and Tailwind CSS support."
+  },
+
+  "home": {
+    "title": "Home Page",
+    "description": "Welcome to the home page of our Next.js template."
+  },
+
+  "not_found": {
+    "title": "Page Not Found",
+    "description": "Sorry, the requested page could not be found."
+  }
+}

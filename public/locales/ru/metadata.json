@@ -1,0 +1,16 @@
+{
+  "global": {
+    "title": "Next.js Шаблон",
+    "description": "Шаблон проекта Next.js с поддержкой TypeScript, Next-Intl и Tailwind CSS."
+  },
+
+  "home": {
+    "title": "Главная страница",
+    "description": "Добро пожаловать на главную страницу нашего Next.js шаблона."
+  },
+
+  "not_found": {
+    "title": "Страница не найдена",
+    "description": "Извините, запрашиваемая страница не найдена."
+  }
+}

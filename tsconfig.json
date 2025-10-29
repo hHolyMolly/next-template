@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@routes/*": ["app/[locale]/(routes)/*"],
+      "@routes": ["app/[locale]/(routes)"],
+
+      "@app/*": ["app/*"],
+      "@app": ["app"],
+
+      "@components/*": ["components/*"],
+      "@components": ["components"],
+
+      "@configs/*": ["configs/*"],
+      "@configs": ["configs"],
+
+      "@hooks/*": ["hooks/*"],
+      "@hooks": ["hooks"],
+
+      "@interfaces/*": ["interfaces/*"],
+      "@interfaces": ["interfaces"],
+
+      "@services/*": ["services/*"],
+      "@services": ["services"],
+
+      "@store/*": ["store/*"],
+      "@store": ["store"],
+
+      "@styles/*": ["styles/*"],
+      "@styles": ["styles"],
+
+      "@utils/*": ["utils/*"],
+      "@utils": ["utils"],
+
+      "@/*": ["*"],
+      "@": ["."]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
