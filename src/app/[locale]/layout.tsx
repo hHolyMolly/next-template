@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { type Metadata } from 'next';
-import { type ReactNode } from 'react';
 
 import { getBaseMetadata } from '@configs/metadata';
 
@@ -15,12 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return getBaseMetadata();
 }
 
-type LayoutProps<TParams = Record<string, string>> = {
-  children: ReactNode;
-  params: TParams;
-};
-
-async function LocaleLayout({ children, params }: LayoutProps<{ locale: string }>) {
+async function LocaleLayout({ children, params }: LayoutProps<'/[locale]'>) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
