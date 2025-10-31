@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "dotenv -e .env -- next dev",
+    "dev": "dotenv -e .env.development -- next dev",
     "build": "next build",
-    "start": "dotenv -e .env -- next start",
+    "start": "dotenv -e .env.production -- next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
