@@ -4,6 +4,8 @@ import { hasLocale } from 'next-intl';
 import { namespaces } from '@services/i18n/constants';
 import { routing } from '@services/i18n/routing';
 
+import urls from '@configs/constants/urls';
+
 type TypeMessages = {
   [key: string]: string | TypeMessages;
 };
@@ -20,7 +22,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       ...(await Promise.all(
         namespaces.map(async (ns) => {
           try {
-            const url = `${process.env.CLIENT_URL}/locales/${locale}/${ns}.json`;
+            const url = `${urls.website}/locales/${locale}/${ns}.json`;
 
             const res = await fetch(url);
 
