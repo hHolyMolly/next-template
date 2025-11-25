@@ -1,6 +1,6 @@
-const website_url = process.env.CLIENT_URL || `http://localhost:${process.env.VITE_PORT || 3000}`;
+const website_url = process.env.NEXT_PUBLIC_CLIENT_URL;
 
-const server_url = process.env.SERVER_URL;
+const server_url = process.env.NEXT_PUBLIC_SERVER_URL;
 
 const urls = {
   website: website_url,
