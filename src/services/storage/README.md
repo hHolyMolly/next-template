@@ -1,9 +1,9 @@
-# Storage: LocalStorage & Cookie
+# Storage: LocalStorage, SessionStorage & Cookie
 
-> Type-safe wrappers for browser storage mechanisms: `localStorage`, `cookie`, and more.
+> Type-safe wrappers for browser storage mechanisms: `localStorage`, `sessionStorage`, `cookie`, and more.
 
 This module provides **reusable, consistent, and safe functions** to work with client-side storage.  
-Currently, it supports `LocalStorage` and `Cookie`, but it can be extended to other storage mechanisms (e.g., sessionStorage, IndexedDB) in the future.
+Currently, it supports `LocalStorage`, `SessionStorage`, and `Cookie`, but it can be extended to other storage mechanisms (e.g., IndexedDB) in the future.
 
 ---
 
@@ -15,10 +15,16 @@ Currently, it supports `LocalStorage` and `Cookie`, but it can be extended to ot
   - [Get Method](#get-method)
   - [Set Method](#set-method)
   - [Remove Method](#remove-method)
-- [Cookie](#2-cookie)
+- [SessionStorage](#2-sessionstorage)
+  - [File Structure](#file-structure-1)
+  - [Paths Example](#paths-example-1)
   - [Get Method](#get-method-1)
   - [Set Method](#set-method-1)
   - [Remove Method](#remove-method-1)
+- [Cookie](#3-cookie)
+  - [Get Method](#get-method-2)
+  - [Set Method](#set-method-2)
+  - [Remove Method](#remove-method-2)
 
 ---
 
@@ -87,7 +93,70 @@ console.log(removedUser); // null
 
 ---
 
-## 2. Cookie
+## 2. SessionStorage
+
+### File Structure
+
+There are two main files for configuration:
+
+- `functions.ts` — contains functions to work with SessionStorage.
+- `paths.ts` — defines keys (paths) used for storage.
+
+---
+
+### Usage
+
+#### Paths Example
+
+```ts
+const SESSION_STORAGE_PATHS = {
+  temp_data: 'temp_data',
+  form_state: 'form_state',
+} as const;
+
+export default SESSION_STORAGE_PATHS;
+```
+
+#### GET Method
+
+```ts
+import { SESSION_STORAGE_PATHS, customSessionStorage } from '@services/storage';
+
+type TypeUser = {
+  id: number;
+  name: string;
+};
+
+const user = customSessionStorage.get<TypeUser | null>(SESSION_STORAGE_PATHS.temp_data, null);
+console.log(user); // { id: 1, name: 'Alice' } or null
+
+const formState = customSessionStorage.get<boolean>(SESSION_STORAGE_PATHS.form_state, false);
+console.log(formState); // true or false
+```
+
+#### SET Method
+
+```ts
+import { SESSION_STORAGE_PATHS, customSessionStorage } from '@services/storage';
+
+customSessionStorage.set(SESSION_STORAGE_PATHS.temp_data, { id: 1, name: 'Alice' });
+customSessionStorage.set(SESSION_STORAGE_PATHS.form_state, true);
+```
+
+#### REMOVE Method
+
+```ts
+import { SESSION_STORAGE_PATHS, customSessionStorage } from '@services/storage';
+
+customSessionStorage.remove(SESSION_STORAGE_PATHS.temp_data);
+
+const removedData = customSessionStorage.get(SESSION_STORAGE_PATHS.temp_data, null);
+console.log(removedData); // null
+```
+
+---
+
+## 3. Cookie
 
 ### File Structure
 

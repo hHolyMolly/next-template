@@ -1,4 +1,4 @@
-const customCookieStorage = {
+export const customCookieStorage = {
   get<T>(name: string, fallback: T): T {
     try {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -37,5 +37,3 @@ const customCookieStorage = {
     }
   },
 };
-
-export default customCookieStorage;

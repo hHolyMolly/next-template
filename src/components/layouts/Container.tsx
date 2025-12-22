@@ -1,5 +1,5 @@
 import React from 'react';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 type Props = {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ type Props = {
 
 function Container({ children, className, style }: Props) {
   return (
-    <div className={classNames('container', className)} style={style}>
+    <div className={clsx('container', className)} style={style}>
       {children}
     </div>
   );

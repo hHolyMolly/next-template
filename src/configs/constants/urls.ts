@@ -2,7 +2,7 @@ const website_url = process.env.NEXT_PUBLIC_CLIENT_URL;
 
 const server_url = process.env.NEXT_PUBLIC_SERVER_URL;
 
-const urls = {
+export const urls = {
   website: website_url,
 
   server: {
@@ -10,5 +10,3 @@ const urls = {
     api: `${server_url}/api`,
   },
 } as const;
-
-export default urls;

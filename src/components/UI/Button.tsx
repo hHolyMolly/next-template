@@ -1,5 +1,5 @@
 import React from 'react';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 import { type TypeStatus } from '@interfaces/status.types';
 
@@ -7,10 +7,10 @@ import { LoadingIcon } from '@components/icons';
 
 type Props<T = React.ReactNode> = {
   children: T;
-  className?: HTMLButtonElement["className"];
+  className?: HTMLButtonElement['className'];
   style?: React.CSSProperties;
   onClick?: () => void;
-  disabled?: HTMLButtonElement["disabled"];
+  disabled?: HTMLButtonElement['disabled'];
   type?: 'submit' | 'reset' | 'button';
   status?: TypeStatus;
   ariaLabel?: string;
@@ -19,7 +19,7 @@ type Props<T = React.ReactNode> = {
   after?: T;
 };
 
-const Button: React.FC<Props> = ({
+const ButtonComponent: React.FC<Props> = ({
   children,
   className,
   style,
@@ -32,9 +32,15 @@ const Button: React.FC<Props> = ({
   before,
   after,
 }) => {
+  const handleClick = React.useCallback(() => {
+    onClick?.();
+  }, [onClick]);
+
+  const isDisabled = status === 'error' || disabled;
+
   return (
     <button
-      className={classNames(
+      className={clsx(
         'gap-x-[6px] inline-flex justify-center items-center overflow-hidden rounded-[8px] bg-blue-500 text-center font-semibold text-white',
 
         className,
@@ -46,12 +52,12 @@ const Button: React.FC<Props> = ({
         'disabled:pointer-events-none',
       )}
       style={style}
-      onClick={() => onClick?.()}
+      onClick={handleClick}
       type={type}
-      disabled={status === "error" || disabled}
+      disabled={isDisabled}
       aria-label={ariaLabel}
     >
-      {status !== "loading" ? (
+      {status !== 'loading' ? (
         <>
           {before && <span>{before}</span>}
 
@@ -66,4 +72,8 @@ const Button: React.FC<Props> = ({
   );
 };
 
-export default React.memo(Button);
+ButtonComponent.displayName = 'Button';
+
+const Button = React.memo(ButtonComponent);
+
+export { Button };

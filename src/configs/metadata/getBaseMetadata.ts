@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { type Metadata } from 'next';
 
-import urls from '@configs/constants/urls';
+import { urls } from '@configs/constants/urls';
 
 const PREVIEW_IMAGE = `${urls.website}/assets/img/previews/global.webp`;
 

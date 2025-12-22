@@ -7,6 +7,7 @@ import { getBaseMetadata } from '@configs/metadata';
 
 import { routing } from '@services/i18n/routing';
 
+import ClientProvidersProps from '@components/layouts/ClientProviders';
 import Header from '@components/layouts/Header';
 import Footer from '@components/layouts/Footer';
 
@@ -22,12 +23,16 @@ async function LocaleLayout({ children, params }: LayoutProps<'/[locale]'>) {
   setRequestLocale(locale);
 
   return (
-    <NextIntlClientProvider>
-      <Header />
+    <NextIntlClientProvider locale={locale}>
+      <ClientProvidersProps>
+        <div className="wrapper">
+          <Header />
 
-      <main className="page">{children}</main>
+          <main className="page">{children}</main>
 
-      <Footer />
+          <Footer />
+        </div>
+      </ClientProvidersProps>
     </NextIntlClientProvider>
   );
 }

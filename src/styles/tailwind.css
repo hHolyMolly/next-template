@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  :root {
+    --transition-duration: 0.3s;
+    --transition-timing: ease;
+  }
+
+  .transition-custom-all {
+    transition: all var(--transition-duration) var(--transition-timing);
+  }
+}
+
+@layer components {
+  ._ibg {
+    position: relative;
+  }
+
+  ._ibg img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+  }
+}

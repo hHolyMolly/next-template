@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
 
-import urls from '@configs/constants/urls';
+import { urls } from '@configs/constants/urls';
 
 const API: AxiosInstance = axios.create({
   baseURL: urls.server.api,

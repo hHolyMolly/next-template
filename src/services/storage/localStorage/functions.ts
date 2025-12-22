@@ -1,4 +1,4 @@
-const customLocalStorage = {
+export const customLocalStorage = {
   get<T>(key: string, fallback: T): T {
     try {
       const raw = window.localStorage.getItem(key);
@@ -29,5 +29,3 @@ const customLocalStorage = {
     }
   },
 };
-
-export default customLocalStorage;

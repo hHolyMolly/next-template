@@ -1,7 +1,5 @@
 import { getLocale } from 'next-intl/server';
 
-import ReduxProviderWrapper from '@components/layouts/ReduxProviderWrapper';
-
 import '@styles/normalize.css';
 import '@styles/vars.css';
 import '@styles/index.scss';
@@ -17,11 +15,7 @@ async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang={locale}>
-      <body>
-        <ReduxProviderWrapper>
-          <div className="wrapper">{children}</div>
-        </ReduxProviderWrapper>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

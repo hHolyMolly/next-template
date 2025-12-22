@@ -4,7 +4,7 @@ import { hasLocale } from 'next-intl';
 import { namespaces } from '@services/i18n/constants';
 import { routing } from '@services/i18n/routing';
 
-import urls from '@configs/constants/urls';
+import { urls } from '@configs/constants/urls';
 
 type TypeMessages = {
   [key: string]: string | TypeMessages;

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useParams } from 'next/navigation';
 
 import { useRouter, usePathname } from '@services/i18n/navigation';
@@ -38,7 +38,7 @@ const LanguageSwitch: React.FC = () => {
         <div>
           {locales.map((locale, idx: number) => (
             <button
-              className={classNames(
+              className={clsx(
                 'px-[8px] py-[4px] rounded-[4px]',
 
                 locale === currentLocale
