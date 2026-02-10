@@ -1,12 +1,15 @@
 'use client';
 
+import React from 'react';
 import { useLocale } from 'next-intl';
 import clsx from 'clsx';
 
 import { Link, usePathname } from '@/services/i18n/navigation';
 import { locales } from '@/services/i18n/constants';
 
-function LanguageSwitch() {
+import { localeFlags } from './flags';
+
+export default function LanguageSwitch() {
   const currentLocale = useLocale();
   const pathname = usePathname();
 
@@ -19,16 +22,17 @@ function LanguageSwitch() {
           href={pathname}
           locale={locale}
           className={clsx(
-            'px-2 py-1 rounded text-sm font-medium transition-colors',
-            locale === currentLocale ? 'bg-white text-black' : 'text-slate-400 hover:text-white',
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+            locale === currentLocale
+              ? 'bg-white/15 text-white ring-1 ring-white/20'
+              : 'text-slate-400 hover:text-white hover:bg-white/5',
           )}
           key={locale}
         >
+          {localeFlags[locale]}
           {locale.toUpperCase()}
         </Link>
       ))}
     </div>
   );
 }
-
-export default LanguageSwitch;
