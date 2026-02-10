@@ -1,131 +1,84 @@
-# 📌 Next Template
+# Next Template
 
----
+Production-ready Next.js 16 template — TypeScript, Tailwind CSS, SCSS, i18n, Redux Toolkit, React Query, and more.
 
-## 🚀 Installation and Launch
+<!-- [Live Demo](https://next-template.vercel.app) — раскомментируй после деплоя -->
 
-### 1. Installing `PNPM` 📦
+## Quick Start
 
-Before starting development, install `PNPM`:
-
-```sh
-npm install -g pnpm
-```
-
-### 2. Installing Dependencies ⚙️
-
-With `PNPM`:
-
-```sh
+```bash
+pnpm dlx degit hHolyMolly/next-template my-app
+cd my-app
 pnpm install
-```
-
-Alternatively, with `NPM`:
-
-```sh
-npm install
-```
-
-### 3. Running in Development Mode 🖥️
-
-With `PNPM`:
-
-```sh
 pnpm dev
 ```
 
-Alternatively, with `NPM`:
+## Features
 
-```sh
-npm run dev
+- **Next.js 16** — App Router, Turbopack, proxy.ts
+- **TypeScript** — strict mode
+- **Tailwind CSS + SCSS** — utility-first + custom styles
+- **next-intl** — multi-language support (i18n)
+- **Redux Toolkit** — global state management
+- **React Query** — server state, caching, devtools
+- **Axios** — API layer with typed `request<T>()` helper
+- **Vitest** — unit testing with React Testing Library
+- **CVA + clsx + twMerge** — component variant system
+- **ESLint + Prettier** — code quality
+- **PM2** — production process manager
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Dev server (Turbopack) |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | ESLint check |
+| `pnpm lint:fix` | ESLint auto-fix |
+| `pnpm format` | Prettier formatting |
+| `pnpm test` | Run tests |
+| `pnpm test:watch` | Tests in watch mode |
+| `pnpm clean` | Remove .next, out, dist |
+| `pnpm clean:all` | Remove node_modules + .next |
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (routes)/       # Page routes
+│   ├── api/            # API routes
+│   ├── error.tsx       # Error boundary
+│   ├── not-found.tsx   # 404 page
+│   └── layout.tsx      # Root layout
+├── components/
+│   ├── layouts/        # Layout components (ClientProviders, etc.)
+│   ├── icons/          # Icon components
+│   └── UI/             # Reusable UI components (Button, etc.)
+├── configs/
+│   ├── project/        # Project settings (name, i18n, sitemap, robots)
+│   ├── metadata/       # SEO metadata helpers
+│   └── constants/      # URLs, environment
+├── hooks/              # Custom React hooks
+├── lib/                # Shared instances (queryClient)
+├── services/
+│   ├── api/            # Axios instance + request helper
+│   ├── i18n/           # Internationalization (routing, navigation)
+│   └── storage/        # Storage utilities
+├── store/              # Redux store + slices
+├── styles/             # Global styles (Tailwind, SCSS, fonts)
+├── types/              # TypeScript types
+└── utils/              # Utility functions (cn, debounce, logger)
 ```
 
-### 4. Build for Production 🛠️
+## Configuration
 
-With `PNPM`:
+- **Project** — [`src/configs/project`](src/configs/project/index.ts) (name, locales, sitemap, robots)
+- **URLs** — [`src/configs/constants/urls.ts`](src/configs/constants/urls.ts)
+- **Environment** — `.env.development` / `.env.production`
+- **Translations** — [`public/locales/{locale}/`](public/locales/)
 
-```sh
-pnpm build
-```
+## License
 
-Alternatively, with `NPM`:
-
-```sh
-npm run build
-```
-
-### 5. Start Production Server 🚀
-
-> ⚠️ Requires a successful `build` step beforehand.
-
-With `PNPM`:
-
-```sh
-pnpm start
-```
-
-Alternatively, with `NPM`:
-
-```sh
-npm run start
-```
-
-### 6. Linting and Formatting ✨
-
-#### Check code with ESLint:
-
-With `PNPM`:
-
-```sh
-pnpm lint
-```
-
-Alternatively, with `NPM`:
-
-```sh
-npm run lint
-```
-
-#### Fix linting issues automatically:
-
-With `PNPM`:
-
-```sh
-pnpm lint:fix
-```
-
-Alternatively, with `NPM`:
-
-```sh
-npm run lint:fix
-```
-
-#### Format code with Prettier:
-
-With `PNPM`:
-
-```sh
-pnpm format
-```
-
-Alternatively, with `NPM`:
-
-```sh
-npm run format
-```
-
-### 7. Cleaning the Project 🧹
-
-Removes `node_modules`, `dist`, and lock files:
-
-With `PNPM`:
-
-```sh
-pnpm clean
-```
-
-Alternatively, with `NPM`:
-
-```sh
-npm run clean
-```
+MIT © [HolyMolly](https://github.com/hHolyMolly)
