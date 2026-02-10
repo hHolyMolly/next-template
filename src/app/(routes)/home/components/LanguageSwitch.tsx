@@ -1,32 +1,24 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import clsx from 'clsx';
-import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-import { useRouter, usePathname } from '@services/i18n/navigation';
-import { locales } from '@services/i18n/constants';
-
-import { customCookieStorage } from '@services/storage';
+import { locales } from '@/services/i18n/constants';
 
 const LanguageSwitch: React.FC = () => {
   const t = useTranslations('translations');
+  const currentLocale = useLocale();
   const router = useRouter();
-  const pathname = usePathname();
-  const params = useParams();
-
-  const currentLocale = params.locale as string;
 
   const handleChangeLanguage = React.useCallback(
     (locale: string) => {
-      if (locale === currentLocale) return console.warn('You are already using this language');
-      customCookieStorage.set('NEXT_LOCALE', locale, { path: '/', maxAge: 31536000 });
-      router.replace(pathname, {
-        locale,
-      });
+      if (locale === currentLocale) return;
+      document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Lax`;
+      router.refresh();
     },
-    [currentLocale, pathname, router],
+    [currentLocale, router],
   );
 
   return (
@@ -35,8 +27,8 @@ const LanguageSwitch: React.FC = () => {
       <div>
         <div>{t('language_switch')}</div>
 
-        <div>
-          {locales.map((locale, idx: number) => (
+        <div className="flex gap-2">
+          {locales.map((locale) => (
             <button
               className={clsx(
                 'px-[8px] py-[4px] rounded-[4px]',
@@ -47,7 +39,7 @@ const LanguageSwitch: React.FC = () => {
               )}
               onClick={() => handleChangeLanguage(locale)}
               type="button"
-              key={`locale_${locale}${idx}`}
+              key={locale}
             >
               {locale.toUpperCase()}
             </button>
