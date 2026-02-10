@@ -1,6 +1,6 @@
 import { type Metadata } from 'next';
 
-import getBaseMetadata from '@configs/metadata/getBaseMetadata';
+import getBaseMetadata from '@/configs/metadata/getBaseMetadata';
 
 async function createMetadata(overrides?: Partial<Metadata>): Promise<Metadata> {
   const base = await getBaseMetadata();
