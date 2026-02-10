@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-function Error({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const t = useTranslations('translations.errors');
 
   return (
@@ -18,4 +18,4 @@ function Error({ reset }: { error: Error & { digest?: string }; reset: () => voi
   );
 }
 
-export default Error;
+export default ErrorPage;

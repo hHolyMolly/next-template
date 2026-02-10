@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * Global Error — обрабатывает ошибки root layout.
- * i18n недоступен, т.к. layout сломан — тексты inline.
+ * Global error boundary for root layout failures.
+ * i18n is unavailable since the layout is broken — text is inlined.
  */
 function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
