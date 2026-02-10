@@ -1,47 +1,18 @@
 import { getRequestConfig } from 'next-intl/server';
-import { cookies, headers } from 'next/headers';
+import { hasLocale } from 'next-intl';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { namespaces, defaultLocale, locales } from '@/services/i18n/constants';
+import { namespaces } from '@/services/i18n/constants';
+import { routing } from '@/services/i18n/routing';
 
 type TypeMessages = {
   [key: string]: string | TypeMessages;
 };
 
-/**
- * Определение локали без middleware:
- * 1. Cookie NEXT_LOCALE
- * 2. Accept-Language заголовок
- * 3. Локаль по умолчанию
- */
-async function resolveLocale(): Promise<string> {
-  try {
-    const cookieStore = await cookies();
-    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value;
-
-    if (localeCookie && locales.includes(localeCookie)) {
-      return localeCookie;
-    }
-
-    const headerStore = await headers();
-    const acceptLanguage = headerStore.get('accept-language');
-
-    if (acceptLanguage) {
-      const preferred = acceptLanguage.split(',')[0]?.split('-')[0]?.trim();
-      if (preferred && locales.includes(preferred)) {
-        return preferred;
-      }
-    }
-  } catch {
-    // cookies/headers могут быть недоступны в некоторых контекстах
-  }
-
-  return defaultLocale;
-}
-
-export default getRequestConfig(async () => {
-  const locale = await resolveLocale();
+export default getRequestConfig(async ({ requestLocale }) => {
+  const requested = await requestLocale;
+  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
 
   let messages: TypeMessages = {};
 

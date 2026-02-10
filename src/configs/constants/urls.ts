@@ -6,6 +6,6 @@ export const urls = {
   website: website_url,
 
   server: {
-    api: server_url ? `${server_url}/api` : '/api/proxy',
+    api: server_url ? `${server_url}/api` : '',
   },
 } as const;

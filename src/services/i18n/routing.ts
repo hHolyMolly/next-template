@@ -3,8 +3,8 @@ import { defineRouting } from 'next-intl/routing';
 import { locales, defaultLocale } from '@/services/i18n/constants';
 
 /**
- * Конфигурация локализации.
- * localePrefix: 'never' при одной локали, 'as-needed' при нескольких.
+ * Locale configuration.
+ * localePrefix: 'never' for single locale, 'as-needed' for multiple.
  */
 export const routing = defineRouting({
   locales,

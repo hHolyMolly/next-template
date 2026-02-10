@@ -1,13 +1,12 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import type { NextRequest } from 'next/server';
 
-/**
- * Proxy для обработки запросов.
- * Расширяйте по мере необходимости: auth, i18n redirect, rate limiting и т.д.
- *
- * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
- */
-export function proxy(_request: NextRequest) {
-  return NextResponse.next();
+import { routing } from '@/services/i18n/routing';
+
+const middleware = createMiddleware(routing);
+
+export function proxy(request: NextRequest) {
+  return middleware(request);
 }
 
 export const config = {
