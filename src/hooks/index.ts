@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /**
- * Хук для отслеживания media query.
+ * Hook for tracking media query state.
  *
  * @example
  * const isMobile = useMediaQuery('(max-width: 768px)');
@@ -28,7 +28,7 @@ export function useMediaQuery(query: string): boolean {
 }
 
 /**
- * Хук для debounce значения.
+ * Hook for debouncing a value.
  *
  * @example
  * const [search, setSearch] = useState('');
@@ -46,7 +46,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 /**
- * Хук для отслеживания кликов вне элемента.
+ * Hook for tracking clicks outside an element.
  *
  * @example
  * const ref = useRef<HTMLDivElement>(null);
@@ -73,7 +73,7 @@ export function useClickOutside<T extends HTMLElement>(
 }
 
 /**
- * Хук для блокировки скролла страницы.
+ * Hook for locking page scroll.
  *
  * @example
  * useScrollLock(isModalOpen);
@@ -92,7 +92,7 @@ export function useScrollLock(isLocked: boolean): void {
 }
 
 /**
- * Хук для переключения boolean-значения.
+ * Hook for toggling a boolean value.
  *
  * @example
  * const [isOpen, toggle, setIsOpen] = useToggle(false);

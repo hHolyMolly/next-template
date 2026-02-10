@@ -1,9 +1,9 @@
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
- * Dev-only утилиты логирования.
- * Все вызовы автоматически отключаются в production —
- * пользователь не увидит отладочных сообщений в консоли.
+ * Dev-only logging utilities.
+ * All calls are automatically disabled in production —
+ * users will never see debug messages in the console.
  *
  * @example
  * logger.log('Data loaded', data);

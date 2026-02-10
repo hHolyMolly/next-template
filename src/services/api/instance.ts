@@ -24,8 +24,8 @@ API.interceptors.response.use(
 );
 
 /**
- * Типизированный хелпер для API-запросов.
- * Возвращает `data` из ответа, убирая обёртку AxiosResponse.
+ * Typed helper for API requests.
+ * Returns `data` from the response, unwrapping AxiosResponse.
  *
  * @example
  * const users = await request<User[]>({ url: '/users', method: 'GET' });
@@ -35,9 +35,7 @@ export async function request<T>(config: AxiosRequestConfig): Promise<T> {
   return response.data;
 }
 
-/**
- * Type guard для проверки, является ли ошибка AxiosError.
- */
+/** Type guard for checking if an error is an AxiosError. */
 export function isApiError(error: unknown): error is AxiosError {
   return axios.isAxiosError(error);
 }

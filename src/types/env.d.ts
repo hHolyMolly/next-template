@@ -2,13 +2,13 @@ declare namespace NodeJS {
   interface ProcessEnv {
     readonly NODE_ENV: 'development' | 'production' | 'test';
 
-    /** URL клиентского приложения */
+    /** Client application URL */
     readonly NEXT_PUBLIC_CLIENT_URL: string;
 
-    /** URL серверного API (для proxy и SSR-запросов) */
+    /** Server API URL (for SSR requests) */
     readonly NEXT_PUBLIC_SERVER_URL?: string;
 
-    /** Включить анализ бандла */
+    /** Enable bundle analyzer */
     readonly ANALYZE?: string;
   }
 }

@@ -1,11 +1,7 @@
-/**
- * Глобальные типы проекта.
- */
-
-/** Статус асинхронной операции */
+/** Async operation status */
 export type TypeStatus = 'loading' | 'loaded' | 'error';
 
-/** Конфигурация проекта */
+/** Project configuration */
 export type ProjectConfig = {
   name: string;
 
@@ -14,9 +10,9 @@ export type ProjectConfig = {
     locales: string[];
   };
 
-  /** Генерировать sitemap.xml */
+  /** Generate sitemap.xml */
   sitemap: boolean;
 
-  /** Разрешить индексацию (robots.txt) */
+  /** Allow indexing (robots.txt) */
   robots: boolean;
 };

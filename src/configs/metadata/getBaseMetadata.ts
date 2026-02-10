@@ -6,8 +6,8 @@ import { urls } from '@/configs/constants/urls';
 const PREVIEW_IMAGE = `${urls.website}/assets/img/previews/global.webp`;
 
 /**
- * Базовые метаданные для всех страниц.
- * Все тексты (включая titleTemplate) берутся из i18n JSON-файлов.
+ * Base metadata for all pages.
+ * All texts (including titleTemplate) come from i18n JSON files.
  */
 async function getBaseMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.global');

@@ -1,6 +1,6 @@
 /**
- * Runtime-валидация переменных окружения.
- * Вызывается при старте приложения для раннего обнаружения проблем.
+ * Runtime validation of environment variables.
+ * Called at application startup for early problem detection.
  */
 
 const requiredVars = ['NEXT_PUBLIC_CLIENT_URL'] as const;

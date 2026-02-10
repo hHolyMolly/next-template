@@ -15,9 +15,9 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined;
 
 /**
- * Возвращает QueryClient-инстанс.
- * На сервере — создаёт новый клиент для каждого запроса.
- * На клиенте — повторно использует один и тот же экземпляр.
+ * Returns a QueryClient instance.
+ * On the server — creates a new client per request.
+ * On the client — reuses the same singleton instance.
  */
 export function getQueryClient() {
   if (typeof window === 'undefined') {
