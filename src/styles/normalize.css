@@ -8,13 +8,10 @@
 *,
 *:before,
 *:after {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
-:focus,
-:active {
+:focus:not(:focus-visible) {
   outline: none;
 }
 
@@ -29,8 +26,6 @@ html,
 body {
   height: 100%;
   width: 100%;
-  -ms-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -91,7 +86,6 @@ ul li {
 img {
   vertical-align: top;
   user-select: none;
-  pointer-events: none;
 }
 
 h1,
@@ -102,30 +96,4 @@ h5,
 h6 {
   font-size: inherit;
   font-weight: 400;
-}
-
-.swiper {
-  touch-action: pan-y;
-}
-
-.swiper-wrapper {
-  display: inline-flex;
-}
-
-.swiper-grid > .swiper-wrapper {
-  flex-wrap: wrap;
-}
-
-.swiper-grid-column > .swiper-wrapper {
-  flex-wrap: wrap;
-  flex-direction: column;
-}
-
-.swiper-autoheight,
-.swiper-autoheight .swiper-slide {
-  height: auto !important;
-}
-
-.swiper-autoheight .swiper-wrapper {
-  align-items: flex-start;
 }

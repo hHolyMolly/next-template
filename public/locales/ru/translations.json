@@ -1,3 +1,12 @@
 {
-  "language_switch": "Сменить язык:"
+  "language_switch": "Сменить язык:",
+
+  "errors": {
+    "something_went_wrong": "Что-то пошло не так",
+    "try_again": "Попробовать снова",
+    "page_not_found": "Страница не найдена",
+    "go_home": "На главную"
+  },
+
+  "loading": "Загрузка..."
 }

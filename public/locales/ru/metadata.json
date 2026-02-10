@@ -1,6 +1,7 @@
 {
   "global": {
     "title": "Next.js Шаблон",
+    "title_template": "%s | Next.js Шаблон",
     "description": "Шаблон проекта Next.js с поддержкой TypeScript, Next-Intl и Tailwind CSS."
   },
 
