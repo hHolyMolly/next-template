@@ -1,17 +1,17 @@
 {
   "global": {
-    "title": "Next.js Template",
-    "title_template": "%s | Next.js Template",
-    "description": "A Next.js project template with TypeScript, Next-Intl, and Tailwind CSS support."
+    "title": "Project",
+    "title_template": "%s | Project",
+    "description": "Project description."
   },
 
   "home": {
-    "title": "Home Page",
-    "description": "Welcome to the home page of our Next.js template."
+    "title": "Home",
+    "description": "Home page."
   },
 
   "not_found": {
-    "title": "Page Not Found",
-    "description": "Sorry, the requested page could not be found."
+    "title": "Not Found",
+    "description": "The page you are looking for does not exist."
   }
 }
