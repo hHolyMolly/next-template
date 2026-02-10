@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 
-import styles from '@components/icons/LoadingIcon/index.module.scss';
+import styles from '@/components/icons/LoadingIcon/index.module.scss';
 
 type LoadingIconProps = {
   className?: string;
