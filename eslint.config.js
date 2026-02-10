@@ -29,13 +29,7 @@ const eslintConfig = [
   },
   eslintConfigPrettier,
   {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'build/**',
-      'next-env.d.ts',
-      'vitest.config.ts',
-    ],
+    ignores: ['node_modules/**', '.next/**', 'build/**', 'next-env.d.ts', 'vitest.config.ts'],
   },
 ];
 

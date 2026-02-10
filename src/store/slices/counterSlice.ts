@@ -1,3 +1,12 @@
+/**
+ * Counter slice (demo — delete after starting work)
+ *
+ * This is a demo Redux slice for the template.
+ * Replace it with your own slices.
+ *
+ * To remove: delete this file and remove the import from src/store/index.ts
+ */
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface ICounterState {

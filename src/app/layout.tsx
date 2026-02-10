@@ -3,14 +3,11 @@ import { type Metadata } from 'next';
 
 import { roboto } from '@/styles/fonts';
 import { getBaseMetadata } from '@/configs/metadata';
-import { validateEnv } from '@/configs/env';
 
 import '@/styles/normalize.css';
 import '@/styles/tailwind.css';
 import '@/styles/vars.css';
 import '@/styles/index.scss';
-
-validateEnv();
 
 type RootLayoutProps = {
   children: React.ReactNode;

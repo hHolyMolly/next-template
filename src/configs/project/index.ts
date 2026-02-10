@@ -12,7 +12,7 @@ export const projectConfig: ProjectConfig = {
     locales: ['ru', 'en'],
   },
 
-  /** Production flags. Always disabled in dev. */
-  sitemap: true,
-  robots: true,
+  /** Production flags. Disabled in dev to prevent crawling. */
+  sitemap: process.env.NODE_ENV === 'production',
+  robots: process.env.NODE_ENV === 'production',
 } as const;

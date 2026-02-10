@@ -19,7 +19,13 @@ export const customCookieStorage = {
       );
       let cookieStr = `${name}=${cookieValue}`;
 
-      if (options?.path) cookieStr += `; path=${options.path}`;
+      cookieStr += `; path=${options?.path ?? '/'}`;
+      cookieStr += '; SameSite=Lax';
+
+      if (window.location.protocol === 'https:') {
+        cookieStr += '; Secure';
+      }
+
       if (options?.expires) cookieStr += `; expires=${options.expires.toUTCString()}`;
       if (options?.maxAge) cookieStr += `; max-age=${options.maxAge}`;
 

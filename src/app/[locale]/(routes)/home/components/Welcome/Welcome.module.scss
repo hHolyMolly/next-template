@@ -1,3 +1,30 @@
+/* Welcome section variables */
+$welcome-bg-from: #0f172a;
+$welcome-bg-to: #020617;
+$welcome-glow-purple: rgba(120, 119, 198, 0.15);
+$welcome-glow-blue: rgba(56, 189, 248, 0.1);
+$welcome-accent: #38bdf8;
+$welcome-accent-secondary: #818cf8;
+$welcome-accent-purple: #c084fc;
+$welcome-text: #f8fafc;
+$welcome-text-muted: #94a3b8;
+$welcome-text-dim: #64748b;
+$welcome-text-footer: #475569;
+$welcome-badge-bg: rgba(56, 189, 248, 0.1);
+$welcome-badge-border: rgba(56, 189, 248, 0.2);
+$welcome-success: #22c55e;
+$welcome-glass-bg: rgba(255, 255, 255, 0.05);
+$welcome-glass-border: rgba(255, 255, 255, 0.1);
+$welcome-glass-hover-bg: rgba(255, 255, 255, 0.08);
+$welcome-glass-hover-border: rgba(255, 255, 255, 0.2);
+$welcome-tag-bg: rgba(255, 255, 255, 0.03);
+$welcome-tag-border: rgba(255, 255, 255, 0.06);
+$welcome-tag-hover-bg: rgba(255, 255, 255, 0.06);
+$welcome-tag-hover-border: rgba(255, 255, 255, 0.1);
+$welcome-shadow: rgba(56, 189, 248, 0.3);
+$welcome-shadow-hover: rgba(56, 189, 248, 0.4);
+
+/* Animations */
 @keyframes scale-in {
   0% {
     transform: scale(0);
@@ -13,3 +40,259 @@
 .scaleIn {
   animation: scale-in 0.2s ease-out;
 }
+
+/* Section */
+.section {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px 40px;
+  background: linear-gradient(180deg, $welcome-bg-from 0%, $welcome-bg-to 100%);
+  overflow: hidden;
+}
+
+.glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, $welcome-glow-purple, transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, $welcome-glow-blue, transparent);
+}
+
+/* Language switch (top-right) */
+.languageSwitch {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 10;
+}
+
+/* Content */
+.content {
+  position: relative;
+  text-align: center;
+  max-width: 720px;
+  width: 100%;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-bottom: 32px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $welcome-accent;
+  background: $welcome-badge-bg;
+  border: 1px solid $welcome-badge-border;
+  border-radius: 100px;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  background: $welcome-success;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Title */
+.title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: $welcome-text;
+  margin-bottom: 24px;
+  text-wrap: balance;
+}
+
+.titleGradient {
+  background: linear-gradient(135deg, $welcome-accent 0%, $welcome-accent-secondary 50%, $welcome-accent-purple 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Description */
+.description {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: $welcome-text-muted;
+  margin-bottom: 40px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $welcome-bg-from;
+  background: linear-gradient(135deg, $welcome-accent 0%, $welcome-accent-secondary 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px $welcome-shadow;
+  transition: all 0.2s;
+  text-decoration: none;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px $welcome-shadow-hover;
+  }
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: $welcome-glass-bg;
+  border: 1px solid $welcome-glass-border;
+  border-radius: 12px;
+  transition: all 0.2s;
+  text-decoration: none;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: $welcome-glass-hover-bg;
+    border-color: $welcome-glass-hover-border;
+  }
+}
+
+/* Install command */
+.install {
+  max-width: 520px;
+  margin: 0 auto 48px;
+}
+
+.installButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 24px;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  background: $welcome-glass-bg;
+  border: 1px solid $welcome-glass-border;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+
+  &:hover {
+    background: $welcome-glass-hover-bg;
+    border-color: $welcome-glass-hover-border;
+  }
+}
+
+.installDollar {
+  color: $welcome-text-dim;
+  user-select: none;
+}
+
+.installText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.installIcon {
+  flex-shrink: 0;
+  color: $welcome-text-dim;
+  transition: color 0.2s;
+}
+
+.installButton:hover .installIcon {
+  color: #cbd5e1;
+}
+
+.installIconCheck {
+  color: $welcome-success;
+}
+
+/* Stack */
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  background: $welcome-tag-bg;
+  border: 1px solid $welcome-tag-border;
+  border-radius: 8px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $welcome-tag-hover-bg;
+    border-color: $welcome-tag-hover-border;
+  }
+}
+
+.tagIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Footer */
+.footer {
+  position: absolute;
+  bottom: 24px;
+  font-size: 0.875rem;
+  color: $welcome-text-footer;
+
+  a {
+    color: $welcome-text-dim;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $welcome-text-muted;
+    }
+  }
+}
+

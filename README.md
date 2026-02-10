@@ -15,33 +15,33 @@ pnpm dev
 
 ## Tech Stack
 
-| Category | Technology |
-| --- | --- |
-| Framework | Next.js 16 (App Router, Turbopack) |
-| Language | TypeScript (strict mode) |
-| Styling | Tailwind CSS + SCSS |
-| i18n | next-intl (middleware, `[locale]` routing) |
-| State | Redux Toolkit + React Query |
-| API | Axios with typed `request<T>()` helper |
-| Testing | Vitest + React Testing Library |
-| Variants | CVA + clsx + tailwind-merge |
-| Code Quality | ESLint 9 + Prettier |
-| Process | PM2 (production) |
+| Category     | Technology                                 |
+| ------------ | ------------------------------------------ |
+| Framework    | Next.js 16 (App Router, Turbopack)         |
+| Language     | TypeScript (strict mode)                   |
+| Styling      | Tailwind CSS + SCSS                        |
+| i18n         | next-intl (middleware, `[locale]` routing) |
+| State        | Redux Toolkit + React Query                |
+| API          | Axios with typed `request<T>()` helper     |
+| Testing      | Vitest + React Testing Library             |
+| Variants     | CVA + clsx + tailwind-merge                |
+| Code Quality | ESLint 9 + Prettier                        |
+| Process      | PM2 (production)                           |
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Dev server (Turbopack) |
-| `pnpm build` | Production build |
-| `pnpm start` | Start production server |
-| `pnpm lint` | ESLint check |
-| `pnpm lint:fix` | ESLint auto-fix |
-| `pnpm format` | Prettier formatting |
-| `pnpm test` | Run tests |
-| `pnpm test:watch` | Tests in watch mode |
-| `pnpm clean` | Remove `.next`, `dist` |
-| `pnpm clean:all` | Remove `node_modules` + `.next` |
+| Command           | Description                     |
+| ----------------- | ------------------------------- |
+| `pnpm dev`        | Dev server (Turbopack)          |
+| `pnpm build`      | Production build                |
+| `pnpm start`      | Start production server         |
+| `pnpm lint`       | ESLint check                    |
+| `pnpm lint:fix`   | ESLint auto-fix                 |
+| `pnpm format`     | Prettier formatting             |
+| `pnpm test`       | Run tests                       |
+| `pnpm test:watch` | Tests in watch mode             |
+| `pnpm clean`      | Remove `.next`, `dist`          |
+| `pnpm clean:all`  | Remove `node_modules` + `.next` |
 
 ## Project Structure
 
@@ -82,12 +82,12 @@ src/
 
 ## Configuration
 
-| Setting | Location |
-| --- | --- |
-| Project | [`src/configs/project`](src/configs/project/index.ts) |
-| URLs | [`src/configs/constants/urls.ts`](src/configs/constants/urls.ts) |
-| Environment | `.env.development` / `.env.production` |
-| Translations | [`public/locales/{locale}/`](public/locales/) |
+| Setting      | Location                                                         |
+| ------------ | ---------------------------------------------------------------- |
+| Project      | [`src/configs/project`](src/configs/project/index.ts)            |
+| URLs         | [`src/configs/constants/urls.ts`](src/configs/constants/urls.ts) |
+| Environment  | `.env.development` / `.env.production`                           |
+| Translations | [`public/locales/{locale}/`](public/locales/)                    |
 
 ## Deploy
 

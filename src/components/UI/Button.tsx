@@ -1,6 +1,7 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import clsx from 'clsx';
+
+import { cn } from '@/lib/cn';
 
 import { type TypeStatus } from '@/types';
 
@@ -57,7 +58,7 @@ const ButtonComponent = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={clsx(
+        className={cn(
           buttonVariants({ variant, size }),
           status === 'loading' && 'pointer-events-none',
           className,
