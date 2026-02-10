@@ -2,7 +2,7 @@
 
 Production-ready Next.js 16 template — TypeScript, Tailwind CSS, SCSS, i18n, Redux Toolkit, React Query, and more.
 
-<!-- [Live Demo](https://next-template.vercel.app) — раскомментируй после деплоя -->
+<!-- [Live Demo](https://hholymolly.github.io/next-template) — раскомментируй после деплоя -->
 
 ## Quick Start
 
@@ -29,18 +29,18 @@ pnpm dev
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| `pnpm dev` | Dev server (Turbopack) |
-| `pnpm build` | Production build |
-| `pnpm start` | Start production server |
-| `pnpm lint` | ESLint check |
-| `pnpm lint:fix` | ESLint auto-fix |
-| `pnpm format` | Prettier formatting |
-| `pnpm test` | Run tests |
-| `pnpm test:watch` | Tests in watch mode |
-| `pnpm clean` | Remove .next, out, dist |
-| `pnpm clean:all` | Remove node_modules + .next |
+| Command           | Description                 |
+| ----------------- | --------------------------- |
+| `pnpm dev`        | Dev server (Turbopack)      |
+| `pnpm build`      | Production build            |
+| `pnpm start`      | Start production server     |
+| `pnpm lint`       | ESLint check                |
+| `pnpm lint:fix`   | ESLint auto-fix             |
+| `pnpm format`     | Prettier formatting         |
+| `pnpm test`       | Run tests                   |
+| `pnpm test:watch` | Tests in watch mode         |
+| `pnpm clean`      | Remove .next, out, dist     |
+| `pnpm clean:all`  | Remove node_modules + .next |
 
 ## Project Structure
 

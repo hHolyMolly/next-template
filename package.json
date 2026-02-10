@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.26.2",
   "scripts": {
     "dev": "dotenv -e .env.development -- next dev",
     "build": "next build",

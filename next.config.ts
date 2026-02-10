@@ -6,39 +6,49 @@ const withBundleAnalyzer = createBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const isStaticExport = process.env.STATIC_EXPORT === 'true';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   turbopack: {},
   poweredByHeader: false,
 
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
-          },
-        ],
-      },
-    ];
-  },
+  ...(isStaticExport && {
+    output: 'export',
+    basePath: process.env.BASE_PATH || '',
+    images: { unoptimized: true },
+  }),
 
-  async rewrites() {
-    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
-    if (!serverUrl) return [];
+  ...(!isStaticExport && {
+    async headers() {
+      return [
+        {
+          source: '/(.*)',
+          headers: [
+            { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+            { key: 'X-Content-Type-Options', value: 'nosniff' },
+            { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+            {
+              key: 'Strict-Transport-Security',
+              value: 'max-age=63072000; includeSubDomains; preload',
+            },
+          ],
+        },
+      ];
+    },
 
-    return [
-      {
-        source: '/api/proxy/:path*',
-        destination: `${serverUrl}/api/:path*`,
-      },
-    ];
-  },
+    async rewrites() {
+      const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+      if (!serverUrl) return [];
+
+      return [
+        {
+          source: '/api/proxy/:path*',
+          destination: `${serverUrl}/api/:path*`,
+        },
+      ];
+    },
+  }),
 };
 
 const withNextIntl = createNextIntlPlugin('./src/services/i18n/request.ts');
