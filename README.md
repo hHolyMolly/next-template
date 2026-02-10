@@ -2,8 +2,6 @@
 
 Production-ready Next.js 16 template — TypeScript, Tailwind CSS, SCSS, i18n, Redux Toolkit, React Query, and more.
 
-<!-- [Live Demo](https://hholymolly.github.io/next-template) — раскомментируй после деплоя -->
-
 ## Quick Start
 
 ```bash
@@ -15,10 +13,10 @@ pnpm dev
 
 ## Features
 
-- **Next.js 16** — App Router, Turbopack, proxy.ts
+- **Next.js 16** — App Router, Turbopack, `[locale]` routing
 - **TypeScript** — strict mode
 - **Tailwind CSS + SCSS** — utility-first + custom styles
-- **next-intl** — multi-language support (i18n)
+- **next-intl** — multi-language support with middleware
 - **Redux Toolkit** — global state management
 - **React Query** — server state, caching, devtools
 - **Axios** — API layer with typed `request<T>()` helper
@@ -47,29 +45,35 @@ pnpm dev
 ```
 src/
 ├── app/
-│   ├── (routes)/       # Page routes
-│   ├── api/            # API routes
-│   ├── error.tsx       # Error boundary
-│   ├── not-found.tsx   # 404 page
-│   └── layout.tsx      # Root layout
+│   ├── page.tsx            # Redirects to default locale
+│   ├── not-found.tsx       # Root 404 (client component)
+│   ├── global-error.tsx    # Global error boundary
+│   ├── layout.tsx          # Root layout (minimal)
+│   ├── robots.ts           # robots.txt
+│   ├── sitemap.ts          # sitemap.xml
+│   └── [locale]/
+│       ├── layout.tsx      # Locale layout (providers, header, footer)
+│       ├── error.tsx       # Error boundary
+│       ├── not-found.tsx   # 404 page (i18n)
+│       └── (routes)/       # Page routes
 ├── components/
-│   ├── layouts/        # Layout components (ClientProviders, etc.)
-│   ├── icons/          # Icon components
-│   └── UI/             # Reusable UI components (Button, etc.)
+│   ├── layouts/            # Layout components (ClientProviders, Header, Footer)
+│   ├── icons/              # Icon components
+│   └── UI/                 # Reusable UI components (Button, etc.)
 ├── configs/
-│   ├── project/        # Project settings (name, i18n, sitemap, robots)
-│   ├── metadata/       # SEO metadata helpers
-│   └── constants/      # URLs, environment
-├── hooks/              # Custom React hooks
-├── lib/                # Shared instances (queryClient)
+│   ├── project/            # Project settings (name, i18n, sitemap, robots)
+│   ├── metadata/           # SEO metadata helpers
+│   └── constants/          # URLs
+├── hooks/                  # Custom React hooks
+├── lib/                    # Shared instances (cn, queryClient)
 ├── services/
-│   ├── api/            # Axios instance + request helper
-│   ├── i18n/           # Internationalization (routing, navigation)
-│   └── storage/        # Storage utilities
-├── store/              # Redux store + slices
-├── styles/             # Global styles (Tailwind, SCSS, fonts)
-├── types/              # TypeScript types
-└── utils/              # Utility functions (cn, debounce, logger)
+│   ├── api/                # Axios instance + request helper
+│   ├── i18n/               # Internationalization (routing, navigation, middleware)
+│   └── storage/            # Storage utilities
+├── store/                  # Redux store + slices
+├── styles/                 # Global styles (Tailwind, SCSS, fonts)
+├── types/                  # TypeScript types
+└── utils/                  # Utility functions (debounce, logger)
 ```
 
 ## Configuration
@@ -78,6 +82,14 @@ src/
 - **URLs** — [`src/configs/constants/urls.ts`](src/configs/constants/urls.ts)
 - **Environment** — `.env.development` / `.env.production`
 - **Translations** — [`public/locales/{locale}/`](public/locales/)
+
+## Deploy
+
+Recommended: [Vercel](https://vercel.com/) — zero-config deployment for Next.js.
+
+```bash
+pnpm dlx vercel
+```
 
 ## License
 

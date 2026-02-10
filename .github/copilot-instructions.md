@@ -1,95 +1,105 @@
 # Next Template — Copilot Instructions
 
-## Проект
+## Project
 
-Next.js 16 шаблон (App Router, Turbopack) с TypeScript, Tailwind CSS, next-intl, Redux Toolkit, TanStack React Query, Axios.
+Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-intl, Redux Toolkit, TanStack React Query, Axios.
 
-## Архитектурные правила
+## Architecture Rules
 
-### Алиасы
+### Aliases
 
-- Используем **только `@/`** алиас (= `./src/`). Других алиасов нет.
+- Use **only `@/`** alias (= `./src/`). No other aliases.
 
-### Локализация (i18n)
+### Routing
 
-- **Все тексты** хранятся в `public/locales/{locale}/{namespace}.json`.
-- Файлы переводов: `translations.json` (UI-тексты), `metadata.json` (SEO).
-- **Никакие строки** не хардкодятся в компонентах — всё через `useTranslations()` или `getTranslations()`.
-- Исключение: `global-error.tsx` — i18n недоступен (layout сломан), текст inline.
+- Root layout (`src/app/layout.tsx`) is minimal — only `<html>`, `<body>`, styles, metadata.
+- Root `page.tsx` redirects to the default locale.
+- Root `not-found.tsx` is a client component — no i18n.
+- All page content lives under `src/app/[locale]/`.
+- `[locale]/layout.tsx` contains providers, header, footer, `NextIntlClientProvider`.
+- `[locale]/(routes)/` — route group for pages.
+- `[locale]/[...rest]/page.tsx` — catch-all for 404.
+- `proxy.ts` (not middleware.ts) — Next.js 16 convention. Uses `createMiddleware(routing)` from next-intl.
 
-### Стилизация
+### Localization (i18n)
 
-- Tailwind CSS классы. SCSS только для `index.scss` (wrapper/page layout).
-- CSS-переменные в `vars.css`. Container задаётся в `tailwind.css`.
-- Для объединения классов используем `cn()` из `@/utils/cn` (clsx + tailwind-merge).
+- **All texts** are stored in `public/locales/{locale}/{namespace}.json`.
+- Translation files: `translations.json` (UI texts), `metadata.json` (SEO).
+- **No strings** are hardcoded in components — everything via `useTranslations()` or `getTranslations()`.
+- Exception: `global-error.tsx` — i18n is unavailable (layout is broken), text is inline.
+- Language switching uses `<Link>` from `@/services/i18n/navigation` with `locale` prop.
 
-### Компоненты
+### Styling
 
-- UI-компоненты → `src/components/UI/` (Button, Input и т.д.).
-- Layout-компоненты → `src/components/layouts/` (Header, Footer, Container, ClientProviders).
-- Иконки → `src/components/icons/`.
-- Страничные компоненты → `src/app/(routes)/{page}/components/`.
+- Tailwind CSS classes. SCSS only for `index.scss` (wrapper/page layout).
+- CSS variables in `vars.css`. Container defined in `tailwind.css`.
+- Use `cn()` from `@/lib/cn` (clsx + tailwind-merge) for merging classes.
+
+### Components
+
+- UI components → `src/components/UI/` (Button, Input, etc.).
+- Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders).
+- Icons → `src/components/icons/`.
+- Page-specific components → `src/app/[locale]/(routes)/{page}/components/`.
 
 ### API
 
-- Axios-инстанс: `src/services/api/instance.ts`.
-- `request<T>(config)` — типизированный хелпер, возвращает `data` из AxiosResponse.
-- `isApiError(error)` — type guard для AxiosError.
-- API-эндпоинты: `src/services/api/paths.ts`.
-- Модули API: `src/services/api/{resource}/index.ts` — функции + React Query хуки.
+- Axios instance: `src/services/api/instance.ts`.
+- `request<T>(config)` — typed helper, returns `data` from AxiosResponse.
+- `isApiError(error)` — type guard for AxiosError.
+- API endpoints: `src/services/api/paths.ts`.
+- API modules: `src/services/api/{resource}/index.ts` — functions + React Query hooks.
 
-### Типы
+### Types
 
-- Глобальные типы → `src/types/index.ts`.
-- Компонентные типы — рядом с компонентом или inline.
-- Папки `interfaces/` не существует — всё в `types/`.
+- Global types → `src/types/index.ts`.
+- Component types — next to the component or inline.
+- No `interfaces/` directory — everything in `types/`.
 
-### Хуки
+### Hooks
 
-- Переиспользуемые хуки → `src/hooks/index.ts`.
-- Доступные: `useMediaQuery`, `useDebounce`, `useClickOutside`, `useScrollLock`, `useToggle`.
+- Reusable hooks → `src/hooks/index.ts`.
+- Available: `useMediaQuery`, `useDebounce`, `useClickOutside`, `useScrollLock`, `useToggle`.
 
-### Логирование
+### Logging
 
-- Используем `logger` из `@/utils/logger` вместо `console.*`.
-- В production все вызовы logger автоматически становятся noop.
+- Use `logger` from `@/utils/logger` instead of `console.*`.
+- In production all logger calls automatically become noop.
 
-### Конфигурация
+### Configuration
 
-- `src/configs/project/` — название, i18n, sitemap, robots.
-- `src/configs/constants/urls.ts` — URL-ы (website, server API).
+- `src/configs/project/` — name, i18n, sitemap, robots.
+- `src/configs/constants/urls.ts` — URLs (website, server API).
 - `src/configs/metadata/` — `getBaseMetadata()`, `createMetadata()`.
-- `src/configs/env.ts` — валидация env-переменных.
-- `src/configs/routes.ts` — маршруты приложения.
+- `src/configs/env.ts` — env variable validation.
+- `src/configs/routes.ts` — application routes.
 
 ### State Management
 
-- Redux Toolkit: `src/store/` — глобальный стейт.
-- TanStack React Query: серверный стейт и кэширование API.
-- React Query DevTools подключены в ClientProviders.
+- Redux Toolkit: `src/store/` — global state.
+- TanStack React Query: server state and API caching.
+- React Query DevTools connected in ClientProviders.
 
-### Тесты
+### Tests
 
 - Vitest + @testing-library/react.
-- Тесты в `src/__tests__/` с зеркальной структурой.
-- Запуск: `pnpm test` / `pnpm test:watch`.
+- Tests in `src/__tests__/` with mirrored structure.
+- Run: `pnpm test` / `pnpm test:watch`.
 
-### Файловые конвенции
+### Code Style
 
-- `proxy.ts` (не middleware.ts) — конвенция Next.js 16.
-- `(routes)/` — route group для страниц.
-- `[...rest]/page.tsx` — catch-all для 404.
-- Нет `loading.tsx` — страницы загружаются напрямую.
+- All comments in English.
+- Minimal comments — only where intent is non-obvious.
 
-## Команды
+## Commands
 
 ```
-pnpm dev          # Dev-сервер (порт 5555)
+pnpm dev          # Dev server (port 5555)
 pnpm build        # Production build
 pnpm lint         # ESLint
 pnpm lint:fix     # ESLint autofix
 pnpm format       # Prettier
 pnpm test         # Vitest
 pnpm analyze      # Bundle analyzer
-pnpm clean        # Очистка .next/out/dist
+pnpm clean        # Clean .next/out/dist
 ```
