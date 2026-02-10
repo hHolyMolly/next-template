@@ -40,7 +40,7 @@ pnpm dev
 | `pnpm format` | Prettier formatting |
 | `pnpm test` | Run tests |
 | `pnpm test:watch` | Tests in watch mode |
-| `pnpm clean` | Remove `.next`, `out`, `dist` |
+| `pnpm clean` | Remove `.next`, `dist` |
 | `pnpm clean:all` | Remove `node_modules` + `.next` |
 
 ## Project Structure

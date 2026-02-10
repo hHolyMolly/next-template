@@ -11,8 +11,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "clean": "rm -rf .next out dist",
-    "clean:all": "rm -rf node_modules .next out dist pnpm-lock.yaml",
+    "clean": "rm -rf .next dist",
+    "clean:all": "rm -rf node_modules .next dist pnpm-lock.yaml",
     "test": "vitest run",
     "test:watch": "vitest",
     "analyze": "ANALYZE=true next build"

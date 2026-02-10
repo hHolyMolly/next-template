@@ -2,6 +2,8 @@
 
 import React from 'react';
 
+import styles from '@/app/[locale]/(routes)/home/components/Welcome/Welcome.module.scss';
+
 interface CopyCommandProps {
   command: string;
 }
@@ -39,7 +41,7 @@ export default function CopyCommand({ command }: CopyCommandProps) {
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="animate-scale-in"
+            className={styles.scaleIn}
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
