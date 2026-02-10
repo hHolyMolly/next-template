@@ -9,10 +9,6 @@ export default {
         black: 'rgb(var(--black-rgb), <alpha-value>)',
       },
     },
-
-    screens: {},
-
-    fontFamily: {},
   },
 
   future: {

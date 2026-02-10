@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -11,42 +11,12 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": "./src",
     "paths": {
-      "@routes/*": ["app/[locale]/(routes)/*"],
-      "@routes": ["app/[locale]/(routes)"],
-
-      "@app/*": ["app/*"],
-      "@app": ["app"],
-
-      "@components/*": ["components/*"],
-      "@components": ["components"],
-
-      "@configs/*": ["configs/*"],
-      "@configs": ["configs"],
-
-      "@hooks/*": ["hooks/*"],
-      "@hooks": ["hooks"],
-
-      "@interfaces/*": ["interfaces/*"],
-      "@interfaces": ["interfaces"],
-
-      "@services/*": ["services/*"],
-      "@services": ["services"],
-
-      "@store/*": ["store/*"],
-      "@store": ["store"],
-
-      "@styles/*": ["styles/*"],
-      "@styles": ["styles"],
-
-      "@utils/*": ["utils/*"],
-      "@utils": ["utils"],
-
-      "@/*": ["*"],
-      "@": ["."]
+      "@/*": ["*"]
     },
     "plugins": [
       {
@@ -54,6 +24,13 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "src/types/env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
