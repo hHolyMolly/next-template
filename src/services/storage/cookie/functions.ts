@@ -1,12 +1,14 @@
+import { logger } from '@/utils/logger';
+
 export const customCookieStorage = {
   get<T>(name: string, fallback: T): T {
     try {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      if (!match) return fallback;
+      if (!match?.[2]) return fallback;
 
       return JSON.parse(decodeURIComponent(match[2]));
     } catch (err) {
-      console.error(`cookie.get: failed to parse ${name}`, err);
+      logger.error(`cookie.get: failed to parse ${name}`, err);
 
       return fallback;
     }
@@ -31,7 +33,7 @@ export const customCookieStorage = {
 
       document.cookie = cookieStr;
     } catch (err) {
-      console.error(`cookie.set: failed to save ${name}`, err);
+      logger.error(`cookie.set: failed to save ${name}`, err);
     }
   },
 
@@ -39,7 +41,7 @@ export const customCookieStorage = {
     try {
       document.cookie = `${name}=; path=${path}; max-age=0`;
     } catch (err) {
-      console.error(`cookie.remove: failed to remove ${name}`, err);
+      logger.error(`cookie.remove: failed to remove ${name}`, err);
     }
   },
 };

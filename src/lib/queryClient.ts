@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { QueryClient } from '@tanstack/react-query';
 
 function makeQueryClient() {
@@ -17,12 +18,14 @@ let browserQueryClient: QueryClient | undefined;
 
 /**
  * Returns a QueryClient instance.
- * On the server — creates a new client per request.
+ * On the server — deduplicates via React.cache() per request.
  * On the client — reuses the same singleton instance.
  */
+const getServerQueryClient = cache(() => makeQueryClient());
+
 export function getQueryClient() {
   if (typeof window === 'undefined') {
-    return makeQueryClient();
+    return getServerQueryClient();
   }
   if (!browserQueryClient) {
     browserQueryClient = makeQueryClient();

@@ -1,5 +1,6 @@
-import React from 'react';
-import clsx from 'clsx';
+import { useMemo, memo } from 'react';
+
+import { cn } from '@/lib/cn';
 
 import styles from '@/components/icons/LoadingIcon/index.module.scss';
 
@@ -16,15 +17,9 @@ const LoadingIconComponent = ({
   strokeWidth = 3,
   color = 'currentColor',
 }: LoadingIconProps) => {
-  const containerStyle = React.useMemo(
-    () => ({
-      width: size,
-      height: size,
-    }),
-    [size],
-  );
+  const containerStyle = useMemo(() => ({ width: size, height: size }), [size]);
 
-  const getItemStyle = React.useCallback(
+  const itemStyle = useMemo(
     () => ({
       width: size,
       height: size,
@@ -35,9 +30,9 @@ const LoadingIconComponent = ({
   );
 
   return (
-    <div className={clsx(styles.LoadingElem, className)} style={containerStyle}>
+    <div className={cn(styles.LoadingElem, className)} style={containerStyle}>
       {[...Array(4)].map((_, idx: number) => (
-        <div style={getItemStyle()} key={`loading-icon_${idx}`} />
+        <div style={itemStyle} key={`loading-icon_${idx}`} />
       ))}
     </div>
   );
@@ -45,6 +40,6 @@ const LoadingIconComponent = ({
 
 LoadingIconComponent.displayName = 'LoadingIcon';
 
-const LoadingIcon = React.memo(LoadingIconComponent);
+const LoadingIcon = memo(LoadingIconComponent);
 
 export { LoadingIcon };

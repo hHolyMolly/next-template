@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Hook for tracking clicks outside an element.
- * Handler is memoized via useCallback so parent doesn't need useCallback.
+ * Handler is always up-to-date via useRef (no stale closure).
  *
  * @example
  * const ref = useRef<HTMLDivElement>(null);
@@ -14,13 +14,16 @@ export function useClickOutside<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   handler: (event: MouseEvent | TouchEvent) => void,
 ): void {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stableHandler = useCallback(handler, []);
+  const handlerRef = useRef(handler);
+
+  useEffect(() => {
+    handlerRef.current = handler;
+  });
 
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       if (!ref.current || ref.current.contains(event.target as Node)) return;
-      stableHandler(event);
+      handlerRef.current(event);
     };
 
     document.addEventListener('mousedown', listener);
@@ -30,5 +33,5 @@ export function useClickOutside<T extends HTMLElement>(
       document.removeEventListener('mousedown', listener);
       document.removeEventListener('touchstart', listener);
     };
-  }, [ref, stableHandler]);
+  }, [ref]);
 }

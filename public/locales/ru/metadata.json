@@ -1,8 +1,8 @@
 {
   "global": {
-    "title": "Проект",
-    "title_template": "%s | Проект",
-    "description": "Описание проекта."
+    "title": "Next Template",
+    "title_template": "%s | Next Template",
+    "description": "Production-ready шаблон Next.js."
   },
 
   "home": {

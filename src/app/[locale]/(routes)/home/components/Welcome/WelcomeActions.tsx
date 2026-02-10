@@ -1,33 +1,29 @@
-import styles from '@/app/[locale]/(routes)/home/components/Welcome/Welcome.module.scss';
+import { useTranslations } from 'next-intl';
 
-interface ActionLink {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
-  variant: 'primary' | 'secondary';
-}
+import type { ActionLink } from './types';
+import styles from './Welcome.module.scss';
 
 interface WelcomeActionsProps {
   links: ActionLink[];
 }
 
 export default function WelcomeActions({ links }: WelcomeActionsProps) {
+  const t = useTranslations('welcome');
+
   return (
     <div className={styles.actions}>
-      {links.map(({ href, label, icon, variant }) => (
+      {links.map(({ href, labelKey, icon, variant }) => (
         <a
-          key={label}
+          key={labelKey}
           href={href}
           className={variant === 'primary' ? styles.btnPrimary : styles.btnSecondary}
           target="_blank"
           rel="noopener noreferrer"
         >
           {icon}
-          {label}
+          {t(labelKey)}
         </a>
       ))}
     </div>
   );
 }
-
-export type { ActionLink };

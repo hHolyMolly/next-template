@@ -1,14 +1,15 @@
-import styles from '@/app/[locale]/(routes)/home/components/Welcome/Welcome.module.scss';
+import styles from './Welcome.module.scss';
 
 interface WelcomeFooterProps {
+  label: string;
   author: string;
   authorUrl: string;
 }
 
-export default function WelcomeFooter({ author, authorUrl }: WelcomeFooterProps) {
+export default function WelcomeFooter({ label, author, authorUrl }: WelcomeFooterProps) {
   return (
     <div className={styles.footer}>
-      Made by{' '}
+      {label}{' '}
       <a href={authorUrl} target="_blank" rel="noopener noreferrer">
         @{author}
       </a>

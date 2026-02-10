@@ -125,7 +125,12 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
 }
 
 .titleGradient {
-  background: linear-gradient(135deg, $welcome-accent 0%, $welcome-accent-secondary 50%, $welcome-accent-purple 100%);
+  background: linear-gradient(
+    135deg,
+    $welcome-accent 0%,
+    $welcome-accent-secondary 50%,
+    $welcome-accent-purple 100%
+  );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -295,4 +300,3 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
     }
   }
 }
-

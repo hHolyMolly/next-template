@@ -1,15 +1,16 @@
-import { GITHUB_URL, README_URL } from '@/app/[locale]/(routes)/home/components/Welcome/constants';
-import { type ActionLink } from '@/app/[locale]/(routes)/home/components/Welcome/WelcomeActions';
+import { GITHUB_URL, README_URL } from './constants';
+import type { ActionLink } from './types';
 
 /**
  * Welcome page action buttons.
  *
  * SVG icons are inlined for zero-dependency rendering.
+ * labelKey maps to welcome.json translation keys.
  */
 export const actionLinks: ActionLink[] = [
   {
     href: GITHUB_URL,
-    label: 'GitHub',
+    labelKey: 'github',
     variant: 'primary',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -19,7 +20,7 @@ export const actionLinks: ActionLink[] = [
   },
   {
     href: README_URL,
-    label: 'Documentation',
+    labelKey: 'documentation',
     variant: 'secondary',
     icon: (
       <svg

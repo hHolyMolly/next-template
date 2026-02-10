@@ -1,5 +1,5 @@
-import { type StackItem } from '@/app/[locale]/(routes)/home/components/Welcome/stack';
-import styles from '@/app/[locale]/(routes)/home/components/Welcome/Welcome.module.scss';
+import type { StackItem } from './types';
+import styles from './Welcome.module.scss';
 
 interface WelcomeStackProps {
   items: StackItem[];

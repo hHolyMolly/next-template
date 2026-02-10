@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 export const customSessionStorage = {
   get<T>(key: string, fallback: T): T {
     try {
@@ -5,7 +7,7 @@ export const customSessionStorage = {
 
       return raw ? JSON.parse(raw) : fallback;
     } catch (err) {
-      console.error(`sessionStorage.get: failed to parse ${key}`, err);
+      logger.error(`sessionStorage.get: failed to parse ${key}`, err);
 
       return fallback;
     }
@@ -17,7 +19,7 @@ export const customSessionStorage = {
 
       window.sessionStorage.setItem(key, JSON.stringify(value, replacer));
     } catch (err) {
-      console.error(`sessionStorage.set: failed to save ${key}`, err);
+      logger.error(`sessionStorage.set: failed to save ${key}`, err);
     }
   },
 
@@ -25,7 +27,7 @@ export const customSessionStorage = {
     try {
       window.sessionStorage.removeItem(key);
     } catch (err) {
-      console.error(`sessionStorage.remove: failed to remove ${key}`, err);
+      logger.error(`sessionStorage.remove: failed to remove ${key}`, err);
     }
   },
 };

@@ -1,4 +1,4 @@
-import styles from '@/app/[locale]/(routes)/home/components/Welcome/Welcome.module.scss';
+import styles from './Welcome.module.scss';
 
 interface WelcomeHeroProps {
   title: string;

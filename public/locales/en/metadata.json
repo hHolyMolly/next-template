@@ -1,8 +1,8 @@
 {
   "global": {
-    "title": "Project",
-    "title_template": "%s | Project",
-    "description": "Project description."
+    "title": "Next Template",
+    "title_template": "%s | Next Template",
+    "description": "Production-ready Next.js template."
   },
 
   "home": {

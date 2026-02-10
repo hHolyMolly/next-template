@@ -1,4 +1,4 @@
-import React from 'react';
+import { forwardRef, memo, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/cn';
@@ -31,26 +31,16 @@ const buttonVariants = cva(
   },
 );
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants> & {
     status?: TypeStatus;
-    before?: React.ReactNode;
-    after?: React.ReactNode;
+    before?: ReactNode;
+    after?: ReactNode;
   };
 
-const ButtonComponent = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const ButtonComponent = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      children,
-      className,
-      variant,
-      size,
-      status = 'loaded',
-      before,
-      after,
-      disabled,
-      ...props
-    },
+    { children, className, variant, size, status = 'loaded', before, after, disabled, ...props },
     ref,
   ) => {
     const isDisabled = status === 'error' || disabled;
@@ -82,7 +72,7 @@ const ButtonComponent = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 ButtonComponent.displayName = 'Button';
 
-const Button = React.memo(ButtonComponent);
+const Button = memo(ButtonComponent);
 
 export { Button, buttonVariants };
 export type { ButtonProps };

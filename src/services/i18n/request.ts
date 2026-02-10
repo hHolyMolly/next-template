@@ -1,7 +1,5 @@
 import { getRequestConfig } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
-import fs from 'fs/promises';
-import path from 'path';
 
 import { namespaces } from '@/services/i18n/constants';
 import { routing } from '@/services/i18n/routing';
@@ -22,24 +20,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
       ...(await Promise.all(
         namespaces.map(async (ns) => {
           try {
-            const filePath = path.join(process.cwd(), 'public', 'locales', locale, `${ns}.json`);
-            const text = await fs.readFile(filePath, 'utf-8');
-
-            if (!text) {
-              console.warn(`Empty JSON for ${ns} in ${locale}`);
-              return { [ns]: {} };
-            }
-
-            let data;
-
-            try {
-              data = JSON.parse(text);
-            } catch (err) {
-              console.error(`Invalid JSON in ${ns} for ${locale}`, err);
-              data = {};
-            }
-
-            return { [ns]: data };
+            const mod = await import(`../../../public/locales/${locale}/${ns}.json`);
+            return { [ns]: mod.default ?? mod };
           } catch (err) {
             console.error(`Error loading ${ns} for ${locale}:`, err);
             return { [ns]: {} };

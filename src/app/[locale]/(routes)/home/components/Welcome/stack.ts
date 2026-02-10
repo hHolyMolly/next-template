@@ -1,3 +1,5 @@
+import type { StackItem } from './types';
+
 /**
  * Technology stack displayed on the welcome page.
  *
@@ -6,12 +8,6 @@
  * - color — SVG fill color (hex)
  * - icon  — SVG path data (24×24 viewBox)
  */
-
-export interface StackItem {
-  name: string;
-  color: string;
-  icon: string;
-}
 
 export const stack: StackItem[] = [
   {

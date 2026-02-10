@@ -1,0 +1,11 @@
+{
+  "badge_label": "Готов к продакшену",
+  "title": "Next.js Шаблон",
+  "subtitle": "для современной разработки",
+  "description": "Production-ready шаблон с TypeScript, Tailwind CSS, i18n, управлением состоянием и всем необходимым для масштабируемых приложений.",
+  "github": "GitHub",
+  "documentation": "Документация",
+  "copy_success": "Скопировано!",
+  "footer": "Сделано",
+  "tech_stack": "Технологии"
+}

@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
 import { useLocale } from 'next-intl';
-import clsx from 'clsx';
 
+import { cn } from '@/lib/cn';
 import { Link, usePathname } from '@/services/i18n/navigation';
 import { locales } from '@/services/i18n/constants';
 
@@ -21,7 +20,7 @@ export default function LanguageSwitch() {
         <Link
           href={pathname}
           locale={locale}
-          className={clsx(
+          className={cn(
             'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
             locale === currentLocale
               ? 'bg-white/15 text-white ring-1 ring-white/20'

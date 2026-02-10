@@ -1,17 +1,17 @@
 'use client';
 
-import React from 'react';
+import { useState, useCallback } from 'react';
 
-import styles from '@/app/[locale]/(routes)/home/components/Welcome/Welcome.module.scss';
+import styles from './Welcome.module.scss';
 
 interface CopyCommandProps {
   command: string;
 }
 
 export default function CopyCommand({ command }: CopyCommandProps) {
-  const [copied, setCopied] = React.useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const handleCopy = React.useCallback(async () => {
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(command);
       setCopied(true);

@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 export const customLocalStorage = {
   get<T>(key: string, fallback: T): T {
     try {
@@ -5,7 +7,7 @@ export const customLocalStorage = {
 
       return raw ? JSON.parse(raw) : fallback;
     } catch (err) {
-      console.error(`storage.get: failed to parse ${key}`, err);
+      logger.error(`storage.get: failed to parse ${key}`, err);
 
       return fallback;
     }
@@ -17,7 +19,7 @@ export const customLocalStorage = {
 
       window.localStorage.setItem(key, JSON.stringify(value, replacer));
     } catch (err) {
-      console.error(`storage.set: failed to save ${key}`, err);
+      logger.error(`storage.set: failed to save ${key}`, err);
     }
   },
 
@@ -25,7 +27,7 @@ export const customLocalStorage = {
     try {
       window.localStorage.removeItem(key);
     } catch (err) {
-      console.error(`storage.remove: failed to remove ${key}`, err);
+      logger.error(`storage.remove: failed to remove ${key}`, err);
     }
   },
 };

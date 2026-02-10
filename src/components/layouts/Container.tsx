@@ -1,18 +1,17 @@
-import React from 'react';
-import clsx from 'clsx';
+import type { ReactNode, CSSProperties } from 'react';
+
+import { cn } from '@/lib/cn';
 
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 };
 
-function Container({ children, className, style }: Props) {
+export default function Container({ children, className, style }: Props) {
   return (
-    <div className={clsx('container', className)} style={style}>
+    <div className={cn('container', className)} style={style}>
       {children}
     </div>
   );
 }
-
-export default React.memo(Container);
