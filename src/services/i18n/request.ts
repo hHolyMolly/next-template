@@ -1,18 +1,47 @@
 import { getRequestConfig } from 'next-intl/server';
-import { hasLocale } from 'next-intl';
+import { cookies, headers } from 'next/headers';
+import fs from 'fs/promises';
+import path from 'path';
 
-import { namespaces } from '@services/i18n/constants';
-import { routing } from '@services/i18n/routing';
-
-import { urls } from '@configs/constants/urls';
+import { namespaces, defaultLocale, locales } from '@/services/i18n/constants';
 
 type TypeMessages = {
   [key: string]: string | TypeMessages;
 };
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  const requested = await requestLocale;
-  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+/**
+ * Определение локали без middleware:
+ * 1. Cookie NEXT_LOCALE
+ * 2. Accept-Language заголовок
+ * 3. Локаль по умолчанию
+ */
+async function resolveLocale(): Promise<string> {
+  try {
+    const cookieStore = await cookies();
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value;
+
+    if (localeCookie && locales.includes(localeCookie)) {
+      return localeCookie;
+    }
+
+    const headerStore = await headers();
+    const acceptLanguage = headerStore.get('accept-language');
+
+    if (acceptLanguage) {
+      const preferred = acceptLanguage.split(',')[0]?.split('-')[0]?.trim();
+      if (preferred && locales.includes(preferred)) {
+        return preferred;
+      }
+    }
+  } catch {
+    // cookies/headers могут быть недоступны в некоторых контекстах
+  }
+
+  return defaultLocale;
+}
+
+export default getRequestConfig(async () => {
+  const locale = await resolveLocale();
 
   let messages: TypeMessages = {};
 
@@ -22,16 +51,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
       ...(await Promise.all(
         namespaces.map(async (ns) => {
           try {
-            const url = `${urls.website}/locales/${locale}/${ns}.json`;
+            const filePath = path.join(process.cwd(), 'public', 'locales', locale, `${ns}.json`);
+            const text = await fs.readFile(filePath, 'utf-8');
 
-            const res = await fetch(url);
-
-            if (!res.ok) {
-              console.error(`Failed to load ${ns} for ${locale}: ${res.status}`);
-              return { [ns]: {} };
-            }
-
-            const text = await res.text();
             if (!text) {
               console.warn(`Empty JSON for ${ns} in ${locale}`);
               return { [ns]: {} };

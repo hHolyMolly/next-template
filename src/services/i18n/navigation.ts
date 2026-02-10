@@ -1,5 +1,8 @@
 import { createNavigation } from 'next-intl/navigation';
 
-import { routing } from '@services/i18n/routing';
+import { routing } from '@/services/i18n/routing';
 
-export const { Link, redirect, usePathname, useRouter, getPathname } = createNavigation(routing);
+/**
+ * Типизированные навигационные хелперы на основе конфигурации локалей.
+ */
+export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);

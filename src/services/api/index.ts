@@ -1,5 +1,5 @@
-import API_PATHS from '@services/api/paths';
+import API_PATHS from '@/services/api/paths';
 
-import API from '@services/api/instance';
+import API, { request, isApiError } from '@/services/api/instance';
 
-export { API_PATHS, API };
+export { API_PATHS, API, request, isApiError };

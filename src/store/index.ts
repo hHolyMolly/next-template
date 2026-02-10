@@ -1,16 +1,19 @@
-import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
-import counterSlice from '@store/slices/counterSlice';
+import counterSlice from '@/store/slices/counterSlice';
 
-export const store = configureStore({
-  reducer: {
-    counter: counterSlice,
-  },
-});
+export function makeStore() {
+  return configureStore({
+    reducer: {
+      counter: counterSlice,
+    },
+  });
+}
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type AppStore = ReturnType<typeof makeStore>;
+export type RootState = ReturnType<AppStore['getState']>;
+export type AppDispatch = AppStore['dispatch'];
 
-export const useAppDispatch: () => AppDispatch = useDispatch;
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
