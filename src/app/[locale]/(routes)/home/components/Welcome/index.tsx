@@ -9,9 +9,9 @@
  * and update (routes)/page.tsx with your own page.
  */
 
-import CopyCommand from './CopyCommand';
-import { INSTALL_COMMAND, GITHUB_URL, README_URL } from './constants';
-import { stack } from './stack';
+import CopyCommand from '@/app/[locale]/(routes)/home/components/Welcome/CopyCommand';
+import { INSTALL_COMMAND, GITHUB_URL, README_URL } from '@/app/[locale]/(routes)/home/components/Welcome/constants';
+import { stack } from '@/app/[locale]/(routes)/home/components/Welcome/stack';
 
 interface WelcomeProps {
   languageSwitch?: React.ReactNode;
