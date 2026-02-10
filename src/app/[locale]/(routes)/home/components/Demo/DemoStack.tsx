@@ -1,11 +1,11 @@
 import type { StackItem } from './types';
-import styles from './Welcome.module.scss';
+import styles from './Demo.module.scss';
 
-interface WelcomeStackProps {
+interface DemoStackProps {
   items: StackItem[];
 }
 
-export default function WelcomeStack({ items }: WelcomeStackProps) {
+export default function DemoStack({ items }: DemoStackProps) {
   return (
     <div className={styles.stack}>
       {items.map(({ name, color, icon }) => (

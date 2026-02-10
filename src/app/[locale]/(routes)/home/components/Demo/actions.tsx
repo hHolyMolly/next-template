@@ -2,10 +2,10 @@ import { GITHUB_URL, README_URL } from './constants';
 import type { ActionLink } from './types';
 
 /**
- * Welcome page action buttons.
+ * Demo page action buttons.
  *
  * SVG icons are inlined for zero-dependency rendering.
- * labelKey maps to welcome.json translation keys.
+ * labelKey maps to demo.json translation keys.
  */
 export const actionLinks: ActionLink[] = [
   {

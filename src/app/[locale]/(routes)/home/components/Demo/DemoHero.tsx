@@ -1,12 +1,12 @@
-import styles from './Welcome.module.scss';
+import styles from './Demo.module.scss';
 
-interface WelcomeHeroProps {
+interface DemoHeroProps {
   title: string;
   subtitle: string;
   description: string;
 }
 
-export default function WelcomeHero({ title, subtitle, description }: WelcomeHeroProps) {
+export default function DemoHero({ title, subtitle, description }: DemoHeroProps) {
   return (
     <>
       <h1 className={styles.title}>

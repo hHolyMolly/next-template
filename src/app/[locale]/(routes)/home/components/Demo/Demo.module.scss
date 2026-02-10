@@ -1,28 +1,28 @@
-/* Welcome section variables */
-$welcome-bg-from: #0f172a;
-$welcome-bg-to: #020617;
-$welcome-glow-purple: rgba(120, 119, 198, 0.15);
-$welcome-glow-blue: rgba(56, 189, 248, 0.1);
-$welcome-accent: #38bdf8;
-$welcome-accent-secondary: #818cf8;
-$welcome-accent-purple: #c084fc;
-$welcome-text: #f8fafc;
-$welcome-text-muted: #94a3b8;
-$welcome-text-dim: #64748b;
-$welcome-text-footer: #475569;
-$welcome-badge-bg: rgba(56, 189, 248, 0.1);
-$welcome-badge-border: rgba(56, 189, 248, 0.2);
-$welcome-success: #22c55e;
-$welcome-glass-bg: rgba(255, 255, 255, 0.05);
-$welcome-glass-border: rgba(255, 255, 255, 0.1);
-$welcome-glass-hover-bg: rgba(255, 255, 255, 0.08);
-$welcome-glass-hover-border: rgba(255, 255, 255, 0.2);
-$welcome-tag-bg: rgba(255, 255, 255, 0.03);
-$welcome-tag-border: rgba(255, 255, 255, 0.06);
-$welcome-tag-hover-bg: rgba(255, 255, 255, 0.06);
-$welcome-tag-hover-border: rgba(255, 255, 255, 0.1);
-$welcome-shadow: rgba(56, 189, 248, 0.3);
-$welcome-shadow-hover: rgba(56, 189, 248, 0.4);
+/* Demo section variables */
+$demo-bg-from: #0f172a;
+$demo-bg-to: #020617;
+$demo-glow-purple: rgba(120, 119, 198, 0.15);
+$demo-glow-blue: rgba(56, 189, 248, 0.1);
+$demo-accent: #38bdf8;
+$demo-accent-secondary: #818cf8;
+$demo-accent-purple: #c084fc;
+$demo-text: #f8fafc;
+$demo-text-muted: #94a3b8;
+$demo-text-dim: #64748b;
+$demo-text-footer: #475569;
+$demo-badge-bg: rgba(56, 189, 248, 0.1);
+$demo-badge-border: rgba(56, 189, 248, 0.2);
+$demo-success: #22c55e;
+$demo-glass-bg: rgba(255, 255, 255, 0.05);
+$demo-glass-border: rgba(255, 255, 255, 0.1);
+$demo-glass-hover-bg: rgba(255, 255, 255, 0.08);
+$demo-glass-hover-border: rgba(255, 255, 255, 0.2);
+$demo-tag-bg: rgba(255, 255, 255, 0.03);
+$demo-tag-border: rgba(255, 255, 255, 0.06);
+$demo-tag-hover-bg: rgba(255, 255, 255, 0.06);
+$demo-tag-hover-border: rgba(255, 255, 255, 0.1);
+$demo-shadow: rgba(56, 189, 248, 0.3);
+$demo-shadow-hover: rgba(56, 189, 248, 0.4);
 
 /* Animations */
 @keyframes scale-in {
@@ -49,8 +49,8 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 24px 40px;
-  background: linear-gradient(180deg, $welcome-bg-from 0%, $welcome-bg-to 100%);
+  padding: 60px 24px;
+  background: linear-gradient(180deg, $demo-bg-from 0%, $demo-bg-to 100%);
   overflow: hidden;
 }
 
@@ -59,8 +59,8 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, $welcome-glow-purple, transparent),
-    radial-gradient(ellipse 60% 40% at 100% 100%, $welcome-glow-blue, transparent);
+    radial-gradient(ellipse 80% 50% at 50% -20%, $demo-glow-purple, transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, $demo-glow-blue, transparent);
 }
 
 /* Language switch (top-right) */
@@ -88,16 +88,16 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
   margin-bottom: 32px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: $welcome-accent;
-  background: $welcome-badge-bg;
-  border: 1px solid $welcome-badge-border;
+  color: $demo-accent;
+  background: $demo-badge-bg;
+  border: 1px solid $demo-badge-border;
   border-radius: 100px;
 }
 
 .badgeDot {
   width: 6px;
   height: 6px;
-  background: $welcome-success;
+  background: $demo-success;
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -119,7 +119,7 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  color: $welcome-text;
+  color: $demo-text;
   margin-bottom: 24px;
   text-wrap: balance;
 }
@@ -127,9 +127,9 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
 .titleGradient {
   background: linear-gradient(
     135deg,
-    $welcome-accent 0%,
-    $welcome-accent-secondary 50%,
-    $welcome-accent-purple 100%
+    $demo-accent 0%,
+    $demo-accent-secondary 50%,
+    $demo-accent-purple 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
@@ -140,36 +140,36 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
 .description {
   font-size: 1.25rem;
   line-height: 1.7;
-  color: $welcome-text-muted;
-  margin-bottom: 40px;
+  color: $demo-text-muted;
+  margin-bottom: 48px;
 }
 
 /* Actions */
 .actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 }
 
 .btnPrimary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 28px;
+  padding: 16px 32px;
   font-size: 1rem;
   font-weight: 600;
-  color: $welcome-bg-from;
-  background: linear-gradient(135deg, $welcome-accent 0%, $welcome-accent-secondary 100%);
+  color: $demo-bg-from;
+  background: linear-gradient(135deg, $demo-accent 0%, $demo-accent-secondary 100%);
   border-radius: 12px;
-  box-shadow: 0 4px 24px $welcome-shadow;
+  box-shadow: 0 4px 24px $demo-shadow;
   transition: all 0.2s;
   text-decoration: none;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px $welcome-shadow-hover;
+    box-shadow: 0 8px 32px $demo-shadow-hover;
   }
 }
 
@@ -177,20 +177,20 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 28px;
+  padding: 16px 32px;
   font-size: 1rem;
   font-weight: 600;
   color: #cbd5e1;
-  background: $welcome-glass-bg;
-  border: 1px solid $welcome-glass-border;
+  background: $demo-glass-bg;
+  border: 1px solid $demo-glass-border;
   border-radius: 12px;
   transition: all 0.2s;
   text-decoration: none;
 
   &:hover {
     transform: translateY(-2px);
-    background: $welcome-glass-hover-bg;
-    border-color: $welcome-glass-hover-border;
+    background: $demo-glass-hover-bg;
+    border-color: $demo-glass-hover-border;
   }
 }
 
@@ -209,21 +209,21 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
   font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
   font-size: 0.875rem;
   color: #cbd5e1;
-  background: $welcome-glass-bg;
-  border: 1px solid $welcome-glass-border;
+  background: $demo-glass-bg;
+  border: 1px solid $demo-glass-border;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
 
   &:hover {
-    background: $welcome-glass-hover-bg;
-    border-color: $welcome-glass-hover-border;
+    background: $demo-glass-hover-bg;
+    border-color: $demo-glass-hover-border;
   }
 }
 
 .installDollar {
-  color: $welcome-text-dim;
+  color: $demo-text-dim;
   user-select: none;
 }
 
@@ -236,7 +236,7 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
 
 .installIcon {
   flex-shrink: 0;
-  color: $welcome-text-dim;
+  color: $demo-text-dim;
   transition: color 0.2s;
 }
 
@@ -245,7 +245,7 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
 }
 
 .installIconCheck {
-  color: $welcome-success;
+  color: $demo-success;
 }
 
 /* Stack */
@@ -266,14 +266,14 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
   font-size: 0.875rem;
   font-weight: 500;
   color: #e2e8f0;
-  background: $welcome-tag-bg;
-  border: 1px solid $welcome-tag-border;
+  background: $demo-tag-bg;
+  border: 1px solid $demo-tag-border;
   border-radius: 8px;
   transition: all 0.2s;
 
   &:hover {
-    background: $welcome-tag-hover-bg;
-    border-color: $welcome-tag-hover-border;
+    background: $demo-tag-hover-bg;
+    border-color: $demo-tag-hover-border;
   }
 }
 
@@ -287,16 +287,18 @@ $welcome-shadow-hover: rgba(56, 189, 248, 0.4);
 .footer {
   position: absolute;
   bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.875rem;
-  color: $welcome-text-footer;
+  color: $demo-text-footer;
 
   a {
-    color: $welcome-text-dim;
+    color: $demo-text-dim;
     text-decoration: none;
     transition: color 0.2s;
 
     &:hover {
-      color: $welcome-text-muted;
+      color: $demo-text-muted;
     }
   }
 }

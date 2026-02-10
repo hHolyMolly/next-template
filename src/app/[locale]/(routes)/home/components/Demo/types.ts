@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-/** Welcome page action link */
+/** Demo page action link */
 export interface ActionLink {
   href: string;
   labelKey: string;

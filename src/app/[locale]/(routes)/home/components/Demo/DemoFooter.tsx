@@ -1,12 +1,12 @@
-import styles from './Welcome.module.scss';
+import styles from './Demo.module.scss';
 
-interface WelcomeFooterProps {
+interface DemoFooterProps {
   label: string;
   author: string;
   authorUrl: string;
 }
 
-export default function WelcomeFooter({ label, author, authorUrl }: WelcomeFooterProps) {
+export default function DemoFooter({ label, author, authorUrl }: DemoFooterProps) {
   return (
     <div className={styles.footer}>
       {label}{' '}

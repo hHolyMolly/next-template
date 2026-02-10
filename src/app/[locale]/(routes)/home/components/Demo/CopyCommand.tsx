@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 
-import styles from './Welcome.module.scss';
+import styles from './Demo.module.scss';
 
 interface CopyCommandProps {
   command: string;

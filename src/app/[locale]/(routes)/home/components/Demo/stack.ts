@@ -1,7 +1,7 @@
 import type { StackItem } from './types';
 
 /**
- * Technology stack displayed on the welcome page.
+ * Technology stack displayed on the demo page.
  *
  * Each entry has:
  * - name  — display name

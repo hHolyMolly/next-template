@@ -1,5 +1,5 @@
 /**
- * Welcome page constants.
+ * Demo page constants.
  *
  * Change these values to match your project.
  */

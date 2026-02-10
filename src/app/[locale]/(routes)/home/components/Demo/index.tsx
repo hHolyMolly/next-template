@@ -1,5 +1,5 @@
 /**
- * Welcome Section (demo — delete after starting work)
+ * Demo Section (demo — delete after starting work)
  *
  * This component is a template demo page.
  * Replace it with your own home page content.
@@ -11,25 +11,25 @@
 
 import { useTranslations } from 'next-intl';
 
-import CopyCommand from '@/app/[locale]/(routes)/home/components/Welcome/CopyCommand';
-import WelcomeBadge from '@/app/[locale]/(routes)/home/components/Welcome/WelcomeBadge';
-import WelcomeHero from '@/app/[locale]/(routes)/home/components/Welcome/WelcomeHero';
-import WelcomeActions from '@/app/[locale]/(routes)/home/components/Welcome/WelcomeActions';
-import WelcomeStack from '@/app/[locale]/(routes)/home/components/Welcome/WelcomeStack';
-import WelcomeFooter from '@/app/[locale]/(routes)/home/components/Welcome/WelcomeFooter';
+import CopyCommand from '@/app/[locale]/(routes)/home/components/Demo/CopyCommand';
+import DemoBadge from '@/app/[locale]/(routes)/home/components/Demo/DemoBadge';
+import DemoHero from '@/app/[locale]/(routes)/home/components/Demo/DemoHero';
+import DemoActions from '@/app/[locale]/(routes)/home/components/Demo/DemoActions';
+import DemoStack from '@/app/[locale]/(routes)/home/components/Demo/DemoStack';
+import DemoFooter from '@/app/[locale]/(routes)/home/components/Demo/DemoFooter';
 import { INSTALL_COMMAND, AUTHOR, AUTHOR_URL, VERSION } from './constants';
 import { stack } from './stack';
 import { actionLinks } from './actions';
-import styles from './Welcome.module.scss';
+import styles from './Demo.module.scss';
 
 import type { ReactNode } from 'react';
 
-interface WelcomeProps {
+interface DemoProps {
   languageSwitch?: ReactNode;
 }
 
-export default function Welcome({ languageSwitch }: WelcomeProps) {
-  const t = useTranslations('welcome');
+export default function Demo({ languageSwitch }: DemoProps) {
+  const t = useTranslations('demo');
 
   return (
     <section className={styles.section}>
@@ -38,22 +38,22 @@ export default function Welcome({ languageSwitch }: WelcomeProps) {
       {languageSwitch && <div className={styles.languageSwitch}>{languageSwitch}</div>}
 
       <div className={styles.content}>
-        <WelcomeBadge version={VERSION} label={t('badge_label')} />
+        <DemoBadge version={VERSION} label={t('badge_label')} />
 
-        <WelcomeHero
+        <DemoHero
           title={t('title')}
           subtitle={t('subtitle')}
           description={t('description')}
         />
 
-        <WelcomeActions links={actionLinks} />
+        <DemoActions links={actionLinks} />
 
         <CopyCommand command={INSTALL_COMMAND} />
 
-        <WelcomeStack items={stack} />
+        <DemoStack items={stack} />
       </div>
 
-      <WelcomeFooter
+      <DemoFooter
         label={t('footer')}
         author={AUTHOR}
         authorUrl={AUTHOR_URL}

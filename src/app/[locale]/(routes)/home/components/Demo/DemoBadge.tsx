@@ -1,11 +1,11 @@
-import styles from './Welcome.module.scss';
+import styles from './Demo.module.scss';
 
-interface WelcomeBadgeProps {
+interface DemoBadgeProps {
   version: string;
   label: string;
 }
 
-export default function WelcomeBadge({ version, label }: WelcomeBadgeProps) {
+export default function DemoBadge({ version, label }: DemoBadgeProps) {
   return (
     <span className={styles.badge}>
       <span className={styles.badgeDot} />

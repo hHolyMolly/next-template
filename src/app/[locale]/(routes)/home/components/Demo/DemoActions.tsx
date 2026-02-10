@@ -1,14 +1,14 @@
 import { useTranslations } from 'next-intl';
 
 import type { ActionLink } from './types';
-import styles from './Welcome.module.scss';
+import styles from './Demo.module.scss';
 
-interface WelcomeActionsProps {
+interface DemoActionsProps {
   links: ActionLink[];
 }
 
-export default function WelcomeActions({ links }: WelcomeActionsProps) {
-  const t = useTranslations('welcome');
+export default function DemoActions({ links }: DemoActionsProps) {
+  const t = useTranslations('demo');
 
   return (
     <div className={styles.actions}>
