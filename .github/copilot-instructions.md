@@ -101,5 +101,5 @@ pnpm lint:fix     # ESLint autofix
 pnpm format       # Prettier
 pnpm test         # Vitest
 pnpm analyze      # Bundle analyzer
-pnpm clean        # Clean .next/out/dist
+pnpm clean        # Clean .next/dist
 ```

@@ -8,7 +8,7 @@ export const projectConfig: ProjectConfig = {
   name: 'next-template',
 
   i18n: {
-    defaultLocale: 'ru',
+    defaultLocale: 'en',
     locales: ['ru', 'en'],
   },
 
