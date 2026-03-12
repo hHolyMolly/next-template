@@ -88,7 +88,10 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
 
 - `src/configs/project/` — name, i18n, sitemap, robots.
 - `src/configs/constants/urls.ts` — URLs (website, server API).
-- `src/configs/metadata/` — `getBaseMetadata()`, `createMetadata()`.
+- `src/configs/metadata/` — `getBaseMetadata()`, `createMetadata()`, `previewImage()`.
+  - OG/Twitter preview images stored in `public/assets/img/previews/` (`.webp`).
+  - Use `preview` shorthand in `createMetadata({ preview: 'about' })` for per-page preview.
+  - Global fallback: `global.webp`.
 - `src/configs/env.ts` — env variable validation.
 - `src/configs/routes.ts` — application routes.
 
