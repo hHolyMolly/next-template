@@ -38,7 +38,6 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
 - Colors applied via Tailwind tokens: `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, etc.
 - Container defined in `tailwind.css`.
 - Use `cn()` from `@/lib/cn` (clsx + tailwind-merge) for merging classes.
-- Dark mode selector: `[data-theme="dark"]`.
 
 ### Components
 
@@ -47,6 +46,7 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
   - Button uses `cva` variants and `asChild` via `@radix-ui/react-slot`.
   - Toast notifications: `sonner` (not react-hot-toast). Use `toast()` from `sonner`.
 - Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders, ErrorBoundary).
+- No theme switching — single light theme only.
 - Icons → `src/components/icons/`.
 - Page-specific components → `src/app/[locale]/(routes)/{page}/components/`.
 
