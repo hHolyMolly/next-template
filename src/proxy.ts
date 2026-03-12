@@ -23,7 +23,9 @@ const rateLimit = createRateLimit({ limit: 100, windowSeconds: 60 });
 
 // Allowed external origins for CSP directives.
 // Add your API domain, CDN, analytics, etc.
-const ALLOWED_CONNECT = [urls.server.api && new URL(urls.server.api).origin].filter(Boolean);
+const ALLOWED_CONNECT = [urls.server.api ? new URL(urls.server.api).origin : undefined].filter(
+  Boolean,
+);
 const ALLOWED_IMG: string[] = []; // e.g. 'https://images.unsplash.com'
 const ALLOWED_FONT = ['https://fonts.gstatic.com'];
 
