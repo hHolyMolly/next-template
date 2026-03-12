@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 /** Demo page action link */
 export interface ActionLink {
   href: string;
-  labelKey: string;
+  labelKey: 'github' | 'documentation';
   icon: ReactNode;
   variant: 'primary' | 'secondary';
 }
