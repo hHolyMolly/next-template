@@ -12,7 +12,7 @@ async function TemplatePage({ params }: Props) {
   const { locale } = await params;
   await setRequestLocale(locale);
 
-  return <>Home Page</>;
+  return <>Template Page</>;
 }
 
 export default TemplatePage;
