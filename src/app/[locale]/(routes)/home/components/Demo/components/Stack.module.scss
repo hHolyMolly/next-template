@@ -1,0 +1,35 @@
+@use '../variables' as *;
+
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  background: $demo-tag-bg;
+  border: 1px solid $demo-tag-border;
+  border-radius: 8px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $demo-tag-hover-bg;
+    border-color: $demo-tag-hover-border;
+  }
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}

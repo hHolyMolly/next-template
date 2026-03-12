@@ -1,0 +1,30 @@
+@use '../variables' as *;
+
+.title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: $demo-text;
+  margin-bottom: 24px;
+  text-wrap: balance;
+}
+
+.gradient {
+  background: linear-gradient(
+    135deg,
+    $demo-accent 0%,
+    $demo-accent-secondary 50%,
+    $demo-accent-purple 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.description {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: $demo-text-muted;
+  margin-bottom: 48px;
+}

@@ -11,15 +11,15 @@
 
 import { useTranslations } from 'next-intl';
 
-import CopyCommand from '@/app/[locale]/(routes)/home/components/Demo/CopyCommand';
-import DemoBadge from '@/app/[locale]/(routes)/home/components/Demo/DemoBadge';
-import DemoHero from '@/app/[locale]/(routes)/home/components/Demo/DemoHero';
-import DemoActions from '@/app/[locale]/(routes)/home/components/Demo/DemoActions';
-import DemoStack from '@/app/[locale]/(routes)/home/components/Demo/DemoStack';
-import DemoFooter from '@/app/[locale]/(routes)/home/components/Demo/DemoFooter';
+import Badge from './components/Badge';
+import Hero from './components/Hero';
+import Actions from './components/Actions';
+import CopyCommand from './components/CopyCommand';
+import Stack from './components/Stack';
+import Footer from './components/Footer';
 import { INSTALL_COMMAND, AUTHOR, AUTHOR_URL, VERSION } from './constants';
-import { stack } from './stack';
-import { actionLinks } from './actions';
+import { stack } from './data/stack';
+import { actionLinks } from './data/actions';
 import styles from './Demo.module.scss';
 
 import type { ReactNode } from 'react';
@@ -38,22 +38,22 @@ export default function Demo({ languageSwitch }: DemoProps) {
       {languageSwitch && <div className={styles.languageSwitch}>{languageSwitch}</div>}
 
       <div className={styles.content}>
-        <DemoBadge version={VERSION} label={t('badge_label')} />
+        <Badge version={VERSION} label={t('badge_label')} />
 
-        <DemoHero
+        <Hero
           title={t('title')}
           subtitle={t('subtitle')}
           description={t('description')}
         />
 
-        <DemoActions links={actionLinks} />
+        <Actions links={actionLinks} />
 
         <CopyCommand command={INSTALL_COMMAND} />
 
-        <DemoStack items={stack} />
+        <Stack items={stack} />
       </div>
 
-      <DemoFooter
+      <Footer
         label={t('footer')}
         author={AUTHOR}
         authorUrl={AUTHOR_URL}

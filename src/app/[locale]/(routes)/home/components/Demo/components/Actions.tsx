@@ -1,13 +1,13 @@
 import { useTranslations } from 'next-intl';
 
-import type { ActionLink } from './types';
-import styles from './Demo.module.scss';
+import type { ActionLink } from '../types';
+import styles from './Actions.module.scss';
 
-interface DemoActionsProps {
+interface ActionsProps {
   links: ActionLink[];
 }
 
-export default function DemoActions({ links }: DemoActionsProps) {
+export default function Actions({ links }: ActionsProps) {
   const t = useTranslations('demo');
 
   return (

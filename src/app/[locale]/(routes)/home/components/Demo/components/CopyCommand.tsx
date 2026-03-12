@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-import styles from './Demo.module.scss';
+import styles from './CopyCommand.module.scss';
 
 interface CopyCommandProps {
   command: string;
@@ -34,13 +34,13 @@ export default function CopyCommand({ command }: CopyCommandProps) {
       <button
         type="button"
         onClick={handleCopy}
-        className={styles.installButton}
+        className={styles.button}
         aria-label={`Copy install command: ${command}`}
       >
-        <span className={styles.installDollar}>$</span>
-        <span className={styles.installText}>{command}</span>
+        <span className={styles.dollar}>$</span>
+        <span className={styles.text}>{command}</span>
 
-        <span className={styles.installIcon}>
+        <span className={styles.icon}>
           {copied ? (
             <svg
               width="18"
@@ -51,7 +51,7 @@ export default function CopyCommand({ command }: CopyCommandProps) {
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`${styles.scaleIn} ${styles.installIconCheck}`}
+              className={`${styles.scaleIn} ${styles.iconCheck}`}
               aria-hidden="true"
             >
               <polyline points="20 6 9 17 4 12" />

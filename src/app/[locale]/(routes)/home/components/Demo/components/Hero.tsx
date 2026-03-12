@@ -1,18 +1,18 @@
-import styles from './Demo.module.scss';
+import styles from './Hero.module.scss';
 
-interface DemoHeroProps {
+interface HeroProps {
   title: string;
   subtitle: string;
   description: string;
 }
 
-export default function DemoHero({ title, subtitle, description }: DemoHeroProps) {
+export default function Hero({ title, subtitle, description }: HeroProps) {
   return (
     <>
       <h1 className={styles.title}>
         {title}
         <br />
-        <span className={styles.titleGradient}>{subtitle}</span>
+        <span className={styles.gradient}>{subtitle}</span>
       </h1>
 
       <p className={styles.description}>{description}</p>

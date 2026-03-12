@@ -1,5 +1,5 @@
-import { GITHUB_URL, README_URL } from './constants';
-import type { ActionLink } from './types';
+import { GITHUB_URL, README_URL } from '../constants';
+import type { ActionLink } from '../types';
 
 /**
  * Demo page action buttons.
