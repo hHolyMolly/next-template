@@ -6,11 +6,6 @@ import { fileURLToPath } from 'node:url';
 if (!existsSync('.git')) {
   const projectName = basename(resolve('.'));
 
-  // Remove CI workflows (only needed for the template repo)
-  if (existsSync('.github/workflows')) {
-    rmSync('.github/workflows', { recursive: true });
-  }
-
   // Replace project name in source files
   const filesToUpdate = ['src/configs/project/index.ts', 'ecosystem.config.cjs'];
 
