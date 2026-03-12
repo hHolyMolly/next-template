@@ -1,7 +1,6 @@
 {
   "global": {
     "title": "Next Template",
-    "title_template": "%s | Next Template",
     "description": "Production-ready шаблон Next.js."
   },
 
@@ -9,8 +8,13 @@
     "description": "Next Template описание."
   },
 
+  "template": {
+    "title": "Шаблон страницы",
+    "description": "Описание шаблона страницы"
+  },
+
   "not_found": {
-    "title": "Не найдено",
+    "title": "404 — Страница не найдена",
     "description": "Запрашиваемая страница не существует."
   }
 }

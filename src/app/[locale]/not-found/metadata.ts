@@ -9,5 +9,9 @@ export async function generateNotFoundMetadata(): Promise<Metadata> {
   return createMetadata({
     title: t('title'),
     description: t('description'),
+    robots: {
+      index: false,
+      follow: false,
+    },
   });
 }

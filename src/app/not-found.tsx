@@ -1,41 +1,27 @@
-import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+
+import Header from '@/components/layouts/Header';
+import Footer from '@/components/layouts/Footer';
 
 /**
  * Root-level 404 page — outside [locale] layout.
  *
- * Catches requests that don't match any locale prefix (e.g., `/nonexistent`).
- * i18n is unavailable here, so text is hardcoded.
- *
- * `[locale]/not-found.tsx` handles 404s inside locale routes.
+ * Catches requests that don't match any locale prefix (e.g., `/template.html`).
+ * Uses the same translations and layout as the locale-level 404.
  */
-function RootNotFoundPage() {
+async function RootNotFoundPage() {
+  const t = await getTranslations('translations.errors');
+  const meta = await getTranslations('metadata.not_found');
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '50vh',
-        gap: '16px',
-        fontFamily: 'system-ui, sans-serif',
-      }}
-    >
-      <h2 style={{ fontSize: '3.5rem', fontWeight: 700, margin: 0 }}>404</h2>
-      <p style={{ color: 'var(--text-secondary, #6b7280)', margin: 0 }}>Page not found</p>
-      <Link
-        href="/"
-        style={{
-          padding: '8px 16px',
-          borderRadius: '8px',
-          background: 'var(--accent, #000)',
-          color: '#fff',
-          textDecoration: 'none',
-          fontSize: '0.875rem',
-        }}
-      >
-        Go home
-      </Link>
+    <div className="wrapper">
+      <title>{meta('title')}</title>
+      <meta name="robots" content="noindex, nofollow" />
+      <Header />
+      <main id="main-content" className="page">
+        {t('not_found_title')}
+      </main>
+      <Footer />
     </div>
   );
 }

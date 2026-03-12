@@ -8,13 +8,13 @@
  * - hue: 0-360 degrees (none = achromatic)
  */
 :root {
-  --background: 100.00% 0.0000 none;
+  --background: 100% 0 none;
   --foreground: 20.79% 0.0399 265.7;
 
-  --card: 100.00% 0.0000 none;
+  --card: 100% 0 none;
   --card-foreground: 20.79% 0.0399 265.7;
 
-  --popover: 100.00% 0.0000 none;
+  --popover: 100% 0 none;
   --popover-foreground: 20.79% 0.0399 265.7;
 
   --primary: 62.32% 0.1879 259.8;
@@ -30,7 +30,7 @@
   --accent-foreground: 20.79% 0.0399 265.7;
 
   --destructive: 63.68% 0.2078 25.3;
-  --destructive-foreground: 98.48% 0.0000 none;
+  --destructive-foreground: 98.48% 0 none;
 
   --border: 92.78% 0.0058 264.5;
   --input: 92.78% 0.0058 264.5;
@@ -38,36 +38,4 @@
   --radius: 0.5rem;
 
   --shadow-color: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme='dark'] {
-  --background: 20.79% 0.0399 265.7;
-  --foreground: 96.84% 0.0068 247.9;
-
-  --card: 20.79% 0.0399 265.7;
-  --card-foreground: 96.84% 0.0068 247.9;
-
-  --popover: 20.79% 0.0399 265.7;
-  --popover-foreground: 96.84% 0.0068 247.9;
-
-  --primary: 71.35% 0.1435 254.6;
-  --primary-foreground: 20.79% 0.0399 265.7;
-
-  --secondary: 28.00% 0.0369 260.0;
-  --secondary-foreground: 96.84% 0.0068 247.9;
-
-  --muted: 37.20% 0.0392 257.3;
-  --muted-foreground: 71.07% 0.0351 256.8;
-
-  --accent: 37.20% 0.0392 257.3;
-  --accent-foreground: 96.84% 0.0068 247.9;
-
-  --destructive: 39.59% 0.1331 25.7;
-  --destructive-foreground: 96.84% 0.0068 247.9;
-
-  --border: 37.20% 0.0392 257.3;
-  --input: 37.20% 0.0392 257.3;
-  --ring: 71.35% 0.1435 254.6;
-
-  --shadow-color: rgba(0, 0, 0, 0.4);
 }

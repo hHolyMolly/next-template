@@ -3,6 +3,10 @@
  * Only includes rules NOT covered by @tailwind base.
  */
 
+html {
+  overscroll-behavior: none;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }

@@ -33,22 +33,22 @@ pnpm dev
 
 ## Commands
 
-| Command              | Description                       |
-| -------------------- | --------------------------------- |
-| `pnpm dev`           | Dev server (Turbopack)            |
-| `pnpm build`         | Production build                  |
-| `pnpm start`         | Start production server           |
-| `pnpm lint`          | ESLint check                      |
-| `pnpm lint:fix`      | ESLint auto-fix                   |
-| `pnpm format`        | Prettier formatting               |
-| `pnpm format:check`  | Check formatting without changes  |
-| `pnpm typecheck`     | TypeScript type checking          |
-| `pnpm test`          | Run tests                         |
-| `pnpm test:watch`    | Tests in watch mode               |
-| `pnpm test:coverage` | Tests with coverage report        |
-| `pnpm clean`         | Remove `.next`, `dist`            |
-| `pnpm clean:all`     | Remove `node_modules` + `.next`   |
-| `pnpm analyze`       | Bundle analyzer                   |
+| Command              | Description                      |
+| -------------------- | -------------------------------- |
+| `pnpm dev`           | Dev server (Turbopack)           |
+| `pnpm build`         | Production build                 |
+| `pnpm start`         | Start production server          |
+| `pnpm lint`          | ESLint check                     |
+| `pnpm lint:fix`      | ESLint auto-fix                  |
+| `pnpm format`        | Prettier formatting              |
+| `pnpm format:check`  | Check formatting without changes |
+| `pnpm typecheck`     | TypeScript type checking         |
+| `pnpm test`          | Run tests                        |
+| `pnpm test:watch`    | Tests in watch mode              |
+| `pnpm test:coverage` | Tests with coverage report       |
+| `pnpm clean`         | Remove `.next`, `dist`           |
+| `pnpm clean:all`     | Remove `node_modules` + `.next`  |
+| `pnpm analyze`       | Bundle analyzer                  |
 
 ## Project Structure
 
@@ -56,20 +56,24 @@ pnpm dev
 src/
 ├── app/
 │   ├── page.tsx                 # Redirect → default locale
-│   ├── not-found.tsx            # Root 404
+│   ├── not-found.tsx            # Root 404 (i18n, header, footer)
 │   ├── global-error.tsx         # Global error boundary
-│   ├── layout.tsx               # Root layout (+ ThemeScript)
+│   ├── layout.tsx               # Root layout (styles, fonts, JSON-LD)
 │   ├── robots.ts                # robots.txt generation
 │   ├── sitemap.ts               # sitemap.xml generation
 │   └── [locale]/
-│       ├── layout.tsx           # Locale layout (providers, header, footer)
-│       ├── loading.tsx          # Loading state (Suspense boundary)
+│       ├── layout.tsx           # Locale layout (providers)
+│       ├── page.tsx             # Home page (no header/footer — landing)
+│       ├── loading.tsx          # Loading state
 │       ├── error.tsx            # Error boundary
-│       ├── not-found.tsx        # 404 page (i18n)
-│       └── (routes)/            # Page routes
-│           └── home/            # Demo welcome page (delete after start)
+│       ├── not-found.tsx        # 404 page (i18n, header, footer)
+│       └── (routes)/            # Pages with header & footer
+│           ├── layout.tsx       # Adds Header + Footer wrapper
+│           ├── template/        # Template starter page
+│           ├── [...]rest/       # Catch-all → 404
+│           └── home/            # Demo components (delete after start)
 ├── components/
-│   ├── layouts/                 # Header, Footer, ClientProviders, ThemeProvider
+│   ├── layouts/                 # Header, Footer, Container, ClientProviders
 │   ├── icons/                   # SVG icon components
 │   └── UI/                      # Reusable UI components
 │       ├── Button.tsx           # CVA button with variants
@@ -87,7 +91,6 @@ src/
 │   ├── useMediaQuery            # SSR-safe media queries
 │   ├── useScrollLock            # Scroll locking
 │   ├── useToggle                # Boolean toggle
-│   ├── useTheme                 # Theme switching (light/dark/system)
 │   └── useToast                 # Toast notifications
 ├── lib/
 │   ├── cn.ts                    # clsx + tailwind-merge
@@ -119,31 +122,35 @@ src/
 | URLs         | [`src/configs/constants/urls.ts`](src/configs/constants/urls.ts) |
 | Environment  | `.env.example` → `.env.development` / `.env.production`          |
 | Translations | [`public/locales/{locale}/`](public/locales/)                    |
-| Theme        | [`src/styles/vars.css`](src/styles/vars.css)                     |
+| Styles       | [`src/styles/vars.css`](src/styles/vars.css)                     |
 
 ## UI Components
 
 ### Button
+
 ```tsx
 <Button variant="primary" size="md" status="loaded">Click me</Button>
 <Button variant="destructive" before={<TrashIcon />}>Delete</Button>
 ```
 
 ### Input
+
 ```tsx
 <Input label="Email" placeholder="you@example.com" error="Required" />
 <Input variant="filled" size="lg" before={<SearchIcon />} />
 ```
 
 ### Modal
+
 ```tsx
 const [isOpen, toggle] = useToggle();
 <Modal isOpen={isOpen} onClose={toggle} title="Confirm">
   <p>Are you sure?</p>
-</Modal>
+</Modal>;
 ```
 
 ### Toast
+
 ```tsx
 const { success, error } = useToast();
 success('Saved successfully!');
@@ -151,6 +158,7 @@ error('Something went wrong');
 ```
 
 ### Skeleton
+
 ```tsx
 <Skeleton width={200} height={20} />
 <SkeletonText lines={3} />
@@ -158,17 +166,26 @@ error('Something went wrong');
 <SkeletonCard />
 ```
 
-## Theming
+## Getting Started
 
-Light/dark theme with CSS variables and system preference detection:
+After cloning, the demo page is at `/` (home). To start building your project:
 
-```tsx
-const { theme, toggleTheme, setTheme } = useTheme();
-setTheme('dark');    // Force dark
-setTheme('system');  // Follow OS preference
-```
+1. **Delete demo page**: remove `src/app/[locale]/(routes)/home/` folder
+2. **Update home page**: edit `src/app/[locale]/page.tsx` with your content
+3. **Use template page**: `src/app/[locale]/(routes)/template/` is a starter page with Header + Footer — rename and customize it
+4. **Add new pages**: create folders inside `(routes)/` — they automatically get Header + Footer from `(routes)/layout.tsx`
+5. **Pages without Header/Footer**: create page files directly in `[locale]/` (outside `(routes)/`)
+6. **Update translations**: edit files in `public/locales/{en,ru}/`
+7. **Update metadata**: edit `public/locales/{locale}/metadata.json`
 
-Theme colors are defined in [`src/styles/vars.css`](src/styles/vars.css).
+### Page structure
+
+| Route        | Header/Footer | Description                 |
+| ------------ | ------------- | --------------------------- |
+| `/`          | No            | Home / landing page         |
+| `/template`  | Yes           | Template starter page       |
+| `/any-route` | Yes           | Any page inside `(routes)/` |
+| `/404`       | Yes           | Not found page              |
 
 ## Docker
 

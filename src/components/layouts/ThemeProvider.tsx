@@ -48,12 +48,14 @@ type ThemeState = { theme: Theme; resolved: ResolvedTheme };
 const listeners = new Set<() => void>();
 let currentState: ThemeState = { theme: 'system', resolved: 'light' };
 
+const SERVER_SNAPSHOT: ThemeState = { theme: 'system', resolved: 'light' };
+
 function getSnapshot(): ThemeState {
   return currentState;
 }
 
 function getServerSnapshot(): ThemeState {
-  return { theme: 'system', resolved: 'light' };
+  return SERVER_SNAPSHOT;
 }
 
 function subscribe(listener: () => void): () => void {
@@ -161,7 +163,9 @@ function ThemeScript({ nonce }: { nonce?: string }) {
     })();
   `;
 
-  return <script nonce={nonce} dangerouslySetInnerHTML={{ __html: script }} />;
+  return (
+    <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: script }} />
+  );
 }
 
 export { ThemeProvider, ThemeScript, useTheme };

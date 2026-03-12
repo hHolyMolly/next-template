@@ -6,6 +6,7 @@
   "errors": {
     "something_went_wrong": "Что-то пошло не так",
     "try_again": "Попробовать снова",
+    "not_found_title": "404 \u2014 Страница не найдена",
     "page_not_found": "Страница не найдена",
     "go_home": "На главную"
   }

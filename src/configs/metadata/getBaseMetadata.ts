@@ -14,13 +14,9 @@ async function getBaseMetadata(): Promise<Metadata> {
 
   const title = t('title');
   const description = t('description');
-  const titleTemplate = t('title_template');
 
   return {
-    title: {
-      default: title,
-      template: titleTemplate,
-    },
+    title,
     description,
     metadataBase: new URL(urls.website || 'http://localhost:3000'),
 

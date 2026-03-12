@@ -39,7 +39,7 @@ export function proxy(request: NextRequest) {
 
   const response = intlMiddleware(request);
 
-  // Generate CSP nonce for inline scripts (ThemeScript, JSON-LD, etc.)
+  // Generate CSP nonce for inline scripts (JSON-LD, etc.)
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
   const connectSrc = ["'self'", ...ALLOWED_CONNECT].join(' ');
