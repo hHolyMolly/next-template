@@ -5,6 +5,8 @@ import { setRequestLocale } from 'next-intl/server';
 import { routing } from '@/services/i18n/routing';
 
 import ClientProviders from '@/components/layouts/ClientProviders';
+import Header from '@/components/layouts/Header';
+import Footer from '@/components/layouts/Footer';
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -22,7 +24,15 @@ async function LocaleLayout({ children, params }: LocaleLayoutProps) {
 
   return (
     <NextIntlClientProvider locale={locale}>
-      <ClientProviders>{children}</ClientProviders>
+      <ClientProviders>
+        <div className="wrapper">
+          <Header />
+          <main id="main-content" className="page">
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </ClientProviders>
     </NextIntlClientProvider>
   );
 }

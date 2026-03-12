@@ -1,8 +1,13 @@
 import Container from '@/components/layouts/Container';
+import { cn } from '@/lib/cn';
 
-function Footer() {
+type FooterProps = {
+  className?: string;
+};
+
+function Footer({ className }: FooterProps) {
   return (
-    <footer className="footer">
+    <footer className={cn('footer', className)}>
       <Container>
         <div className="footer__body">footer</div>
       </Container>

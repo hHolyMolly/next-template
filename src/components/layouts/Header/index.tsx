@@ -1,8 +1,13 @@
 import Container from '@/components/layouts/Container';
+import { cn } from '@/lib/cn';
 
-function Header() {
+type HeaderProps = {
+  className?: string;
+};
+
+function Header({ className }: HeaderProps) {
   return (
-    <header className="header">
+    <header className={cn('header', className)}>
       <div className="header__wrapper">
         <Container>
           <div className="header__body">header</div>
