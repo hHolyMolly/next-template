@@ -12,6 +12,6 @@ export async function generateTemplateMetadata(): Promise<Metadata> {
   return createMetadata({
     title,
     description,
-    // preview: 'template', — use a custom preview from public/assets/img/previews/template.webp
+    // preview: '/assets/img/previews/template.webp',
   });
 }

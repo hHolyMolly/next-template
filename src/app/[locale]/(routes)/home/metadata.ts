@@ -10,6 +10,6 @@ export async function generateHomeMetadata(): Promise<Metadata> {
 
   return createMetadata({
     description,
-    // preview: 'home', — use a custom preview from public/assets/img/previews/home.webp
+    // preview: '/assets/img/previews/home.webp',
   });
 }

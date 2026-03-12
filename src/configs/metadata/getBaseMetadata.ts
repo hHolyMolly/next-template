@@ -4,20 +4,17 @@ import { type Metadata } from 'next';
 import { urls } from '@/configs/constants/urls';
 
 /**
- * Build a full preview image URL from a filename in `public/assets/img/previews/`.
+ * Build a full preview image URL from a path in `public/`.
  *
  * @example
- * previewImage('global')   // → 'https://example.com/assets/img/previews/global.webp'
- * previewImage('home')     // → 'https://example.com/assets/img/previews/home.webp'
- * previewImage('about.png') // → 'https://example.com/assets/img/previews/about.png'
+ * previewImage('/assets/img/previews/global.webp')
+ * previewImage('/assets/img/previews/home.png')
  */
-export function previewImage(name: string): string {
-  const hasExtension = /\.[a-z]+$/i.test(name);
-  const filename = hasExtension ? name : `${name}.webp`;
-  return `${urls.website}/assets/img/previews/${filename}`;
+export function previewImage(path: string): string {
+  return `${urls.website}${path}`;
 }
 
-const PREVIEW_IMAGE = previewImage('global');
+const PREVIEW_IMAGE = previewImage('/assets/img/previews/global.webp');
 
 /**
  * Base metadata for all pages.

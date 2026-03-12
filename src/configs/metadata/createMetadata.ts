@@ -5,13 +5,13 @@ import getBaseMetadata from '@/configs/metadata/getBaseMetadata';
 type MetadataOverrides = Partial<Metadata> & {
   /**
    * Shorthand for OG & Twitter preview image.
-   * Accepts a full URL or a filename from `public/assets/img/previews/`.
+   * Accepts a full URL or a path from `public/`.
    *
    * @example
-   * // filename (resolved via previewImage helper):
-   * createMetadata({ preview: 'home' })
+   * // Path from public/ (resolved via previewImage helper):
+   * createMetadata({ preview: '/assets/img/previews/home.webp' })
    *
-   * // full URL:
+   * // Full URL:
    * createMetadata({ preview: 'https://cdn.example.com/og.png' })
    */
   preview?: string;
@@ -21,14 +21,13 @@ type MetadataOverrides = Partial<Metadata> & {
  * Create page metadata by merging overrides with the base metadata.
  *
  * Use `preview` shorthand to set OG & Twitter image for the page.
- * Place preview images in `public/assets/img/previews/` as `.webp`.
  *
  * @example
  * // Page with custom preview:
  * return createMetadata({
  *   title: 'About Us',
  *   description: 'Learn more about our team',
- *   preview: 'about',
+ *   preview: '/assets/img/previews/about.webp',
  * });
  *
  * // Page using global preview (default):
