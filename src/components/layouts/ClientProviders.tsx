@@ -8,9 +8,15 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { makeStore, type AppStore } from '@/store';
 import { getQueryClient } from '@/lib/queryClient';
 
+import { ThemeProvider } from '@/components/layouts/ThemeProvider';
+import { Toaster } from '@/components/UI/Sonner';
+import { WebVitals } from '@/lib/webVitals';
+
 type ClientProvidersProps = {
   children: ReactNode;
 };
+
+const isDev = process.env.NODE_ENV === 'development';
 
 function ClientProviders({ children }: ClientProvidersProps) {
   const [store] = useState<AppStore>(() => makeStore());
@@ -18,8 +24,14 @@ function ClientProviders({ children }: ClientProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReduxProvider store={store}>{children}</ReduxProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ReduxProvider store={store}>
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </ReduxProvider>
+      {isDev && <ReactQueryDevtools initialIsOpen={false} />}
+      {isDev && <WebVitals />}
     </QueryClientProvider>
   );
 }
