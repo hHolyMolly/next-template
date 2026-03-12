@@ -1,78 +1,52 @@
-import { forwardRef, memo, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/cn';
 
-import { type TypeStatus } from '@/types';
-
-import { LoadingIcon } from '@/components/icons';
-
 const buttonVariants = cva(
-  'gap-x-[6px] inline-flex justify-center items-center overflow-hidden text-center font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        primary: 'bg-blue-500 text-white hover:bg-blue-600',
-        secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
-        outline: 'border border-gray-300 bg-transparent text-gray-900 hover:bg-gray-100',
-        ghost: 'bg-transparent text-gray-900 hover:bg-gray-100',
-        destructive: 'bg-red-500 text-white hover:bg-red-600',
+        default: 'bg-primary text-primary-foreground shadow hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+        outline:
+          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        sm: 'h-8 px-3 text-sm rounded-[6px]',
-        md: 'h-10 px-4 text-base rounded-[8px]',
-        lg: 'h-12 px-6 text-lg rounded-[10px]',
+        default: 'h-9 px-4 py-2',
+        sm: 'h-8 rounded-md px-3 text-xs',
+        lg: 'h-10 rounded-md px-8',
+        icon: 'h-9 w-9',
       },
     },
     defaultVariants: {
-      variant: 'primary',
-      size: 'md',
+      variant: 'default',
+      size: 'default',
     },
   },
 );
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants> & {
-    status?: TypeStatus;
-    before?: ReactNode;
-    after?: ReactNode;
+    asChild?: boolean;
   };
 
-const ButtonComponent = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { children, className, variant, size, status = 'loaded', before, after, disabled, ...props },
-    ref,
-  ) => {
-    const isDisabled = status === 'error' || disabled;
-
-    return (
-      <button
-        ref={ref}
-        className={cn(
-          buttonVariants({ variant, size }),
-          status === 'loading' && 'pointer-events-none',
-          className,
-        )}
-        disabled={isDisabled}
-        {...props}
-      >
-        {status !== 'loading' ? (
-          <>
-            {before && <span>{before}</span>}
-            <span>{children}</span>
-            {after && <span>{after}</span>}
-          </>
-        ) : (
-          <LoadingIcon />
-        )}
-      </button>
-    );
-  },
-);
-
-ButtonComponent.displayName = 'Button';
-
-const Button = memo(ButtonComponent);
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ref,
+  ...props
+}: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) {
+  const Comp = asChild ? Slot : 'button';
+  return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+}
 
 export { Button, buttonVariants };
 export type { ButtonProps };

@@ -1,6 +1,7 @@
 import { getRequestConfig } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
 
+import { logger } from '@/utils/logger';
 import { namespaces } from '@/services/i18n/constants';
 import { routing } from '@/services/i18n/routing';
 
@@ -23,18 +24,32 @@ export default getRequestConfig(async ({ requestLocale }) => {
             const mod = await import(`../../../public/locales/${locale}/${ns}.json`);
             return { [ns]: mod.default ?? mod };
           } catch (err) {
-            console.error(`Error loading ${ns} for ${locale}:`, err);
+            logger.error(`Error loading ${ns} for ${locale}:`, err);
             return { [ns]: {} };
           }
         }),
       )),
     );
   } catch (err) {
-    console.error(`Failed to load messages for ${locale}`, err);
+    logger.error(`Failed to load messages for ${locale}`, err);
   }
 
   return {
     locale,
     messages,
+
+    // Handle missing translation keys gracefully.
+    onError(error) {
+      // Suppress known missing-key warnings in development.
+      if (error.code === 'MISSING_MESSAGE') {
+        logger.warn(`Missing i18n key: ${error.message}`);
+        return;
+      }
+      logger.error('i18n error:', error.message);
+    },
+
+    getMessageFallback({ namespace, key }) {
+      return `${namespace}.${key}`;
+    },
   };
 });

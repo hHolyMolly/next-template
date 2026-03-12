@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 @layer utilities {
   :root {
     --transition-duration: 0.3s;
@@ -19,18 +28,5 @@
     max-width: 1230px;
     margin: 0 auto;
     padding: 0 15px;
-  }
-
-  ._ibg {
-    position: relative;
-  }
-
-  ._ibg img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    object-fit: cover;
   }
 }

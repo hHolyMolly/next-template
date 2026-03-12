@@ -22,6 +22,7 @@ export default function DemoActions({ links }: DemoActionsProps) {
         >
           {icon}
           {t(labelKey)}
+          <span className="sr-only">(opens in new tab)</span>
         </a>
       ))}
     </div>

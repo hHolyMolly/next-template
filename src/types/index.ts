@@ -1,5 +1,10 @@
+import { projectConfig } from '@/configs/project';
+
 /** Async operation status */
 export type TypeStatus = 'loading' | 'loaded' | 'error';
+
+/** Supported locales — derived from projectConfig */
+export type Locale = (typeof projectConfig.i18n.locales)[number];
 
 /** Project configuration */
 export type ProjectConfig = {
@@ -7,7 +12,7 @@ export type ProjectConfig = {
 
   i18n: {
     defaultLocale: string;
-    locales: string[];
+    locales: readonly string[];
   };
 
   /** Generate sitemap.xml */

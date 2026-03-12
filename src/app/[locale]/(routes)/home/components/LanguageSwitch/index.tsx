@@ -21,12 +21,13 @@ export default function LanguageSwitch() {
           href={pathname}
           locale={locale}
           className={cn(
-            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+            'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
             locale === currentLocale
               ? 'bg-white/15 text-white ring-1 ring-white/20'
-              : 'text-slate-400 hover:text-white hover:bg-white/5',
+              : 'text-slate-400 hover:bg-white/5 hover:text-white',
           )}
           key={locale}
+          aria-current={locale === currentLocale ? 'page' : undefined}
         >
           {localeFlags[locale]}
           {locale.toUpperCase()}

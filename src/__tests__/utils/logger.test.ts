@@ -1,17 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('logger utility', () => {
-  const originalEnv = process.env.NODE_ENV;
-
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv;
     vi.restoreAllMocks();
     vi.resetModules();
+    vi.unstubAllEnvs();
   });
 
   describe('in development mode', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
     });
 
     it('calls console.log in dev', async () => {
@@ -38,7 +36,7 @@ describe('logger utility', () => {
 
   describe('in production mode', () => {
     beforeEach(() => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
     });
 
     it('does not call console.log in production', async () => {
@@ -55,11 +53,11 @@ describe('logger utility', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it('does not call console.error in production', async () => {
+    it('still calls console.error in production (errors are always logged)', async () => {
       const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const { logger } = await import('@/utils/logger');
       logger.error('test error');
-      expect(spy).not.toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledWith('[ERROR]', 'test error');
     });
   });
 });

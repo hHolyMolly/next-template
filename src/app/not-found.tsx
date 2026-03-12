@@ -22,13 +22,13 @@ function RootNotFoundPage() {
       }}
     >
       <h2 style={{ fontSize: '3.5rem', fontWeight: 700, margin: 0 }}>404</h2>
-      <p style={{ color: '#6b7280', margin: 0 }}>Page not found</p>
+      <p style={{ color: 'var(--text-secondary, #6b7280)', margin: 0 }}>Page not found</p>
       <Link
         href="/"
         style={{
           padding: '8px 16px',
           borderRadius: '8px',
-          background: '#000',
+          background: 'var(--accent, #000)',
           color: '#fff',
           textDecoration: 'none',
           fontSize: '0.875rem',

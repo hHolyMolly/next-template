@@ -1,5 +1,5 @@
 function Footer() {
-  return <footer />;
+  return <footer>{/* TODO: Add footer content */}</footer>;
 }
 
 export default Footer;

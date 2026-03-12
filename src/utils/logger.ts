@@ -19,7 +19,8 @@ function noop() {}
 export const logger = {
   log: isDev ? console.log.bind(console, '[DEV]') : noop,
   warn: isDev ? console.warn.bind(console, '[DEV]') : noop,
-  error: isDev ? console.error.bind(console, '[DEV]') : noop,
+  // Errors are always logged — critical for production debugging and error reporting.
+  error: console.error.bind(console, isDev ? '[DEV]' : '[ERROR]'),
   info: isDev ? console.info.bind(console, '[DEV]') : noop,
   debug: isDev ? console.debug.bind(console, '[DEV]') : noop,
   table: isDev ? console.table.bind(console) : noop,

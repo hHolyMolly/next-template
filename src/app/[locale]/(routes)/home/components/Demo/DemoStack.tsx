@@ -10,7 +10,7 @@ export default function DemoStack({ items }: DemoStackProps) {
     <div className={styles.stack}>
       {items.map(({ name, color, icon }) => (
         <span key={name} className={styles.tag}>
-          <svg className={styles.tagIcon} viewBox="0 0 24 24" fill={color}>
+          <svg className={styles.tagIcon} viewBox="0 0 24 24" fill={color} aria-hidden="true">
             <path d={icon} />
           </svg>
           {name}

@@ -12,5 +12,7 @@
   "quoteProps": "as-needed",
   "proseWrap": "preserve",
   "htmlWhitespaceSensitivity": "ignore",
-  "embeddedLanguageFormatting": "auto"
+  "embeddedLanguageFormatting": "auto",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["cn", "cva", "clsx"]
 }

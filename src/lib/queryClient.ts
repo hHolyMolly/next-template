@@ -1,11 +1,26 @@
 import { cache } from 'react';
 import { QueryClient } from '@tanstack/react-query';
 
+/**
+ * Query stale times by data category.
+ * Override per-query with `staleTime` option.
+ */
+export const STALE_TIMES = {
+  /** Rarely changing data (config, settings) */
+  static: 10 * 60 * 1000,
+  /** Standard API data (lists, details) */
+  standard: 60 * 1000,
+  /** Frequently changing data (notifications, counters) */
+  dynamic: 10 * 1000,
+  /** Real-time data — always refetch */
+  realtime: 0,
+} as const;
+
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000,
+        staleTime: STALE_TIMES.standard,
         gcTime: 5 * 60 * 1000,
         refetchOnWindowFocus: false,
         retry: 1,

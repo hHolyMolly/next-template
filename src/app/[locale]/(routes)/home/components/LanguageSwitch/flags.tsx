@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import type { Locale } from '@/types';
+
 /**
  * Locale flag SVG components.
  *
@@ -8,13 +10,14 @@ import type { ReactNode } from 'react';
  * Uses CSS overflow-hidden + border-radius instead of clipPath to avoid id conflicts.
  */
 
-export const localeFlags: Record<string, ReactNode> = {
+export const localeFlags: Record<Locale, ReactNode> = {
   en: (
     <svg
       width="20"
       height="15"
       viewBox="0 0 60 30"
-      className="rounded-sm flex-shrink-0 overflow-hidden"
+      className="flex-shrink-0 overflow-hidden rounded-sm"
+      aria-hidden="true"
     >
       <rect width="60" height="30" fill="#012169" />
       <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
@@ -29,7 +32,8 @@ export const localeFlags: Record<string, ReactNode> = {
       width="20"
       height="15"
       viewBox="0 0 60 30"
-      className="rounded-sm flex-shrink-0 overflow-hidden"
+      className="flex-shrink-0 overflow-hidden rounded-sm"
+      aria-hidden="true"
     >
       <rect width="60" height="30" fill="#0039A6" />
       <rect width="60" height="10" fill="#fff" />

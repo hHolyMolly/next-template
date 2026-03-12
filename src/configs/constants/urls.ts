@@ -6,6 +6,6 @@ export const urls = {
   website: website_url,
 
   server: {
-    api: server_url ? `${server_url}/api` : '',
+    api: server_url ? `${server_url}/api` : undefined,
   },
 } as const;

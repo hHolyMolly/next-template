@@ -1,8 +1,4 @@
-import { useMemo, memo } from 'react';
-
 import { cn } from '@/lib/cn';
-
-import styles from '@/components/icons/LoadingIcon/index.module.scss';
 
 type LoadingIconProps = {
   className?: string;
@@ -11,35 +7,43 @@ type LoadingIconProps = {
   color?: string;
 };
 
-const LoadingIconComponent = ({
+const DELAY_CLASSES = [
+  '[animation-delay:-0.45s]',
+  '[animation-delay:-0.3s]',
+  '[animation-delay:-0.15s]',
+  '',
+] as const;
+
+function LoadingIcon({
   className,
   size = 20,
   strokeWidth = 3,
   color = 'currentColor',
-}: LoadingIconProps) => {
-  const containerStyle = useMemo(() => ({ width: size, height: size }), [size]);
-
-  const itemStyle = useMemo(
-    () => ({
-      width: size,
-      height: size,
-      borderWidth: strokeWidth,
-      borderColor: `${color} transparent transparent transparent`,
-    }),
-    [size, strokeWidth, color],
-  );
-
+}: LoadingIconProps) {
   return (
-    <div className={cn(styles.LoadingElem, className)} style={containerStyle}>
-      {[...Array(4)].map((_, idx: number) => (
-        <div style={itemStyle} key={`loading-icon_${idx}`} />
+    <div
+      className={cn('relative inline-block', className)}
+      style={{ width: size, height: size }}
+      role="status"
+      aria-label="Loading"
+    >
+      {Array.from({ length: 4 }, (_, idx) => (
+        <div
+          className={cn(
+            'absolute block animate-spinner rounded-full border-solid',
+            DELAY_CLASSES[idx],
+          )}
+          style={{
+            width: size,
+            height: size,
+            borderWidth: strokeWidth,
+            borderColor: `${color} transparent transparent transparent`,
+          }}
+          key={`loading-icon_${idx}`}
+        />
       ))}
     </div>
   );
-};
-
-LoadingIconComponent.displayName = 'LoadingIcon';
-
-const LoadingIcon = memo(LoadingIconComponent);
+}
 
 export { LoadingIcon };

@@ -9,11 +9,11 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-interface ICounterState {
+interface CounterState {
   value: number;
 }
 
-const initialState: ICounterState = {
+const initialState: CounterState = {
   value: 0,
 };
 
@@ -29,7 +29,7 @@ const counterSlice = createSlice({
       state.value -= 1;
     },
 
-    setIncrementByAmount: (state, action: PayloadAction<ICounterState['value']>) => {
+    setIncrementByAmount: (state, action: PayloadAction<CounterState['value']>) => {
       state.value += action.payload;
     },
   },

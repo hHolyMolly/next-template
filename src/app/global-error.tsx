@@ -1,5 +1,7 @@
 'use client';
 
+import { ThemeScript } from '@/components/layouts/ThemeProvider';
+
 /**
  * Global error boundary — catches errors in root layout.
  *
@@ -18,7 +20,10 @@ interface GlobalErrorProps {
 
 function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body
         style={{
           display: 'flex',
@@ -29,8 +34,8 @@ function GlobalError({ error, reset }: GlobalErrorProps) {
           gap: '16px',
           fontFamily: 'system-ui, sans-serif',
           margin: 0,
-          color: '#1a1a1a',
-          backgroundColor: '#fafafa',
+          color: 'var(--text-primary, #1a1a1a)',
+          backgroundColor: 'var(--bg-primary, #fafafa)',
         }}
       >
         <h2 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>Something went wrong</h2>
@@ -60,7 +65,7 @@ function GlobalError({ error, reset }: GlobalErrorProps) {
             borderRadius: '8px',
             border: 'none',
             cursor: 'pointer',
-            background: '#000',
+            background: 'var(--accent, #000)',
             color: '#fff',
             fontSize: '0.875rem',
             fontWeight: 500,

@@ -1,5 +1,5 @@
 function Header() {
-  return <header />;
+  return <header>{/* TODO: Add navigation */}</header>;
 }
 
 export default Header;
