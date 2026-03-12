@@ -1,4 +1,5 @@
 import { getLocale } from 'next-intl/server';
+import { headers } from 'next/headers';
 import { type Metadata, type Viewport } from 'next';
 
 import { roboto } from '@/styles/fonts';
@@ -27,12 +28,15 @@ export const viewport: Viewport = {
 
 async function RootLayout({ children }: RootLayoutProps) {
   const locale = await getLocale();
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <html lang={locale}>
       <head>
         <script
+          nonce={nonce}
           type="application/ld+json"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: websiteJsonLd(projectConfig.name, urls.website) }}
         />
       </head>
