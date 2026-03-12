@@ -6,6 +6,13 @@ import { fileURLToPath } from 'node:url';
 if (!existsSync('.git')) {
   const projectName = basename(resolve('.'));
 
+  // Remove template-specific files
+  for (const file of ['LICENSE']) {
+    if (existsSync(file)) {
+      rmSync(file);
+    }
+  }
+
   // Replace project name in source files
   const filesToUpdate = ['src/configs/project/index.ts', 'ecosystem.config.cjs'];
 
