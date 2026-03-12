@@ -32,23 +32,41 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
 ### Styling
 
 - Tailwind CSS classes. SCSS only for `index.scss` (wrapper/page layout).
-- CSS variables in `vars.css`. Container defined in `tailwind.css`.
+- CSS variables in `vars.css` use **oklch color space**: `--background: 100.00% 0.0000 none`.
+  - Format: `lightness chroma hue` — perceptually uniform, wider gamut than HSL.
+  - Colors applied in Tailwind via `oklch(var(--token))`.
+- Colors applied via Tailwind tokens: `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, etc.
+- Container defined in `tailwind.css`.
 - Use `cn()` from `@/lib/cn` (clsx + tailwind-merge) for merging classes.
+- Dark mode selector: `[data-theme="dark"]`.
 
 ### Components
 
-- UI components → `src/components/UI/` (Button, Input, etc.).
-- Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders).
+- **UI components** → `src/components/UI/` — based on **shadcn/ui** (new-york style).
+  - Available: Button, Input, Dialog, Skeleton, Sonner (toast), VisuallyHidden.
+  - Button uses `cva` variants and `asChild` via `@radix-ui/react-slot`.
+  - Toast notifications: `sonner` (not react-hot-toast). Use `toast()` from `sonner`.
+- Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders, ErrorBoundary).
 - Icons → `src/components/icons/`.
 - Page-specific components → `src/app/[locale]/(routes)/{page}/components/`.
 
 ### API
 
 - Axios instance: `src/services/api/instance.ts`.
-- `request<T>(config)` — typed helper, returns `data` from AxiosResponse.
+- `request<T>(config, signal?)` — typed helper, returns `data` from AxiosResponse. Supports `AbortSignal`.
 - `isApiError(error)` — type guard for AxiosError.
+- `isAbortError(error)` — checks if error is a cancelled request.
 - API endpoints: `src/services/api/paths.ts`.
 - API modules: `src/services/api/{resource}/index.ts` — functions + React Query hooks.
+
+### Server Actions
+
+- Server Actions go in `src/app/actions.ts` (global) or co-located with pages.
+- All files with Server Actions must start with `'use server'` directive.
+- Always validate inputs — Server Actions are public HTTP endpoints.
+- Use `revalidatePath()` / `revalidateTag()` after mutations.
+- Use `useActionState()` hook in Client Components for form state management.
+- See `src/app/actions.ts` for a documented example.
 
 ### Types
 
@@ -59,12 +77,12 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
 ### Hooks
 
 - Reusable hooks → `src/hooks/index.ts`.
-- Available: `useMediaQuery`, `useDebounce`, `useClickOutside`, `useScrollLock`, `useToggle`.
+- Available: `useMediaQuery`, `useDebounce`, `useClickOutside`, `useScrollLock`, `useToggle`, `useIsomorphicLayoutEffect`.
 
 ### Logging
 
 - Use `logger` from `@/utils/logger` instead of `console.*`.
-- In production all logger calls automatically become noop.
+- In production `logger.log`/`logger.warn` become noop; `logger.error` always logs.
 
 ### Configuration
 
@@ -77,8 +95,14 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
 ### State Management
 
 - Redux Toolkit: `src/store/` — global state.
-- TanStack React Query: server state and API caching.
+- TanStack React Query: server state and API caching. Use `STALE_TIMES` from `@/lib/queryClient`.
 - React Query DevTools connected in ClientProviders.
+
+### Error Handling
+
+- `ErrorBoundary` component in `src/components/layouts/ErrorBoundary.tsx`.
+- Error reporting abstraction: `src/lib/errorReporting.ts` — plug Sentry or other service.
+- Feature flags: `src/configs/featureFlags.ts` — `featureFlags.isEnabled(flag)`.
 
 ### Tests
 
@@ -100,6 +124,7 @@ pnpm lint         # ESLint
 pnpm lint:fix     # ESLint autofix
 pnpm format       # Prettier
 pnpm test         # Vitest
+pnpm test:watch   # Vitest watch mode
 pnpm analyze      # Bundle analyzer
 pnpm clean        # Clean .next/dist
 ```
