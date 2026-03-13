@@ -1,6 +1,6 @@
-import en_translations from '../../public/locales/en/translations.json';
-import en_metadata from '../../public/locales/en/metadata.json';
-import en_demo from '../../public/locales/en/demo.json';
+import en_translations from '@public/locales/en/translations.json';
+import en_metadata from '@public/locales/en/metadata.json';
+import en_demo from '@public/locales/en/demo.json';
 
 type Messages = {
   translations: typeof en_translations;
