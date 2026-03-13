@@ -17,7 +17,7 @@ import Actions from './components/Actions';
 import CopyCommand from './components/CopyCommand';
 import Stack from './components/Stack';
 import Footer from './components/Footer';
-import { INSTALL_COMMAND, AUTHOR, AUTHOR_URL, VERSION } from './constants';
+import { INSTALL_COMMAND, AUTHOR, AUTHOR_URL, VERSION } from './data/constants';
 import { stack } from './data/stack';
 import { actionLinks } from './data/actions';
 

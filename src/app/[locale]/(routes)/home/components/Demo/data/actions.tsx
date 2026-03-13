@@ -1,4 +1,4 @@
-import { GITHUB_URL, README_URL } from '../constants';
+import { GITHUB_URL, README_URL } from './constants';
 import type { ActionLink } from '../types';
 
 /**

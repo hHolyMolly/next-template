@@ -1,4 +1,4 @@
-import type { StackItem } from '../../types';
+import type { StackItem } from '../types';
 
 interface StackProps {
   items: StackItem[];
