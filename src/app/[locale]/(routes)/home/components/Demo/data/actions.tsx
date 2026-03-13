@@ -1,4 +1,7 @@
-import { GITHUB_URL, README_URL } from '@/app/[locale]/(routes)/home/components/Demo/data/constants';
+import {
+  GITHUB_URL,
+  README_URL,
+} from '@/app/[locale]/(routes)/home/components/Demo/data/constants';
 import type { ActionLink } from '@/app/[locale]/(routes)/home/components/Demo/types';
 
 /**

@@ -23,7 +23,6 @@ pnpm dev
 | i18n         | next-intl (middleware, `[locale]` routing) |
 | State        | Redux Toolkit + React Query                |
 | API          | Axios with typed `request<T>()` helper     |
-| Testing      | Vitest + React Testing Library + MSW       |
 | Variants     | CVA + clsx + tailwind-merge                |
 | Code Quality | ESLint 9 + Prettier + Husky + lint-staged  |
 | Commits      | Commitlint (Conventional Commits)          |
@@ -33,22 +32,19 @@ pnpm dev
 
 ## Commands
 
-| Command              | Description                      |
-| -------------------- | -------------------------------- |
-| `pnpm dev`           | Dev server (Turbopack)           |
-| `pnpm build`         | Production build                 |
-| `pnpm start`         | Start production server          |
-| `pnpm lint`          | ESLint check                     |
-| `pnpm lint:fix`      | ESLint auto-fix                  |
-| `pnpm format`        | Prettier formatting              |
-| `pnpm format:check`  | Check formatting without changes |
-| `pnpm typecheck`     | TypeScript type checking         |
-| `pnpm test`          | Run tests                        |
-| `pnpm test:watch`    | Tests in watch mode              |
-| `pnpm test:coverage` | Tests with coverage report       |
-| `pnpm clean`         | Remove `.next`, `dist`           |
-| `pnpm clean:all`     | Remove `node_modules` + `.next`  |
-| `pnpm analyze`       | Bundle analyzer                  |
+| Command            | Description                    |
+| ------------------ | ------------------------------ |
+| `pnpm dev`         | Dev server (Turbopack)         |
+| `pnpm build`       | Production build               |
+| `pnpm start`       | Start production server        |
+| `pnpm preview`     | Build + start                  |
+| `pnpm lint`        | ESLint check                   |
+| `pnpm lint:fix`    | ESLint auto-fix                |
+| `pnpm lint:styles` | Stylelint check + fix          |
+| `pnpm lint:all`    | ESLint + Stylelint + TypeCheck |
+| `pnpm format`      | Prettier formatting            |
+| `pnpm typecheck`   | TypeScript type checking       |
+| `pnpm clean`       | Remove `.next`, `dist`         |
 
 ## Project Structure
 
@@ -105,13 +101,6 @@ src/
 ├── styles/                      # Tailwind, SCSS, fonts, normalize, CSS vars
 ├── types/                       # TypeScript types
 ├── utils/                       # Utility functions (debounce, logger)
-└── __tests__/                   # Test files
-    ├── setup.ts                 # Test setup (jest-dom + MSW)
-    ├── mocks/                   # MSW handlers + server
-    ├── components/              # Component tests
-    ├── hooks/                   # Hook tests
-    ├── lib/                     # Lib tests
-    └── utils/                   # Utility tests
 ```
 
 ## Configuration

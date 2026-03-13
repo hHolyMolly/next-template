@@ -11,23 +11,15 @@
     "dev": "dotenv -e .env.development -- next dev",
     "build": "dotenv -e .env.production -- next build",
     "start": "dotenv -e .env.production -- next start",
+    "preview": "pnpm build && pnpm start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:styles": "stylelint \"src/**/*.{css,scss}\" --fix",
     "lint:all": "pnpm lint && pnpm lint:styles && pnpm typecheck",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf .next dist",
-    "clean:cache": "rm -rf .next .eslintcache .stylelintcache node_modules/.cache",
-    "clean:all": "rm -rf node_modules .next dist pnpm-lock.yaml",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "validate": "pnpm lint:all && pnpm test",
-    "preview": "pnpm build && pnpm start",
-    "analyze": "ANALYZE=true next build",
-    "prepare": "node prepare.js",
-    "typecheck": "tsc --noEmit"
+    "prepare": "node prepare.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -47,23 +39,16 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.0.0",
     "@tanstack/react-query-devtools": "^5.91.3",
-    "@testing-library/jest-dom": "^6.9.0",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.2.2",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.5.0",
     "autoprefixer": "^10.4.24",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "jsdom": "^26.1.0",
-    "msw": "^2.12.10",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
@@ -72,7 +57,6 @@
     "stylelint-config-standard-scss": "^17.0.0",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.0"
+    "typescript": "^5.9.3"
   }
 }

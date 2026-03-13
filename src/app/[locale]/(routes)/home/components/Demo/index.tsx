@@ -17,7 +17,12 @@ import Actions from '@/app/[locale]/(routes)/home/components/Demo/components/Act
 import CopyCommand from '@/app/[locale]/(routes)/home/components/Demo/components/CopyCommand';
 import Stack from '@/app/[locale]/(routes)/home/components/Demo/components/Stack';
 import Footer from '@/app/[locale]/(routes)/home/components/Demo/components/Footer';
-import { INSTALL_COMMAND, AUTHOR, AUTHOR_URL, VERSION } from '@/app/[locale]/(routes)/home/components/Demo/data/constants';
+import {
+  INSTALL_COMMAND,
+  AUTHOR,
+  AUTHOR_URL,
+  VERSION,
+} from '@/app/[locale]/(routes)/home/components/Demo/data/constants';
 import { stack } from '@/app/[locale]/(routes)/home/components/Demo/data/stack';
 import { actionLinks } from '@/app/[locale]/(routes)/home/components/Demo/data/actions';
 

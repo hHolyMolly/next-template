@@ -1,8 +1,6 @@
-import { generateHomeMetadata } from '@/app/[locale]/(routes)/home/metadata';
-
 import { Demo, LanguageSwitch } from '@/app/[locale]/(routes)/home/components';
 
-export const generateMetadata = generateHomeMetadata;
+export { generateHomeMetadata as generateMetadata } from '@/app/[locale]/(routes)/home/metadata';
 
 function HomePage() {
   return <Demo languageSwitch={<LanguageSwitch />} />;

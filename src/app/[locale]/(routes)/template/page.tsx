@@ -1,17 +1,6 @@
-import { setRequestLocale } from 'next-intl/server';
+export { generateTemplateMetadata as generateMetadata } from '@/app/[locale]/(routes)/template/metadata';
 
-import { generateTemplateMetadata } from '@/app/[locale]/(routes)/template/metadata';
-
-export const generateMetadata = generateTemplateMetadata;
-
-type Props = {
-  params: Promise<{ locale: string }>;
-};
-
-async function TemplatePage({ params }: Props) {
-  const { locale } = await params;
-  await setRequestLocale(locale);
-
+function TemplatePage() {
   return <>Template Page</>;
 }
 

@@ -107,12 +107,6 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
 - Error reporting abstraction: `src/lib/errorReporting.ts` — plug Sentry or other service.
 - Feature flags: `src/configs/featureFlags.ts` — `featureFlags.isEnabled(flag)`.
 
-### Tests
-
-- Vitest + @testing-library/react.
-- Tests in `src/__tests__/` with mirrored structure.
-- Run: `pnpm test` / `pnpm test:watch`.
-
 ### Code Style
 
 - All comments in English.
@@ -123,11 +117,13 @@ Next.js 16 template (App Router, Turbopack) with TypeScript, Tailwind CSS, next-
 ```
 pnpm dev          # Dev server (port 5555)
 pnpm build        # Production build
+pnpm start        # Production server
+pnpm preview      # Build + start
 pnpm lint         # ESLint
 pnpm lint:fix     # ESLint autofix
+pnpm lint:styles  # Stylelint
+pnpm lint:all     # ESLint + Stylelint + TypeCheck
 pnpm format       # Prettier
-pnpm test         # Vitest
-pnpm test:watch   # Vitest watch mode
-pnpm analyze      # Bundle analyzer
+pnpm typecheck    # TypeScript check
 pnpm clean        # Clean .next/dist
 ```

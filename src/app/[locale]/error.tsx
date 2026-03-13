@@ -2,6 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/UI';
+
 /**
  * Locale-level error boundary — catches runtime errors inside [locale] layout.
  *
@@ -19,21 +21,16 @@ function ErrorPage({ error, reset }: ErrorPageProps) {
   const t = useTranslations('translations.errors');
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
       <h2 className="text-2xl font-semibold">{t('something_went_wrong')}</h2>
 
       {process.env.NODE_ENV === 'development' && error.message && (
-        <pre className="max-w-[600px] px-4 py-3 rounded-lg bg-red-50 text-red-800 text-sm overflow-auto whitespace-pre-wrap break-words">
+        <pre className="max-w-[600px] overflow-auto whitespace-pre-wrap break-words rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
           {error.message}
         </pre>
       )}
 
-      <button
-        onClick={reset}
-        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-      >
-        {t('try_again')}
-      </button>
+      <Button onClick={reset}>{t('try_again')}</Button>
     </div>
   );
 }

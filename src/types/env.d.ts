@@ -7,8 +7,5 @@ declare namespace NodeJS {
 
     /** Server API URL (for SSR requests) */
     readonly NEXT_PUBLIC_SERVER_URL?: string;
-
-    /** Enable bundle analyzer */
-    readonly ANALYZE?: string;
   }
 }
