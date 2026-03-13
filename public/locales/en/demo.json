@@ -1,8 +1,8 @@
 {
   "badge_label": "Production Ready",
-  "title": "Next.js Template",
-  "subtitle": "for Modern Development",
-  "description": "Production-ready template with TypeScript, Tailwind CSS, i18n, state management, and everything you need for scalable applications.",
+  "title": "Next Template",
+  "subtitle": "Ship Faster, Scale Easier",
+  "description": "A pre-configured foundation with TypeScript, Tailwind CSS, i18n, and state management — so you can focus on building, not setting up.",
   "github": "GitHub",
   "documentation": "Documentation",
   "copy_success": "Copied!",

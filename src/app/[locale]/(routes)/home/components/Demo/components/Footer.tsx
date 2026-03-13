@@ -6,7 +6,7 @@ interface FooterProps {
 
 export default function Footer({ label, author, authorUrl }: FooterProps) {
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sm text-slate-600">
+    <div className="mt-8 text-sm text-slate-600 md:mt-10">
       {label}{' '}
       <a
         href={authorUrl}

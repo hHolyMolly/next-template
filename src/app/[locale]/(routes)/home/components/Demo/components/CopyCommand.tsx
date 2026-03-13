@@ -30,11 +30,11 @@ export default function CopyCommand({ command }: CopyCommandProps) {
   }, [command]);
 
   return (
-    <div className="mx-auto mb-12 max-w-[520px]">
+    <div className="mx-auto mb-8 max-w-[520px] md:mb-12">
       <button
         type="button"
         onClick={handleCopy}
-        className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-left font-mono text-sm text-slate-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08]"
+        className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left font-mono text-sm text-slate-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] md:px-6 md:py-4"
         aria-label={`Copy install command: ${command}`}
       >
         <span className="select-none text-slate-500">$</span>
