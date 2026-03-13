@@ -1,11 +1,11 @@
 {
   "global": {
     "title": "Next Template",
-    "description": "Production-ready шаблон Next.js."
+    "description": "Настроенная основа с TypeScript, Tailwind CSS, i18n и управлением состоянием — чтобы вы могли сосредоточиться на продукте, а не на настройке."
   },
 
   "home": {
-    "description": "Next Template описание."
+    "description": "Настроенная основа с TypeScript, Tailwind CSS, i18n и управлением состоянием — чтобы вы могли сосредоточиться на продукте, а не на настройке."
   },
 
   "template": {

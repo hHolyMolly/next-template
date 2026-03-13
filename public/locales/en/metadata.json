@@ -1,11 +1,11 @@
 {
   "global": {
     "title": "Next Template",
-    "description": "Production-ready Next.js template."
+    "description": "A pre-configured foundation with TypeScript, Tailwind CSS, i18n, and state management — so you can focus on building, not setting up."
   },
 
   "home": {
-    "description": "Next Template description."
+    "description": "A pre-configured foundation with TypeScript, Tailwind CSS, i18n, and state management — so you can focus on building, not setting up."
   },
 
   "template": {
