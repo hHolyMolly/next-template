@@ -5,6 +5,9 @@ export default {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx,json}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-roboto)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: 'oklch(var(--border))',
         input: 'oklch(var(--input))',
