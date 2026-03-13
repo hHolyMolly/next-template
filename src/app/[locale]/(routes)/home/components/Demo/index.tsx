@@ -51,9 +51,9 @@ export default function Demo({ languageSwitch }: DemoProps) {
         <CopyCommand command={INSTALL_COMMAND} />
 
         <Stack items={stack} />
-
-        <Footer label={t('footer')} author={AUTHOR} authorUrl={AUTHOR_URL} />
       </div>
+
+      <Footer label={t('footer')} author={AUTHOR} authorUrl={AUTHOR_URL} />
     </section>
   );
 }
