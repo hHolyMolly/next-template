@@ -1,6 +1,6 @@
-import type { ReactNode, CSSProperties } from 'react';
-
 import { cn } from '@/lib/cn';
+
+import type { ReactNode, CSSProperties } from 'react';
 
 type Props = {
   children: ReactNode;

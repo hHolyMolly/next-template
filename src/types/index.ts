@@ -1,4 +1,4 @@
-import { projectConfig } from '@/configs/project';
+import type { projectConfig } from '@/configs/project';
 
 /** Async operation status */
 export type TypeStatus = 'loading' | 'loaded' | 'error';
@@ -13,6 +13,12 @@ export type ProjectConfig = {
   i18n: {
     defaultLocale: string;
     locales: readonly string[];
+    /**
+     * IANA timezone used by next-intl for server-side date/number formatting.
+     * Keep server and client in sync by pinning it explicitly.
+     * @default 'UTC'
+     */
+    timeZone?: string;
   };
 
   /** Generate sitemap.xml */

@@ -1,6 +1,7 @@
 {
   "shared": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "skip_to_content": "Skip to main content"
   },
 
   "errors": {

@@ -1,8 +1,7 @@
 import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/cn';
-
 import type { ActionLink } from '@/app/[locale]/(routes)/home/components/Demo/types';
+import { cn } from '@/lib/cn';
 
 interface ActionsProps {
   links: ActionLink[];

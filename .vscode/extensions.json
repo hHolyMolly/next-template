@@ -2,10 +2,13 @@
   "recommendations": [
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
     "bradlc.vscode-tailwindcss",
+    "editorconfig.editorconfig",
     "formulahendry.auto-rename-tag",
     "streetsidesoftware.code-spell-checker",
     "mikestead.dotenv",
-    "yoavbls.pretty-ts-errors"
+    "yoavbls.pretty-ts-errors",
+    "vitest.explorer"
   ]
 }

@@ -5,31 +5,32 @@ type ErrorContext = {
   [key: string]: unknown;
 };
 
+type User = { id: string; email?: string } | null;
+
+type Level = 'info' | 'warning' | 'error';
+
+type Reporter = {
+  captureException(error: Error, context?: ErrorContext): void;
+  captureMessage(message: string, level?: Level): void;
+  setUser(user: User): void;
+};
+
+const log = logger.child('errorReporting');
+
 /**
- * Abstract error reporting interface.
- * Replace the placeholder implementation with your preferred service
- * (Sentry, Bugsnag, LogRocket, Datadog, etc.)
+ * Minimal error reporter that forwards to the local logger.
  *
- * @example
- * // In instrumentation.ts or a setup file:
- * import * as Sentry from '@sentry/nextjs';
- * errorReporting.captureException = (error, context) => Sentry.captureException(error, { extra: context });
- * errorReporting.captureMessage = (message) => Sentry.captureMessage(message);
- * errorReporting.setUser = (user) => Sentry.setUser(user);
+ * Swap the implementation (e.g. Sentry, Datadog, Rollbar) without touching
+ * call sites: every consumer imports `errorReporting` and uses the same API.
  */
-export const errorReporting = {
-  captureException(error: Error, context?: ErrorContext) {
-    logger.error('Uncaught error:', error.message, context);
-    // Replace with: Sentry.captureException(error, { extra: context });
+export const errorReporting: Reporter = {
+  captureException(error, context) {
+    log.error(error.message, context);
   },
-
-  captureMessage(message: string, level: 'info' | 'warning' | 'error' = 'info') {
-    logger.error(`[${level}] ${message}`);
-    // Replace with: Sentry.captureMessage(message, level);
+  captureMessage(message, level = 'info') {
+    log.error(`[${level}] ${message}`);
   },
-
-  setUser(user: { id: string; email?: string } | null) {
-    logger.log('Set user:', user);
-    // Replace with: Sentry.setUser(user);
+  setUser(_user) {
+    // no-op until a real reporter is wired up
   },
 };

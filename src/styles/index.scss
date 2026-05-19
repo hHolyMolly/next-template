@@ -1,5 +1,19 @@
 body {
-  font-family: var(--font-roboto), system-ui, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+// Respect the user's OS-level motion preference.
+// Disables non-essential animations/transitions without breaking
+// required motion (e.g. spinner progress indicators).
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .wrapper {

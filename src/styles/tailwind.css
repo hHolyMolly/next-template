@@ -1,3 +1,12 @@
+/* Animations:
+   - Tailwind v3 projects should install the canonical `tailwindcss-animate`
+     plugin and add it to `tailwind.config.ts` → `plugins`.
+   - Tailwind v4 projects can instead `@import "tw-animate-css";` at the top
+     of this file, before any other rules.
+   shadcn/ui's animation utilities (`animate-in`, `animate-out`, etc.) come
+   from whichever of those two you choose.
+*/
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,6 +15,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

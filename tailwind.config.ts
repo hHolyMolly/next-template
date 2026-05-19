@@ -1,12 +1,11 @@
-import { type Config } from 'tailwindcss';
-import tailwindcssAnimate from 'tailwindcss-animate';
+import type { Config } from 'tailwindcss';
 
 export default {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx,json}'],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-roboto)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: 'oklch(var(--border))',
@@ -79,5 +78,5 @@ export default {
     hoverOnlyWhenSupported: true,
   },
 
-  plugins: [tailwindcssAnimate],
+  plugins: [],
 } satisfies Config;

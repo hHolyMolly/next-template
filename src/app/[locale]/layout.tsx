@@ -2,9 +2,8 @@ import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 
-import { routing } from '@/services/i18n/routing';
-
 import ClientProviders from '@/components/layouts/ClientProviders';
+import { routing } from '@/services/i18n/routing';
 
 type LocaleLayoutProps = {
   children: React.ReactNode;

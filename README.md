@@ -18,12 +18,13 @@
 - **TypeScript** — strict mode, full type coverage
 - **Tailwind CSS + SCSS** — utility-first styling with CSS Variables
 - **i18n** — next-intl with middleware & `[locale]` routing
-- **State Management** — Redux Toolkit + React Query
-- **API Layer** — Axios with typed `request<T>()` helper
-- **UI Components** — Button, Input, Modal, Toast, Skeleton (CVA variants)
-- **Code Quality** — ESLint 9 + Prettier + Stylelint + Husky + lint-staged
-- **Commits** — Commitlint (Conventional Commits)
-- **Deploy** — Docker + PM2 + GitHub Actions CI/CD
+- **State Management** — Redux Toolkit + TanStack Query (canonical for all API I/O)
+- **API Layer** — Axios + typed paths + ready-made TanStack Query hooks
+- **Forms** — React Hook Form + Zod resolver + typed `<FormField>`
+- **UI Components** — Button, Input, FormField, Dialog (Radix), Sonner (toast), Skeleton (CVA variants)
+- **Code Quality** — ESLint 9 + Prettier + Stylelint
+- **Testing** — Vitest + React Testing Library
+- **Deploy** — GitHub Actions CI/CD
 
 ## Tech Stack
 
@@ -33,13 +34,12 @@
 | Language     | [TypeScript](https://www.typescriptlang.org) (strict mode)                                                                      |
 | Styling      | [Tailwind CSS](https://tailwindcss.com) + SCSS + CSS Variables                                                                  |
 | i18n         | [next-intl](https://next-intl-docs.vercel.app) (middleware, `[locale]` routing)                                                 |
-| State        | [Redux Toolkit](https://redux-toolkit.js.org) + [React Query](https://tanstack.com/query)                                       |
-| API          | [Axios](https://axios-http.com) with typed `request<T>()` helper                                                                |
+| State        | [Redux Toolkit](https://redux-toolkit.js.org) + [TanStack Query](https://tanstack.com/query)                                    |
+| API          | [Axios](https://axios-http.com) + typed paths + TanStack Query hooks                                                            |
+| Forms        | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) resolver                                                |
 | Variants     | [CVA](https://cva.style) + [clsx](https://github.com/lukeed/clsx) + [tailwind-merge](https://github.com/dcastil/tailwind-merge) |
 | Code Quality | [ESLint 9](https://eslint.org) + [Prettier](https://prettier.io) + [Stylelint](https://stylelint.io)                            |
-| Commits      | Husky + lint-staged + Commitlint                                                                                                |
-| Process      | [PM2](https://pm2.keymetrics.io) (production)                                                                                   |
-| Container    | Docker + docker-compose                                                                                                         |
+| Testing      | [Vitest](https://vitest.dev) + [Testing Library](https://testing-library.com)                                                   |
 | CI/CD        | GitHub Actions                                                                                                                  |
 
 ## Quick Start
@@ -48,6 +48,7 @@
 npx degit hHolyMolly/next-template my-app
 cd my-app
 pnpm install
+pnpm clean:demo        # strip demo surface, rename project, remove LICENSE, self-delete
 pnpm dev
 ```
 
@@ -55,19 +56,22 @@ pnpm dev
 
 ## Commands
 
-| Command            | Description                    |
-| ------------------ | ------------------------------ |
-| `pnpm dev`         | Dev server (Turbopack)         |
-| `pnpm build`       | Production build               |
-| `pnpm start`       | Start production server        |
-| `pnpm preview`     | Build + start                  |
-| `pnpm lint`        | ESLint check                   |
-| `pnpm lint:fix`    | ESLint auto-fix                |
-| `pnpm lint:styles` | Stylelint check + fix          |
-| `pnpm lint:all`    | ESLint + Stylelint + TypeCheck |
-| `pnpm format`      | Prettier formatting            |
-| `pnpm typecheck`   | TypeScript type checking       |
-| `pnpm clean`       | Remove `.next`, `dist`         |
+| Command              | Description                    |
+| -------------------- | ------------------------------ |
+| `pnpm dev`           | Dev server (Turbopack)         |
+| `pnpm build`         | Production build               |
+| `pnpm start`         | Start production server        |
+| `pnpm preview`       | Build + start                  |
+| `pnpm lint`          | ESLint check                   |
+| `pnpm lint:fix`      | ESLint auto-fix                |
+| `pnpm lint:styles`   | Stylelint check + fix          |
+| `pnpm lint:all`      | ESLint + Stylelint + TypeCheck |
+| `pnpm format`        | Prettier formatting            |
+| `pnpm typecheck`     | TypeScript type checking       |
+| `pnpm test`          | Run unit tests (Vitest)        |
+| `pnpm test:watch`    | Unit tests in watch mode       |
+| `pnpm test:coverage` | Unit tests with coverage       |
+| `pnpm clean`         | Remove `.next`, `dist`         |
 
 ## Project Structure
 
@@ -89,7 +93,7 @@ src/
 │       └── (routes)/            # Pages with header & footer
 │           ├── layout.tsx       # Adds Header + Footer wrapper
 │           ├── template/        # Template starter page
-│           ├── [...]rest/       # Catch-all → 404
+│           ├── [...rest]/       # Catch-all → 404
 │           └── home/            # Demo components (delete after start)
 ├── components/
 │   ├── layouts/                 # Header, Footer, Container, ClientProviders
@@ -97,8 +101,8 @@ src/
 │   └── UI/                      # Reusable UI components
 │       ├── Button.tsx           # CVA button with variants
 │       ├── Input.tsx            # CVA input with label/error
-│       ├── Modal.tsx            # Portal-based modal dialog
-│       ├── Toast.tsx            # Toast notification system
+│       ├── Dialog.tsx           # Radix dialog primitives
+│       ├── Sonner.tsx           # Toast notifications (sonner)
 │       └── Skeleton.tsx         # Skeleton loader + presets
 ├── configs/
 │   ├── project/                 # Project name, locales, sitemap, robots
@@ -109,8 +113,7 @@ src/
 │   ├── useDebounce              # Value debouncing
 │   ├── useMediaQuery            # SSR-safe media queries
 │   ├── useScrollLock            # Scroll locking
-│   ├── useToggle                # Boolean toggle
-│   └── useToast                 # Toast notifications
+│   └── useToggle                # Boolean toggle
 ├── lib/
 │   ├── cn.ts                    # clsx + tailwind-merge
 │   ├── queryClient.ts           # React Query client
@@ -136,6 +139,17 @@ src/
 | Translations | [`public/locales/{locale}/`](public/locales/)                    |
 | Styles       | [`src/styles/vars.css`](src/styles/vars.css)                     |
 
+### Optional integrations
+
+The template ships lean — add any of the following when you need them:
+
+- Error reporting (Sentry, Datadog, Rollbar, …): wire the SDK inside
+  `src/instrumentation.ts` / `src/instrumentation-client.ts` and replace the
+  body of `src/lib/errorReporting.ts` — every call site already goes through
+  that abstraction.
+- Distributed rate limiting (Upstash, Redis, …): replace the in-memory
+  backend inside `src/lib/rateLimit.ts` with your vendor of choice.
+
 ## UI Components
 
 ### Button
@@ -152,21 +166,29 @@ src/
 <Input variant="filled" size="lg" before={<SearchIcon />} />
 ```
 
-### Modal
+### Dialog
 
 ```tsx
-const [isOpen, toggle] = useToggle();
-<Modal isOpen={isOpen} onClose={toggle} title="Confirm">
-  <p>Are you sure?</p>
-</Modal>;
+import * as Dialog from '@/components/UI/Dialog';
+
+<Dialog.Root>
+  <Dialog.Trigger asChild>
+    <Button>Open</Button>
+  </Dialog.Trigger>
+  <Dialog.Content>
+    <Dialog.Title>Confirm</Dialog.Title>
+    <p>Are you sure?</p>
+  </Dialog.Content>
+</Dialog.Root>;
 ```
 
 ### Toast
 
 ```tsx
-const { success, error } = useToast();
-success('Saved successfully!');
-error('Something went wrong');
+import { toast } from 'sonner';
+
+toast.success('Saved successfully!');
+toast.error('Something went wrong');
 ```
 
 ### Skeleton
@@ -199,20 +221,101 @@ After cloning, the demo page is at `/` (home). To start building your project:
 | `/any-route` | Yes           | Any page inside `(routes)/` |
 | `/404`       | Yes           | Not found page              |
 
-## Deploy
+## Testing
 
-### Docker
+- **Unit** — [Vitest](https://vitest.dev) + [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/). Place `*.test.ts(x)` / `*.spec.ts(x)` next to source files in `src/`.
+- **Setup files** — [`vitest.config.ts`](vitest.config.ts), [`vitest.setup.ts`](vitest.setup.ts).
 
 ```bash
-# Build and run
-docker-compose up -d
-
-# Or manually
-docker build -t my-app .
-docker run -p 3000:3000 my-app
+pnpm test                # unit tests
+pnpm test:watch          # watch mode
+pnpm test:coverage       # coverage report (v8)
 ```
 
-> Uncomment `output: 'standalone'` in `next.config.ts` before Docker builds.
+## API Layer — TanStack Query first
+
+All API I/O goes through TanStack Query. **Do not** call `request()` directly
+from a component — wrap it in a `useQuery` / `useMutation` so the cache, devtools,
+and loading states stay consistent.
+
+1. Add the endpoint to [`src/services/api/paths.ts`](src/services/api/paths.ts).
+2. Add typed query/mutation hooks in [`src/services/api/queries.ts`](src/services/api/queries.ts) — see the `useTodos` / `useCreateTodo` example.
+3. Import and use in components.
+
+```tsx
+'use client';
+import { useTodos, useCreateTodo } from '@/services/api';
+
+const { data, isLoading } = useTodos();
+const create = useCreateTodo();
+create.mutate({ title: 'Buy milk' });
+```
+
+## Forms — React Hook Form + Zod
+
+```tsx
+'use client';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { FormField, Button } from '@/components/UI';
+
+const schema = z.object({
+  email: z.email(),
+  name: z.string().min(1),
+});
+
+const { control, handleSubmit } = useForm({ resolver: zodResolver(schema) });
+
+<form onSubmit={handleSubmit(onSubmit)}>
+  <FormField control={control} name="name" label="Name" />
+  <FormField control={control} name="email" label="Email" type="email" />
+  <Button type="submit">Send</Button>
+</form>;
+```
+
+## Server Actions
+
+Wrap every mutating action with `withServerAction` to get a typed
+`{ success, data } | { success: false, error }` result instead of thrown
+exceptions. Mutations must also assert same-origin and rate-limit themselves
+— middleware (`proxy.ts`) does **not** see Server Actions.
+
+```ts
+'use server';
+import { withServerAction } from '@/lib/withServerAction';
+import { assertSameOrigin } from '@/lib/assertSameOrigin';
+import { withActionRateLimit } from '@/lib/rateLimitAction';
+import { ValidationError } from '@/lib/errors';
+
+export const sendMessage = withServerAction(
+  withActionRateLimit({ limit: 5, windowSeconds: 60 }, async (input: { email: string }) => {
+    await assertSameOrigin();
+    if (!input.email) throw new ValidationError('email is required', 'email');
+    // ...
+    return { ok: true };
+  }),
+);
+```
+
+## Security notes
+
+- **CSP `style-src 'unsafe-inline'`** stays on by default — Next.js injects
+  inline styles for Suspense fallbacks, `next/image` placeholders and Server
+  Component streaming. Flip `CSP_STRICT_STYLES=true` only after rolling out
+  `Content-Security-Policy-Report-Only` (`CSP_REPORT_ONLY=true`) and
+  confirming there are no violations. Tracked upstream:
+  https://github.com/vercel/next.js/issues/39560
+- **CORS + credentials**: never combine `origins: '*'` with `credentials: true`.
+  Even with an explicit allowlist, **every mutating Route Handler / Server
+  Action must call `assertSameOrigin()`** — `SameSite=Lax` cookies are sent on
+  cross-site top-level navigations and leave a CSRF window otherwise.
+- **Rate limiting** uses an in-memory backend — safe for VPS / Docker /
+  `next start`, **not** safe for serverless (each cold start has its own
+  budget). Swap the backend in `src/lib/rateLimit.ts` for Redis-backed when
+  deploying to Vercel / Lambda / Workers.
+
+## Deploy
 
 ### Vercel
 
@@ -220,10 +323,11 @@ docker run -p 3000:3000 my-app
 npx vercel
 ```
 
-### PM2
+### Self-hosted
 
 ```bash
-pm2 start ecosystem.config.cjs --env production
+pnpm build
+pnpm start
 ```
 
 ## License

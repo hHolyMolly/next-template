@@ -26,7 +26,7 @@ export function createWebStorage(getStorage: () => Storage): WebStorageAdapter {
 
       try {
         const raw = getStorage().getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
+        return raw ? (JSON.parse(raw) as T) : fallback;
       } catch (err) {
         logger.error(`storage.get: failed to parse ${key}`, err);
         return fallback;
@@ -41,9 +41,7 @@ export function createWebStorage(getStorage: () => Storage): WebStorageAdapter {
         return true;
       } catch (err) {
         if (err instanceof DOMException && err.name === 'QuotaExceededError') {
-          logger.error(
-            `storage.set: QuotaExceededError for "${key}". Storage is full.`,
-          );
+          logger.error(`storage.set: QuotaExceededError for "${key}". Storage is full.`);
         } else {
           logger.error(`storage.set: failed to save ${key}`, err);
         }

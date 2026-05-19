@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-
 import type { Locale } from '@/types';
+
+import type { ReactNode } from 'react';
 
 /**
  * Locale flag SVG components.

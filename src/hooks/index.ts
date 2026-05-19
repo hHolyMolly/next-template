@@ -1,6 +1,10 @@
 export { useMediaQuery } from '@/hooks/useMediaQuery';
-export { useDebounce } from '@/hooks/useDebounce';
+export { useDebounce, useDebouncedCallback } from '@/hooks/useDebounce';
+export { useThrottle } from '@/hooks/useThrottle';
 export { useClickOutside } from '@/hooks/useClickOutside';
 export { useScrollLock } from '@/hooks/useScrollLock';
 export { useToggle } from '@/hooks/useToggle';
 export { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+export { useEventListener } from '@/hooks/useEventListener';
+export { useLocalStorage } from '@/hooks/useLocalStorage';
+export { useIntersectionObserver } from '@/hooks/useIntersectionObserver';

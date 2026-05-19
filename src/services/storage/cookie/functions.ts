@@ -43,7 +43,7 @@ export const customCookieStorage = {
       const match = document.cookie.match(new RegExp('(^| )' + escapeRegExp(name) + '=([^;]+)'));
       if (!match?.[2]) return fallback;
 
-      return JSON.parse(decodeURIComponent(match[2]));
+      return JSON.parse(decodeURIComponent(match[2])) as T;
     } catch (err) {
       logger.error(`cookie.get: failed to parse ${name}`, err);
 

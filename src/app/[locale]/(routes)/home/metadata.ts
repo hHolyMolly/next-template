@@ -1,7 +1,8 @@
 import { getTranslations } from 'next-intl/server';
-import { type Metadata } from 'next';
 
 import { createMetadata } from '@/configs/metadata';
+
+import type { Metadata } from 'next';
 
 export async function generateHomeMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.home');

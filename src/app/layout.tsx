@@ -1,12 +1,13 @@
-import { getLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
-import { type Metadata, type Viewport } from 'next';
+import { getLocale } from 'next-intl/server';
 
-import { roboto } from '@/styles/fonts';
-import { getBaseMetadata } from '@/configs/metadata';
-import { websiteJsonLd } from '@/lib/jsonLd';
 import { urls } from '@/configs/constants/urls';
+import { getBaseMetadata } from '@/configs/metadata';
 import { projectConfig } from '@/configs/project';
+import { websiteJsonLd } from '@/lib/jsonLd';
+import { appFont } from '@/styles/fonts';
+
+import type { Metadata, Viewport } from 'next';
 
 import '@/styles/normalize.css';
 import '@/styles/tailwind.css';
@@ -24,6 +25,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0b0d' },
+  ],
 };
 
 async function RootLayout({ children }: RootLayoutProps) {
@@ -33,6 +38,11 @@ async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang={locale}>
       <head>
+        {/* Speed up `next/font/google` loads by establishing the TLS handshake
+            to fonts.gstatic.com as early as possible. `dns-prefetch` falls back
+            for browsers that ignore preconnect (mostly noop on modern ones). */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <script
           nonce={nonce}
           type="application/ld+json"
@@ -40,7 +50,7 @@ async function RootLayout({ children }: RootLayoutProps) {
           dangerouslySetInnerHTML={{ __html: websiteJsonLd(projectConfig.name, urls.website) }}
         />
       </head>
-      <body className={roboto.variable}>{children}</body>
+      <body className={appFont.variable}>{children}</body>
     </html>
   );
 }

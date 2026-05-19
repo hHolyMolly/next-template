@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
-import { makeStore, type AppStore } from '@/store';
-import { getQueryClient } from '@/lib/queryClient';
+import { useState, type ReactNode } from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 
 import { Toaster } from '@/components/UI/Sonner';
+import { getQueryClient } from '@/lib/queryClient';
 import { WebVitals } from '@/lib/webVitals';
+import { makeStore, type AppStore } from '@/store';
 
 type ClientProvidersProps = {
   children: ReactNode;

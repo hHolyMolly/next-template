@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run i18n key parity check only when translation files change.
+if git diff --cached --name-only --diff-filter=ACMR | grep -qE '^public/locales/'; then
+  pnpm check:i18n
+fi

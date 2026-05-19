@@ -24,17 +24,32 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
+    // Never log raw response bodies — they may contain tokens, PII, or
+    // internal stack traces. Log only status, method, URL, and a bounded
+    // message length.
+    const truncate = (value: unknown, max = 200): string => {
+      const s = typeof value === 'string' ? value : JSON.stringify(value ?? '');
+      return s.length > max ? `${s.slice(0, max)}…` : s;
+    };
+
     if (error.response) {
       logger.error(
         `API ${error.response.status}: ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
+        { message: truncate(error.message) },
       );
     } else if (error.code === 'ECONNABORTED') {
       logger.error(`API timeout: ${error.config?.url}`);
+    } else if (!isCancelError(error)) {
+      logger.error(`API network error: ${truncate(error.message)}`);
     }
 
     return Promise.reject(error);
   },
 );
+
+function isCancelError(error: unknown): boolean {
+  return axios.isCancel(error);
+}
 
 /**
  * Typed helper for API requests.
@@ -49,10 +64,7 @@ API.interceptors.response.use(
  * const users = await request<User[]>({ url: '/users' }, controller.signal);
  * controller.abort(); // cancel the request
  */
-export async function request<T>(
-  config: AxiosRequestConfig,
-  signal?: AbortSignal,
-): Promise<T> {
+export async function request<T>(config: AxiosRequestConfig, signal?: AbortSignal): Promise<T> {
   const response = await API.request<T>({
     ...config,
     ...(signal ? { signal } : {}),

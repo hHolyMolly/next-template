@@ -1,0 +1,55 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    groups:
+      react:
+        patterns:
+          - react
+          - react-dom
+          - '@types/react'
+          - '@types/react-dom'
+      next:
+        patterns:
+          - next
+          - 'eslint-config-next'
+          - '@next/*'
+      tanstack:
+        patterns:
+          - '@tanstack/*'
+      radix:
+        patterns:
+          - '@radix-ui/*'
+      eslint:
+        patterns:
+          - eslint
+          - 'eslint-*'
+          - '@typescript-eslint/*'
+      testing:
+        patterns:
+          - vitest
+          - '@vitest/*'
+          - '@vitejs/plugin-react'
+          - 'vite-tsconfig-paths'
+          - '@testing-library/*'
+          - '@playwright/test'
+          - jsdom
+      types:
+        patterns:
+          - '@types/*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - ci

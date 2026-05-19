@@ -1,0 +1,36 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/app/**/{page,layout,loading,error,not-found,route,sitemap,robots,opengraph-image,twitter-image,icon,apple-icon,global-error,default,template}.{ts,tsx}",
+    "src/services/i18n/request.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,js,mjs}"],
+  "ignore": [
+    "src/hooks/**",
+    "src/components/UI/**",
+    "src/components/icons/**",
+    "src/components/layouts/ErrorBoundary.tsx",
+    "src/lib/{assertSameOrigin,cors,errors,lazyLoad,rateLimitAction,withApiHandler,withServerAction}.tsx",
+    "src/lib/{assertSameOrigin,cors,errors,lazyLoad,rateLimitAction,withApiHandler,withServerAction}.ts",
+    "src/services/api/**",
+    "src/services/storage/**",
+    "src/services/i18n/**",
+    "src/configs/featureFlags.ts",
+    "src/store/hooks.ts",
+    "src/types/**",
+    "src/utils/**"
+  ],
+  "ignoreDependencies": [
+    "axios",
+    "eslint-plugin-jsx-a11y",
+    "vite-tsconfig-paths",
+    "@hookform/resolvers"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "exports": "warn",
+    "types": "warn",
+    "nsExports": "warn",
+    "nsTypes": "warn"
+  }
+}

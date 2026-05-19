@@ -1,28 +1,27 @@
 import { validateEnv } from '@/configs/env';
 
 /**
- * Next.js instrumentation hook.
+ * Next.js server instrumentation hook.
  * Runs once when the server starts.
  *
- * This is the place to initialize:
- * - Environment validation
- * - Error reporting (e.g. Sentry: `await import('@sentry/nextjs').then(s => s.init({...}))`)
- * - OpenTelemetry (e.g. `await import('@vercel/otel').then(o => o.registerOTel('app'))`)
- * - Database connections
- * - Any server-side startup logic
+ * Companion: `src/instrumentation-client.ts` runs once in the browser.
  *
  * @see https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation
  */
 export async function register() {
   validateEnv();
 
-  // Initialize error reporting (uncomment when adding Sentry or similar):
-  // if (process.env.NEXT_RUNTIME === 'nodejs') {
-  //   const Sentry = await import('@sentry/nextjs');
-  //   Sentry.init({ dsn: process.env.SENTRY_DSN, tracesSampleRate: 0.1 });
-  // }
-
-  // Initialize OpenTelemetry (uncomment when adding @vercel/otel):
+  // Wire up APM/tracing here, e.g. `@vercel/otel`:
   // const { registerOTel } = await import('@vercel/otel');
   // registerOTel({ serviceName: 'next-template' });
+}
+
+/**
+ * Server-side error hook. Forward to your error reporter of choice
+ * (Sentry / Datadog / Rollbar / etc.) by replacing the body.
+ *
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation#onrequesterror-optional
+ */
+export async function onRequestError(..._args: Parameters<typeof console.error>): Promise<void> {
+  // no-op by default
 }

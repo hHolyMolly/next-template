@@ -11,12 +11,13 @@
 
 import { useTranslations } from 'next-intl';
 
-import Badge from '@/app/[locale]/(routes)/home/components/Demo/components/Badge';
-import Hero from '@/app/[locale]/(routes)/home/components/Demo/components/Hero';
 import Actions from '@/app/[locale]/(routes)/home/components/Demo/components/Actions';
+import Badge from '@/app/[locale]/(routes)/home/components/Demo/components/Badge';
 import CopyCommand from '@/app/[locale]/(routes)/home/components/Demo/components/CopyCommand';
-import Stack from '@/app/[locale]/(routes)/home/components/Demo/components/Stack';
 import Footer from '@/app/[locale]/(routes)/home/components/Demo/components/Footer';
+import Hero from '@/app/[locale]/(routes)/home/components/Demo/components/Hero';
+import Stack from '@/app/[locale]/(routes)/home/components/Demo/components/Stack';
+import { actionLinks } from '@/app/[locale]/(routes)/home/components/Demo/data/actions';
 import {
   INSTALL_COMMAND,
   AUTHOR,
@@ -24,7 +25,6 @@ import {
   VERSION,
 } from '@/app/[locale]/(routes)/home/components/Demo/data/constants';
 import { stack } from '@/app/[locale]/(routes)/home/components/Demo/data/stack';
-import { actionLinks } from '@/app/[locale]/(routes)/home/components/Demo/data/actions';
 
 import type { ReactNode } from 'react';
 

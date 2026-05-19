@@ -1,4 +1,4 @@
-import { type ProjectConfig } from '@/types';
+import type { ProjectConfig } from '@/types';
 import { logger } from '@/utils/logger';
 
 /**
@@ -38,6 +38,7 @@ export const projectConfig: ProjectConfig = validateConfig({
   i18n: {
     defaultLocale: 'en',
     locales: ['ru', 'en'],
+    timeZone: 'UTC',
   },
 
   /** Production flags. Disabled in dev to prevent crawling. */

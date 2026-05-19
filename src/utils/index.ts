@@ -1,2 +1,2 @@
-export * from '@/utils/debounce';
-export * from '@/utils/logger';
+export { debounce } from '@/utils/debounce';
+export { logger } from '@/utils/logger';

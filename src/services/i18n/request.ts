@@ -1,9 +1,10 @@
-import { getRequestConfig } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
+import { getRequestConfig } from 'next-intl/server';
 
-import { logger } from '@/utils/logger';
+import { projectConfig } from '@/configs/project';
 import { namespaces } from '@/services/i18n/constants';
 import { routing } from '@/services/i18n/routing';
+import { logger } from '@/utils/logger';
 
 type TypeMessages = {
   [key: string]: string | TypeMessages;
@@ -37,6 +38,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
   return {
     locale,
     messages,
+    // Pinning the timezone keeps server-rendered dates/numbers identical to
+    // the client output, eliminating hydration mismatches for `format.dateTime`
+    // and locale-aware date formatters. Override via `projectConfig.i18n.timeZone`.
+    timeZone: projectConfig.i18n.timeZone ?? 'UTC',
 
     // Handle missing translation keys gracefully.
     onError(error) {

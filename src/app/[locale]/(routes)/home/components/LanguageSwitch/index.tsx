@@ -2,11 +2,10 @@
 
 import { useLocale } from 'next-intl';
 
-import { cn } from '@/lib/cn';
-import { Link, usePathname } from '@/services/i18n/navigation';
-import { locales } from '@/services/i18n/constants';
-
 import { localeFlags } from '@/app/[locale]/(routes)/home/components/LanguageSwitch/flags';
+import { cn } from '@/lib/cn';
+import { locales } from '@/services/i18n/constants';
+import { Link, usePathname } from '@/services/i18n/navigation';
 
 export default function LanguageSwitch() {
   const currentLocale = useLocale();

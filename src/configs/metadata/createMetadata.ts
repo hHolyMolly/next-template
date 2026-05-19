@@ -1,42 +1,34 @@
-import { type Metadata } from 'next';
-
 import getBaseMetadata from '@/configs/metadata/getBaseMetadata';
+
+import type { Metadata } from 'next';
 
 type MetadataOverrides = Partial<Metadata> & {
   /**
    * Shorthand for OG & Twitter preview image.
    * Accepts a full URL or a path from `public/`.
-   *
-   * @example
-   * // Path from public/ (resolved via previewImage helper):
-   * createMetadata({ preview: '/assets/img/previews/home.webp' })
-   *
-   * // Full URL:
-   * createMetadata({ preview: 'https://cdn.example.com/og.png' })
    */
   preview?: string;
+  /**
+   * Route-relative path (e.g. `/template`) used to build canonical +
+   * hreflang URLs. Defaults to `/`.
+   */
+  path?: string;
 };
 
 /**
  * Create page metadata by merging overrides with the base metadata.
  *
- * Use `preview` shorthand to set OG & Twitter image for the page.
- *
  * @example
- * // Page with custom preview:
  * return createMetadata({
  *   title: 'About Us',
  *   description: 'Learn more about our team',
  *   preview: '/assets/img/previews/about.webp',
+ *   path: '/about',
  * });
- *
- * // Page using global preview (default):
- * return createMetadata({ title: 'Contact' });
  */
 async function createMetadata(overrides?: MetadataOverrides): Promise<Metadata> {
-  const base = await getBaseMetadata();
-
-  const { preview, ...rest } = overrides ?? {};
+  const { preview, path, ...rest } = overrides ?? {};
+  const base = await getBaseMetadata(path ?? '/');
 
   let imageOverrides: { images: string[] } | undefined;
   if (preview) {

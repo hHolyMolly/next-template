@@ -12,88 +12,135 @@ type RateLimitEntry = {
   resetAt: number;
 };
 
+type RateLimitResult = {
+  success: boolean;
+  limit: number;
+  remaining: number;
+  resetAt: number;
+};
+
+type Backend = (ip: string) => Promise<RateLimitResult> | RateLimitResult;
+
 /**
- * Simple in-memory rate limiter for Next.js middleware.
+ * Resolve the client IP from request headers.
  *
- * Limits requests per IP address using a sliding window.
+ * ⚠️ `x-forwarded-for` can be spoofed if the app is not behind a trusted proxy.
+ * Override `trustProxy` only if you know which hop is your reverse proxy
+ * (e.g. `TRUSTED_PROXY_HOPS=1` means take the rightmost IP from XFF).
  *
- * **⚠️ Serverless limitation:**
- * Uses in-memory `Map` — each serverless instance has its own store.
- * In serverless environments (Vercel, AWS Lambda), rate limiting is
- * per-instance and resets on cold starts, making it less effective
- * under high concurrency. For distributed rate limiting, consider:
- * - Upstash Redis (`@upstash/ratelimit`)
- * - Vercel KV
- * - Cloudflare Workers KV
+ * When `TRUSTED_PROXY_HOPS` is unset, we fall back to:
+ * 1. `x-real-ip` (typically set by nginx / Vercel / Cloudflare)
+ * 2. `127.0.0.1` (dev)
  *
- * Works well for long-running Node.js servers (VPS, Docker, `next start`).
+ * Accepts either a `NextRequest` or a plain `Headers` bag so the helper can
+ * be reused from Server Actions where only `await headers()` is available.
+ */
+export function resolveClientIp(source: NextRequest | Headers): string {
+  const headers = source instanceof Headers ? source : source.headers;
+  const hops = Number(process.env.TRUSTED_PROXY_HOPS);
+  const xff = headers.get('x-forwarded-for');
+
+  if (Number.isFinite(hops) && hops > 0 && xff) {
+    const chain = xff
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const pick = chain[Math.max(0, chain.length - hops)];
+    if (pick) return pick;
+  }
+
+  return headers.get('x-real-ip') ?? '127.0.0.1';
+}
+
+/**
+ * Rate limiter for Next.js middleware with an in-memory backend.
+ *
+ * The `Map`-backed backend works well for long-running Node.js servers
+ * (VPS, Docker, `next start`) but does NOT share state across serverless
+ * instances or cold starts — swap in a Redis-backed implementation
+ * when deploying to Vercel/Lambda/Workers.
  *
  * @example
  * // In proxy.ts:
- * import { createRateLimit } from '@/lib/rateLimit';
+ * const rateLimit = createRateLimit({ limit: 100, windowSeconds: 60 });
  *
- * const rateLimit = createRateLimit({ limit: 60, windowSeconds: 60 });
- *
- * export function proxy(request: NextRequest) {
- *   const blocked = rateLimit(request);
+ * export async function proxy(request: NextRequest) {
+ *   const blocked = await rateLimit(request);
  *   if (blocked) return blocked;
  *   // ...rest of middleware
  * }
  */
-export function createRateLimit(config: RateLimitConfig) {
+/**
+ * Low-level limiter: check a single IP against the configured backend and
+ * return the raw `RateLimitResult`. Used by both middleware and Server
+ * Action wrappers (see `rateLimitAction.ts`) so they share one budget.
+ */
+export function createRateLimiter(config: RateLimitConfig) {
   const { limit, windowSeconds } = config;
-  const store = new Map<string, RateLimitEntry>();
+  const backend: Backend = createMemoryBackend(limit, windowSeconds);
 
-  // Periodically clean up expired entries to prevent memory leaks
-  const CLEANUP_INTERVAL = 60_000; // 1 minute
+  return async function check(ip: string): Promise<RateLimitResult> {
+    return backend(ip);
+  };
+}
+
+export function createRateLimit(config: RateLimitConfig) {
+  const check = createRateLimiter(config);
+
+  return async function rateLimit(request: NextRequest): Promise<NextResponse | null> {
+    const ip = resolveClientIp(request);
+    const result = await check(ip);
+
+    if (result.success) return null;
+
+    const retryAfter = Math.max(1, Math.ceil((result.resetAt - Date.now()) / 1000));
+
+    return new NextResponse(JSON.stringify({ error: 'Too Many Requests' }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(retryAfter),
+        'X-RateLimit-Limit': String(result.limit),
+        'X-RateLimit-Remaining': String(Math.max(0, result.remaining)),
+        'X-RateLimit-Reset': String(result.resetAt),
+      },
+    });
+  };
+}
+
+function createMemoryBackend(limit: number, windowSeconds: number): Backend {
+  const store = new Map<string, RateLimitEntry>();
+  const windowMs = windowSeconds * 1000;
+  const CLEANUP_INTERVAL = 60_000;
   let lastCleanup = Date.now();
 
-  function cleanup() {
-    const now = Date.now();
+  function cleanup(now: number) {
     if (now - lastCleanup < CLEANUP_INTERVAL) return;
-
     lastCleanup = now;
     for (const [key, entry] of store) {
-      if (now > entry.resetAt) {
-        store.delete(key);
-      }
+      if (now > entry.resetAt) store.delete(key);
     }
   }
 
-  return function rateLimit(request: NextRequest): NextResponse | null {
-    cleanup();
-
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      '127.0.0.1';
-
+  return (ip) => {
     const now = Date.now();
-    const windowMs = windowSeconds * 1000;
+    cleanup(now);
+
     const entry = store.get(ip);
-
     if (!entry || now > entry.resetAt) {
-      store.set(ip, { count: 1, resetAt: now + windowMs });
-      return null;
+      const resetAt = now + windowMs;
+      store.set(ip, { count: 1, resetAt });
+      return { success: true, limit, remaining: limit - 1, resetAt };
     }
 
-    entry.count++;
+    entry.count += 1;
+    const remaining = limit - entry.count;
 
-    if (entry.count > limit) {
-      const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
-
-      return new NextResponse(JSON.stringify({ error: 'Too Many Requests' }), {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': String(retryAfter),
-          'X-RateLimit-Limit': String(limit),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': String(entry.resetAt),
-        },
-      });
-    }
-
-    return null;
+    return {
+      success: entry.count <= limit,
+      limit,
+      remaining: Math.max(0, remaining),
+      resetAt: entry.resetAt,
+    };
   };
 }

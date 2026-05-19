@@ -10,32 +10,23 @@
 :root {
   --background: 100% 0 none;
   --foreground: 20.79% 0.0399 265.7;
-
   --card: 100% 0 none;
   --card-foreground: 20.79% 0.0399 265.7;
-
   --popover: 100% 0 none;
   --popover-foreground: 20.79% 0.0399 265.7;
-
   --primary: 62.32% 0.1879 259.8;
   --primary-foreground: 98.38% 0.0035 247.9;
-
   --secondary: 98.43% 0.0017 247.8;
   --secondary-foreground: 20.79% 0.0399 265.7;
-
   --muted: 96.71% 0.0029 264.5;
   --muted-foreground: 55.13% 0.0233 264.4;
-
   --accent: 96.71% 0.0029 264.5;
   --accent-foreground: 20.79% 0.0399 265.7;
-
   --destructive: 63.68% 0.2078 25.3;
   --destructive-foreground: 98.48% 0 none;
-
   --border: 92.78% 0.0058 264.5;
   --input: 92.78% 0.0058 264.5;
   --ring: 62.32% 0.1879 259.8;
   --radius: 0.5rem;
-
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgb(0 0 0 / 10%);
 }

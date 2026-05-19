@@ -1,7 +1,8 @@
 import dynamic from 'next/dynamic';
-import { type ComponentType } from 'react';
 
 import { LoadingIcon } from '@/components/icons';
+
+import type { ComponentType } from 'react';
 
 type DynamicOptions = {
   /** Show loading indicator (default: true) */

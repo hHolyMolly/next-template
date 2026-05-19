@@ -1,5 +1,5 @@
-import { cache } from 'react';
 import { QueryClient } from '@tanstack/react-query';
+import { cache } from 'react';
 
 /**
  * Query stale times by data category.
