@@ -53,17 +53,63 @@ if (existsSync(storeIndex)) {
 
 // ---------- 3. Wipe the demo block from the home page ------------------------
 
-// Best-effort: the Home page conditionally imports `<Demo />`. If the project
-// has already customized the page, we leave it alone.
-const homePage = join(ROOT, 'src/app/[locale]/(routes)/home/page.tsx');
-if (existsSync(homePage)) {
-  let src = readFileSync(homePage, 'utf8');
+// Best-effort: the Home page imports `<Demo />`. If the project has already
+// customized the page, we leave it alone.
+const homePageCandidates = ['src/app/[locale]/page.tsx', 'src/app/[locale]/(routes)/home/page.tsx'];
+for (const rel of homePageCandidates) {
+  const abs = join(ROOT, rel);
+  if (!existsSync(abs)) continue;
+  let src = readFileSync(abs, 'utf8');
   const next = src
-    .replace(/^import\s+(?:\{\s*)?Demo(?:\s*\})?\s+from\s+['"][^'"]+Demo['"];\n/m, '')
-    .replace(/<Demo\s*\/>\s*/g, '');
+    // Drop `Demo,` from a destructured import list while keeping siblings.
+    .replace(/(\bimport\s*\{[^}]*?)\bDemo\b\s*,?\s*([^}]*\}\s*from\s*['"][^'"]+['"];?\n?)/m, '$1$2')
+    // Drop a sole `import Demo from '...';` line.
+    .replace(/^import\s+Demo\s+from\s+['"][^'"]+Demo['"];\n/m, '')
+    // Drop `<Demo .../>` element, keeping siblings.
+    .replace(/<Demo\b[^/]*\/>\s*/g, '')
+    // If only a `languageSwitch={<LanguageSwitch />}` remained inside <Demo>, simplify.
+    .replace(/languageSwitch=\{<LanguageSwitch \/>\}\s*/g, '');
   if (next !== src) {
-    writeFileSync(homePage, next);
-    console.log('✓ stripped <Demo /> usage from home/page.tsx');
+    writeFileSync(abs, next);
+    console.log(`✓ stripped <Demo /> usage from ${rel}`);
+  }
+}
+
+// Drop the `Demo` re-export in components/index.ts.
+const homeComponentsIndex = join(ROOT, 'src/app/[locale]/(routes)/home/components/index.ts');
+if (existsSync(homeComponentsIndex)) {
+  let src = readFileSync(homeComponentsIndex, 'utf8');
+  const next = src.replace(
+    /^export\s+\{\s*default as Demo\s*\}\s+from\s+['"][^'"]+Demo['"];\n/m,
+    '',
+  );
+  if (next !== src) {
+    writeFileSync(homeComponentsIndex, next);
+    console.log('✓ removed Demo export from home/components/index.ts');
+  }
+}
+
+// ---------- 3b. Strip the `demo` namespace from i18n typings & constants ----
+
+const i18nTypes = join(ROOT, 'src/types/next-intl.ts');
+if (existsSync(i18nTypes)) {
+  let src = readFileSync(i18nTypes, 'utf8');
+  const next = src
+    .replace(/^import\s+type\s+demo\s+from\s+['"][^'"]+demo\.json['"];\n/m, '')
+    .replace(/^\s*demo:\s*typeof\s+demo;\n/m, '');
+  if (next !== src) {
+    writeFileSync(i18nTypes, next);
+    console.log('✓ removed demo namespace from src/types/next-intl.ts');
+  }
+}
+
+const i18nConstants = join(ROOT, 'src/services/i18n/constants.ts');
+if (existsSync(i18nConstants)) {
+  let src = readFileSync(i18nConstants, 'utf8');
+  const next = src.replace(/,\s*'demo'/g, '').replace(/'demo'\s*,\s*/g, '');
+  if (next !== src) {
+    writeFileSync(i18nConstants, next);
+    console.log("✓ removed 'demo' from src/services/i18n/constants.ts namespaces");
   }
 }
 
