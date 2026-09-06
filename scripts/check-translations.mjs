@@ -2,7 +2,7 @@
 /**
  * Verify that all locales expose the same translation keys.
  *
- * - Reads every namespace from `public/locales/{locale}/*.json`.
+ * - Reads every namespace from `src/messages/{locale}/*.json`.
  * - Compares key paths against the default locale defined in
  *   `src/services/i18n/constants.ts` (indirectly via project config).
  * - Exits with code 1 on any missing / extra keys.
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-const localesDir = path.join(root, 'public', 'locales');
+const localesDir = path.join(root, 'src', 'messages');
 
 /** Flatten nested object keys into dot-paths. */
 function flattenKeys(obj, prefix = '') {

@@ -14,5 +14,6 @@
   "htmlWhitespaceSensitivity": "ignore",
   "embeddedLanguageFormatting": "auto",
   "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./src/styles/tailwind.css",
   "tailwindFunctions": ["cn", "cva", "clsx"]
 }

@@ -3,7 +3,6 @@ import nextConfig from 'eslint-config-next';
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import nextTypescript from 'eslint-config-next/typescript';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import importPlugin from 'eslint-plugin-import';
 import unusedImports from 'eslint-plugin-unused-imports';
 
 // Note: jsx-a11y is already registered by `eslint-config-next/core-web-vitals` —
@@ -15,9 +14,11 @@ const eslintConfig = [
   ...nextTypescript,
   ...tanstackQuery.configs['flat/recommended'],
   {
+    // `import` plugin is registered by eslint-config-next — configuring
+    // `import/*` rules below reuses that instance (re-registering our own
+    // copy triggers "Cannot redefine plugin").
     plugins: {
       'unused-imports': unusedImports,
-      import: importPlugin,
     },
     rules: {
       'unused-imports/no-unused-imports': 'warn',

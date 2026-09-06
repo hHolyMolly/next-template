@@ -1,0 +1,18 @@
+{
+  "shared": {
+    "loading": "Loading...",
+    "skip_to_content": "Skip to main content",
+    "close": "Close",
+    "opens_in_new_tab": "(opens in new tab)",
+    "nav_home": "Home",
+    "nav_template": "Template"
+  },
+
+  "errors": {
+    "something_went_wrong": "Something went wrong",
+    "try_again": "Try again",
+    "not_found_title": "404 - Page Not Found",
+    "page_not_found": "Page not found",
+    "go_home": "Go home"
+  }
+}

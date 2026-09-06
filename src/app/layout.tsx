@@ -10,8 +10,8 @@ import { appFont } from '@/styles/fonts';
 import type { Metadata, Viewport } from 'next';
 
 import '@/styles/normalize.css';
-import '@/styles/tailwind.css';
 import '@/styles/vars.css';
+import '@/styles/tailwind.css';
 import '@/styles/index.scss';
 
 type RootLayoutProps = {
@@ -25,10 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b0b0d' },
-  ],
+  // Single light theme by design (no dark mode) — keep in sync with manifest.ts
+  themeColor: '#ffffff',
 };
 
 async function RootLayout({ children }: RootLayoutProps) {

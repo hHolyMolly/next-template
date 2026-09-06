@@ -38,9 +38,7 @@ updates:
           - vitest
           - '@vitest/*'
           - '@vitejs/plugin-react'
-          - 'vite-tsconfig-paths'
           - '@testing-library/*'
-          - '@playwright/test'
           - jsdom
       types:
         patterns:

@@ -1,0 +1,18 @@
+{
+  "shared": {
+    "loading": "Загрузка...",
+    "skip_to_content": "Перейти к основному содержимому",
+    "close": "Закрыть",
+    "opens_in_new_tab": "(откроется в новой вкладке)",
+    "nav_home": "Главная",
+    "nav_template": "Шаблон"
+  },
+
+  "errors": {
+    "something_went_wrong": "Что-то пошло не так",
+    "try_again": "Попробовать снова",
+    "not_found_title": "404 - Страница не найдена",
+    "page_not_found": "Страница не найдена",
+    "go_home": "На главную"
+  }
+}

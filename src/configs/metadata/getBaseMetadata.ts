@@ -15,8 +15,6 @@ export function previewImage(path: string): string {
   return `${urls.website}${path}`;
 }
 
-const PREVIEW_IMAGE = previewImage('/assets/img/previews/global.webp');
-
 /** Build `alternates.languages` for every configured locale. */
 function buildLanguageAlternates(path: string): Record<string, string> {
   const { locales, defaultLocale } = projectConfig.i18n;
@@ -54,6 +52,9 @@ async function getBaseMetadata(path = '/'): Promise<Metadata> {
       languages: buildLanguageAlternates(path),
     },
 
+    // No static og/twitter images here — the generated `opengraph-image.tsx`
+    // file convention provides them. Per-page overrides go through the
+    // `preview` option of `createMetadata`.
     openGraph: {
       type: 'website',
       url: canonical,
@@ -61,14 +62,12 @@ async function getBaseMetadata(path = '/'): Promise<Metadata> {
       description,
       locale,
       siteName: projectConfig.name,
-      images: [PREVIEW_IMAGE],
     },
 
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [PREVIEW_IMAGE],
     },
   };
 }

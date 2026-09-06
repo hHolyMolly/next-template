@@ -6,8 +6,6 @@
   "include": [
     "vitest.config.ts",
     "vitest.setup.ts",
-    "playwright.config.ts",
-    "e2e/**/*.ts",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "src/**/*.spec.ts",

@@ -28,7 +28,10 @@ export const errorReporting: Reporter = {
     log.error(error.message, context);
   },
   captureMessage(message, level = 'info') {
-    log.error(`[${level}] ${message}`);
+    // Route to the matching logger method — only real errors should reach
+    // the always-on production error channel.
+    const method = level === 'error' ? 'error' : level === 'warning' ? 'warn' : 'info';
+    log[method](`[${level}] ${message}`);
   },
   setUser(_user) {
     // no-op until a real reporter is wired up

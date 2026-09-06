@@ -18,6 +18,8 @@
 type FeatureFlagKey = keyof typeof flags;
 
 const flags = {
+  /** Demo: gates the Redux-backed banner on the home page (see DemoBanner). */
+  demoBanner: true,
   // Add feature flags here:
   // newCheckout: process.env.NODE_ENV === 'development',
   // darkModeV2: true,

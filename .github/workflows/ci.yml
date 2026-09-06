@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -22,22 +25,24 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Cache Next.js build
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             .next/cache
@@ -49,20 +54,25 @@ jobs:
         run: pnpm lint
 
       - name: Lint (Stylelint)
-        run: pnpm lint:styles
+        run: pnpm lint:css
+
+      - name: Format check (Prettier)
+        run: pnpm format:check
 
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Unit tests
-        run: pnpm test
+      - name: Typecheck tests
+        run: pnpm typecheck:test
+
+      - name: Unit tests (coverage)
+        run: pnpm test:coverage
 
       - name: Check translations
         run: pnpm check:i18n
 
       - name: Knip (unused code/deps)
         run: pnpm knip
-        continue-on-error: true
 
       - name: Build
         run: pnpm build

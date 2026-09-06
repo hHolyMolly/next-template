@@ -1,19 +1,32 @@
 #!/usr/bin/env node
-// Strips the template's demo surface AND finalizes the template for a fresh
-// project (rename, license removal, package.json cleanup).
+// Strips the template's demo surface AND (optionally) finalizes the template
+// for a fresh project (rename, license removal, package.json cleanup).
 // Idempotent: running twice is safe (missing files are ignored).
 //
-// Usage: pnpm clean:demo [project-name]
+// Usage: pnpm clean:demo [project-name] [--force]
+//   --force  run the finalization step even inside a git checkout
+//            (by default it only runs for degit clones, i.e. no .git)
 
 import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 
 const ROOT = process.cwd();
-const projectName = process.argv[2] ?? basename(resolve(ROOT));
+const args = process.argv.slice(2).filter((a) => a !== '--force');
+const force = process.argv.includes('--force');
+const projectName = args[0] ?? basename(resolve(ROOT));
 
 // ---------- 1. Remove demo files/dirs ----------------------------------------
 
-const demoPaths = ['src/app/[locale]/(routes)/home/components/Demo', 'src/store/examples'];
+const demoPaths = [
+  // Demo, LanguageSwitch, ContactForm (+ Server Action), HealthStatus, DemoBanner
+  'src/app/[locale]/components',
+  // Demo-flavored home metadata (the skeleton page defines its own)
+  'src/app/[locale]/metadata.ts',
+  // Old home page (replaced by a skeleton inside (routes) below)
+  'src/app/[locale]/page.tsx',
+  // Demo Route Handler (POST /api/echo). /api/health stays — it is infra.
+  'src/app/api/echo',
+];
 
 for (const rel of demoPaths) {
   const abs = join(ROOT, rel);
@@ -23,77 +36,58 @@ for (const rel of demoPaths) {
   }
 }
 
-// Drop every `demo.json` under public/locales/*
-const localesDir = join(ROOT, 'public/locales');
+// Drop every `demo.json` under src/messages/*
+const localesDir = join(ROOT, 'src/messages');
 if (existsSync(localesDir)) {
   for (const locale of readdirSync(localesDir)) {
     const file = join(localesDir, locale, 'demo.json');
     if (existsSync(file)) {
       rmSync(file);
-      console.log(`✓ removed public/locales/${locale}/demo.json`);
+      console.log(`✓ removed src/messages/${locale}/demo.json`);
     }
   }
 }
 
-// ---------- 2. Unregister the counter reducer --------------------------------
+// ---------- 2. Write a clean home page skeleton ------------------------------
 
-const storeIndex = join(ROOT, 'src/store/index.ts');
-if (existsSync(storeIndex)) {
-  let src = readFileSync(storeIndex, 'utf8');
-  const original = src;
-  src = src
-    .replace(/^import counterSlice from '@\/store\/examples\/counterSlice';\n/m, '')
-    .replace(/^\s*\/\/ Demo slice.*$\n/m, '')
-    .replace(/^\s*counter: counterSlice,\n/m, '');
-  if (src !== original) {
-    writeFileSync(storeIndex, src);
-    console.log('✓ unregistered counter slice in src/store/index.ts');
-  }
+// The skeleton lives inside the (routes) group so it gets Header/Footer and
+// the skip-link from the group layout. No regex surgery on user code — the
+// whole file is replaced, which cannot produce broken syntax.
+const skeletonPath = join(ROOT, 'src/app/[locale]/(routes)/page.tsx');
+const skeleton = `import { getTranslations } from 'next-intl/server';
+
+import { createMetadata } from '@/configs/metadata';
+import { projectConfig } from '@/configs/project';
+
+import type { Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.home');
+
+  return createMetadata({ description: t('description') });
 }
 
-// ---------- 3. Wipe the demo block from the home page ------------------------
-
-// Best-effort: the Home page imports `<Demo />`. If the project has already
-// customized the page, we leave it alone.
-const homePageCandidates = ['src/app/[locale]/page.tsx', 'src/app/[locale]/(routes)/home/page.tsx'];
-for (const rel of homePageCandidates) {
-  const abs = join(ROOT, rel);
-  if (!existsSync(abs)) continue;
-  let src = readFileSync(abs, 'utf8');
-  const next = src
-    // Drop `Demo,` from a destructured import list while keeping siblings.
-    .replace(/(\bimport\s*\{[^}]*?)\bDemo\b\s*,?\s*([^}]*\}\s*from\s*['"][^'"]+['"];?\n?)/m, '$1$2')
-    // Drop a sole `import Demo from '...';` line.
-    .replace(/^import\s+Demo\s+from\s+['"][^'"]+Demo['"];\n/m, '')
-    // Drop `<Demo .../>` element, keeping siblings.
-    .replace(/<Demo\b[^/]*\/>\s*/g, '')
-    // If only a `languageSwitch={<LanguageSwitch />}` remained inside <Demo>, simplify.
-    .replace(/languageSwitch=\{<LanguageSwitch \/>\}\s*/g, '');
-  if (next !== src) {
-    writeFileSync(abs, next);
-    console.log(`✓ stripped <Demo /> usage from ${rel}`);
-  }
-}
-
-// Drop the `Demo` re-export in components/index.ts.
-const homeComponentsIndex = join(ROOT, 'src/app/[locale]/(routes)/home/components/index.ts');
-if (existsSync(homeComponentsIndex)) {
-  let src = readFileSync(homeComponentsIndex, 'utf8');
-  const next = src.replace(
-    /^export\s+\{\s*default as Demo\s*\}\s+from\s+['"][^'"]+Demo['"];\n/m,
-    '',
+function HomePage() {
+  return (
+    <section className="container flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+      <h1 className="text-4xl font-bold tracking-tight">{projectConfig.name}</h1>
+    </section>
   );
-  if (next !== src) {
-    writeFileSync(homeComponentsIndex, next);
-    console.log('✓ removed Demo export from home/components/index.ts');
-  }
 }
 
-// ---------- 3b. Strip the `demo` namespace from i18n typings & constants ----
+export default HomePage;
+`;
+
+if (!existsSync(skeletonPath)) {
+  writeFileSync(skeletonPath, skeleton);
+  console.log('✓ created src/app/[locale]/(routes)/page.tsx (clean skeleton)');
+}
+
+// ---------- 3. Strip the `demo` namespace from i18n typings & constants ------
 
 const i18nTypes = join(ROOT, 'src/types/next-intl.ts');
 if (existsSync(i18nTypes)) {
-  let src = readFileSync(i18nTypes, 'utf8');
+  const src = readFileSync(i18nTypes, 'utf8');
   const next = src
     .replace(/^import\s+type\s+demo\s+from\s+['"][^'"]+demo\.json['"];\n/m, '')
     .replace(/^\s*demo:\s*typeof\s+demo;\n/m, '');
@@ -105,7 +99,7 @@ if (existsSync(i18nTypes)) {
 
 const i18nConstants = join(ROOT, 'src/services/i18n/constants.ts');
 if (existsSync(i18nConstants)) {
-  let src = readFileSync(i18nConstants, 'utf8');
+  const src = readFileSync(i18nConstants, 'utf8');
   const next = src.replace(/,\s*'demo'/g, '').replace(/'demo'\s*,\s*/g, '');
   if (next !== src) {
     writeFileSync(i18nConstants, next);
@@ -113,9 +107,50 @@ if (existsSync(i18nConstants)) {
   }
 }
 
-// ---------- 4. Template finalization ----------------------------------------
+// ---------- 3b. Widen knip ignores -------------------------------------------
 
-if (!existsSync(join(ROOT, '.git'))) {
+// The demo consumed parts of the library surface (server-action toolkit,
+// feature flags, store hooks, @hookform/resolvers). After removal they are
+// intentionally unused until the project grows into them — tell knip so the
+// gate stays green. Delete these entries once you consume the modules.
+const knipPath = join(ROOT, 'knip.json');
+if (existsSync(knipPath)) {
+  const knip = JSON.parse(readFileSync(knipPath, 'utf8'));
+  const addIgnore = [
+    'src/configs/featureFlags.ts',
+    'src/lib/rateLimitAction.ts',
+    'src/lib/withServerAction.ts',
+    'src/store/**',
+  ];
+  const addIgnoreDeps = ['@hookform/resolvers'];
+  knip.ignore = Array.from(new Set([...(knip.ignore ?? []), ...addIgnore]));
+  knip.ignoreDependencies = Array.from(
+    new Set([...(knip.ignoreDependencies ?? []), ...addIgnoreDeps]),
+  );
+  writeFileSync(knipPath, `${JSON.stringify(knip, null, 2)}\n`);
+  console.log('✓ widened knip.json ignores for the now-unconsumed library surface');
+}
+
+// ---------- 4. Reset the demo deploy URL -------------------------------------
+
+const envProd = join(ROOT, '.env.production');
+if (existsSync(envProd)) {
+  const src = readFileSync(envProd, 'utf8');
+  const next = src.replace(
+    /^NEXT_PUBLIC_CLIENT_URL=.*$/m,
+    'NEXT_PUBLIC_CLIENT_URL=https://example.com',
+  );
+  if (next !== src) {
+    writeFileSync(envProd, next);
+    console.log('✓ reset NEXT_PUBLIC_CLIENT_URL in .env.production (set your real domain!)');
+  }
+}
+
+// ---------- 5. Template finalization -----------------------------------------
+
+const isGitCheckout = existsSync(join(ROOT, '.git'));
+
+if (!isGitCheckout || force) {
   for (const file of ['LICENSE']) {
     const abs = join(ROOT, file);
     if (existsSync(abs)) {
@@ -140,7 +175,7 @@ if (!existsSync(join(ROOT, '.git'))) {
   const pkgPath = join(ROOT, 'package.json');
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
   pkg.name = projectName;
-  pkg.version = '1.0.0';
+  pkg.version = '0.1.0';
   delete pkg.description;
   delete pkg.author;
   delete pkg.license;
@@ -158,6 +193,13 @@ if (!existsSync(join(ROOT, '.git'))) {
   } catch {
     // ignore
   }
+
+  if (!isGitCheckout) {
+    console.log('\nℹ No .git found — run `git init && pnpm prepare` to enable git hooks.');
+  }
+} else {
+  console.log('\nℹ Git checkout detected — finalization (rename/LICENSE) skipped.');
+  console.log('  Re-run with --force to finalize: pnpm clean:demo my-app --force');
 }
 
 console.log(`\n✅ Project "${projectName}" cleaned. Run: pnpm dev\n`);

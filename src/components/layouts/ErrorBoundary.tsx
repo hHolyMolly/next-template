@@ -1,8 +1,24 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
+import { Button } from '@/components/UI/Button';
 import { errorReporting } from '@/lib/errorReporting';
+
+/** Default translated fallback (class components can't call hooks). */
+function DefaultFallback({ onReset }: { onReset: () => void }) {
+  const t = useTranslations('translations.errors');
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 p-6 text-center">
+      <p className="text-sm text-muted-foreground">{t('something_went_wrong')}</p>
+      <Button size="sm" onClick={onReset}>
+        {t('try_again')}
+      </Button>
+    </div>
+  );
+}
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -65,17 +81,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         return fallback;
       }
 
-      return (
-        <div className="flex flex-col items-center justify-center gap-3 p-6 text-center">
-          <p className="text-sm text-muted-foreground">Something went wrong</p>
-          <button
-            onClick={this.handleReset}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
-          >
-            Try again
-          </button>
-        </div>
-      );
+      return <DefaultFallback onReset={this.handleReset} />;
     }
 
     return this.props.children;

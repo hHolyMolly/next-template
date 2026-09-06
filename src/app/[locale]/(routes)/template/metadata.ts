@@ -13,6 +13,7 @@ export async function generateTemplateMetadata(): Promise<Metadata> {
   return createMetadata({
     title,
     description,
+    path: '/template',
     // preview: '/assets/img/previews/template.webp',
   });
 }

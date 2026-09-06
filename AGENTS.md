@@ -8,157 +8,132 @@
 
 ## Project
 
-Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind CSS, next-intl, Redux Toolkit, TanStack React Query, Axios.
+Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind CSS v4, next-intl, Redux Toolkit, TanStack React Query, Axios.
 
 ## Architecture Rules
 
 ### Aliases
 
 - Use **only `@/`** alias (= `./src/`). No other aliases inside `src/`.
-- `@public/` is reserved for importing files from `public/` (e.g. translation JSONs).
+- `@public/` is reserved for importing files from `public/` (static assets).
 
 ### Routing
 
-- Root layout (`src/app/layout.tsx`) is minimal — only `<html>`, `<body>`, global styles, JSON-LD.
-- Root `page.tsx` redirects to the default locale.
-- Root `not-found.tsx` is a server component rendered without i18n providers.
+- Root layout (`src/app/layout.tsx`) is minimal — only `<html>`, `<body>`, global styles, JSON-LD. There is **no root `page.tsx`** — the intl middleware rewrites `/` into the default locale.
 - All page content lives under `src/app/[locale]/`.
-- `[locale]/layout.tsx` sets the request locale and wires `NextIntlClientProvider` + `ClientProviders`.
-- `[locale]/(routes)/layout.tsx` adds Header + Footer; pages outside `(routes)` render without them.
-- `[locale]/[...rest]/page.tsx` is a catch-all that triggers `not-found`.
+- `[locale]/layout.tsx` sets the request locale and wires `NextIntlClientProvider` (client namespaces only — see i18n) + `ClientProviders`.
+- `[locale]/(routes)/layout.tsx` adds Header + Footer + skip-link; pages outside `(routes)` render without them (the demo home page is such a page).
+- `[locale]/(routes)/[...rest]/page.tsx` is a catch-all that triggers the styled `[locale]/not-found.tsx`.
+- **`loading.tsx` only at route level** (e.g. `(routes)/template/loading.tsx`), never at locale level: a locale-level Suspense boundary streams a 200 shell before the `[...rest]` catch-all can throw `notFound()`, breaking the 404 status code (verified empirically — segment-scoped boundaries are safe).
 - `proxy.ts` (not `middleware.ts`) — Next.js 16 convention. The exported function **must** be named `proxy`.
-- Middleware composes: rate limit → next-intl routing → CSP nonce/headers.
-- **Parallel routes / intercepting routes**: when you add a `@slot` segment, always pair it with a `default.tsx` at every level that can be matched independently — otherwise a direct navigation produces a 404. Applies recursively through nested layouts.
+- Middleware composes: rate limit (pages only) → nonce/CSP onto **request** headers → next-intl routing → CSP mirrored on response.
+- **Parallel routes / intercepting routes**: when you add a `@slot` segment, always pair it with a `default.tsx` at every level that can be matched independently.
 
 ### Localization (i18n)
 
-- All texts live in `public/locales/{locale}/{namespace}.json`.
-- Namespaces: `translations.json` (UI copy), `metadata.json` (SEO), `demo.json` (demo page — safe to delete).
-- **No hardcoded strings** in components — always `useTranslations()` / `getTranslations()`.
+- All texts live in `src/messages/{locale}/{namespace}.json` (not `public/` — messages are not a public asset).
+- Namespaces: `translations.json` (UI copy), `metadata.json` (SEO, server-only), `demo.json` (demo surface — removed by `pnpm clean:demo`).
+- `clientNamespaces` in `src/services/i18n/constants.ts` controls what is serialized to the client — `metadata` never ships in the RSC payload.
+- **No hardcoded strings** in components — always `useTranslations()` / `getTranslations()`. This includes `sr-only` texts, `aria-label`s and Zod validation messages (schemas are factories taking translated messages — see `ContactForm/schema.ts`).
 - Exception: `global-error.tsx` — i18n is unavailable because the layout is broken; English fallback is acceptable.
 - Language switching uses `<Link>` from `@/services/i18n/navigation` with the `locale` prop.
-- Types for message shape are generated from the default locale — see `src/types/next-intl.ts`.
+- Types for message shape derive from the default locale — see `src/types/next-intl.ts`. `pnpm check:i18n` enforces key parity (also runs in pre-commit when messages change).
 
-### Styling
+### Styling — Tailwind CSS v4
 
-- Tailwind-first. SCSS only for `src/styles/index.scss` (page/layout wrappers).
-- CSS variables in `vars.css` use the **oklch color space**: `--background: 100% 0 none;`
-  - Format: `lightness chroma hue` — perceptually uniform, wider gamut than HSL.
-  - Tokens are applied in Tailwind via `oklch(var(--token))`.
+- **CSS-first config** — there is no `tailwind.config.ts`. Everything lives in `src/styles/tailwind.css`:
+  `@import 'tailwindcss'` + `@import 'tw-animate-css'` (shadcn animation utilities), `@theme inline` maps runtime tokens to utilities, `@utility container` overrides the built-in container, keyframes live inside `@theme`.
+- Design tokens in `src/styles/vars.css` are **complete oklch colors** (`--primary: oklch(62.32% 0.1879 259.8deg)`), so opacity modifiers (`bg-primary/10`) work via color-mix.
+- The next/font variable is `--font-app` (mapped to Tailwind's `--font-sans` in `@theme inline`) — never name a next/font variable after a Tailwind token.
 - Use semantic tokens (`bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`) — never raw colors.
-- Container defined in `tailwind.css`.
+- Single light theme by design (no dark mode); `themeColor` / manifest colors stay light.
 - Use `cn()` from `@/lib/cn` (clsx + tailwind-merge) to merge classes.
-- Animations — prefer Tailwind keyframes from `tailwind.config.ts` or `tw-animate-css` utilities.
+- SCSS only for `src/styles/index.scss` (page/layout wrappers).
 
 ### Components
 
 - **UI components** → `src/components/UI/` — based on **shadcn/ui** (new-york style).
-  - Available: Button, Input, Dialog, Skeleton, Sonner (toast), VisuallyHidden.
-  - Button uses `cva` variants and `asChild` via `@radix-ui/react-slot`.
-  - Toast notifications use `sonner` — call `toast()` from `sonner`, not a custom hook.
+  - Available: Button, Input, FormField, Dialog, Skeleton, Sonner (toast), VisuallyHidden.
+  - Toast notifications use `sonner` — call `toast()` from `sonner` (see ContactForm for live usage).
 - Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders, ErrorBoundary).
-- No theme switching — single light theme only.
-- Icons → `src/components/icons/`.
-- Page-specific components → co-located at `src/app/[locale]/(routes)/{page}/components/`.
+- Icons → `src/components/icons/`. `LoadingIcon` takes a `label` prop for its accessible name.
+- Page-specific/demo components → co-located at `src/app/[locale]/components/`.
 
 ### API
 
-- Axios instance: `src/services/api/instance.ts` — holds interceptors (auth, sanitized error logging).
-- `request<T>(config, signal?)` — low-level typed helper; **never call it directly from a component**.
-- **All client API I/O goes through TanStack Query.** Add endpoints to `src/services/api/paths.ts`, then wrap them in `useQuery` / `useMutation` inside `src/services/api/queries.ts` (see the `useTodos` / `useCreateTodo` example and the `todoKeys` factory).
-- Reuse `STALE_TIMES` from `@/lib/queryClient`; invalidate via the broadest query-key that still makes sense.
-- `isApiError(error)` — type guard for `AxiosError`.
-- `isAbortError(error)` — checks if the error is a cancelled request.
-- API interceptors must **never** log raw server response bodies — only status, method, URL, and a sanitized message.
-- **Server Components / Route Handlers** → use `serverFetch<T>(path, { next: { revalidate, tags } })` from `@/services/api/serverFetch`. It speaks Next.js ISR and tag-based revalidation. Throws `ServerFetchError` on non-2xx.
+- **Route Handlers** wrap in `withApiHandler` (`@/lib/withApiHandler`): CORS + rate limit (`createApiRateLimit` from `@/lib/rateLimit`) + `AppError` → JSON mapping. Live examples: `GET /api/health` (infra, never rate-limited), `POST /api/echo` (demo: Zod body validation + rate limit).
+- **All client API I/O goes through TanStack Query.** Define queries with `queryOptions()` in `src/services/api/queries.ts` — one definition serves `useQuery` on the client and `prefetchQuery` on the server. SSR flow: prefetch in a Server Component + `<HydrationBoundary state={dehydrate(qc)}>` (live example: `[locale]/page.tsx` → `HealthStatus`).
+- Reuse `STALE_TIMES` from `@/lib/queryClient`.
+- Axios instance (`src/services/api/instance.ts`) and `serverFetch` (`src/services/api/serverFetch.ts`) are the transport layer for real backends; interceptors must never log raw response bodies.
 
 ### Forms
 
-- React Hook Form + Zod resolver. Use `<FormField control={...} name="...">` from `@/components/UI` — it bridges RHF and the typed `<Input>` (label, error, hint, aria-describedby).
-- Schema-first: declare a `zod` schema, derive types with `z.infer<typeof schema>`, attach via `useForm({ resolver: zodResolver(schema) })`.
-- For Server-Action-backed forms, combine `useActionState()` with `withServerAction()` so the returned `ServerActionResult` is fully typed.
+- React Hook Form + Zod resolver. `<FormField control={...} name="...">` bridges RHF and the typed `<Input>`.
+- Schema-first and **shared**: the same Zod schema validates on the client (zodResolver) and inside the Server Action. Schemas are factories taking translated messages.
+- Live example: `src/app/[locale]/components/ContactForm/` (schema.ts + actions.ts + index.tsx) — RHF + `useTransition` + `toast()`.
 
 ### Server Actions
 
-- Put Server Actions in `src/app/actions.ts` (global) or co-locate with pages.
-- Every file with Server Actions starts with `'use server'`.
-- **Always validate inputs** — Server Actions are public HTTP endpoints.
-- Verify `Origin` / `Referer` against `NEXT_PUBLIC_CLIENT_URL` for state-changing actions (see `src/lib/assertSameOrigin.ts`). **Mandatory** for every mutation — `SameSite=Lax` cookies leave a CSRF window otherwise, and `proxy.ts` does not see Server Actions.
-- Wrap every action with `withServerAction(...)` from `@/lib/withServerAction` so it returns a discriminated `ServerActionResult<T>` instead of throwing.
-- Rate-limit actions with `withActionRateLimit({ limit, windowSeconds }, action)` from `@/lib/rateLimitAction`. Actions bypass `proxy.ts`, so the middleware limiter does **not** cover them — wrap every mutation.
-- Use `revalidatePath()` / `revalidateTag()` after mutations.
-- Use `useActionState()` in Client Components for form state.
+- Co-locate actions with their feature (`.../ContactForm/actions.ts`); files start with `'use server'`.
+- The canonical mutation pipeline (see `submitContact`):
+  `withServerAction(withActionRateLimit({...}, async (input) => { await assertSameOrigin(); ...validate with Zod...; return data; }))`
+- `assertSameOrigin()` is **mandatory** for every mutation; `proxy.ts` does not see Server Actions.
+- `withServerAction` returns a discriminated `ServerActionResult<T>` — actions never throw to the client.
+- Use `revalidatePath()` / `revalidateTag()` after real mutations.
 
 ### Types
 
-- Global types → `src/types/index.ts`. No `interfaces/` directory.
-- Component-local types — next to the component or inline.
+- Global types → `src/types/index.ts`. `Locale` derives from `projectConfig.i18n.locales` — the config object is `as const satisfies ProjectConfig` so the union stays literal; don't widen it.
 - Prefer `type` over `interface` unless declaration merging is required.
 
 ### Hooks
 
-- Reusable hooks → `src/hooks/`, barrel in `src/hooks/index.ts`.
+- Reusable hooks → `src/hooks/`, barrel in `src/hooks/index.ts`. All SSR-safe.
 - Available: `useMediaQuery`, `useDebounce`, `useThrottle`, `useClickOutside`, `useScrollLock`, `useToggle`, `useIsomorphicLayoutEffect`, `useEventListener`, `useLocalStorage`, `useIntersectionObserver`.
-- All hooks are SSR-safe — return a stable server value or use `useSyncExternalStore`.
 
-### Dynamic imports
+### Logging & Errors
 
-- For heavy client-only components (charts, maps, editors, large modals) use `lazyLoad()` from `@/lib/lazyLoad` — it wraps `next/dynamic` with a standardized loader and `ssr: false` by default.
-- Do **not** use `next/dynamic` directly unless you need non-default options — go through `lazyLoad` so loaders stay consistent.
-
-### Logging
-
-- Use `logger` from `@/utils/logger` instead of `console.*`.
-- In production, `logger.log` / `logger.warn` / `logger.info` / `logger.debug` become no-ops; `logger.error` always logs.
-- `logger.child({ scope })` returns a prefixed logger for a module.
+- Use `logger` from `@/utils/logger` (never `console.*`). `logger.child('scope')` returns a prefixed logger. Only `logger.error` survives production.
+- Error taxonomy: `AppError` subclasses in `@/lib/errors`; `toErrorResponse()` for handlers.
+- `errorReporting` (`@/lib/errorReporting`) is the reporter abstraction; `onRequestError` in `src/instrumentation.ts` is typed via `Instrumentation.onRequestError`.
+- `ErrorBoundary` renders a translated default fallback (`DefaultFallback`).
 
 ### Configuration
 
-- `src/configs/project/` — project name, locales, sitemap, robots.
-- `src/configs/constants/urls.ts` — website + API URLs derived from env.
-- `src/configs/metadata/` — `getBaseMetadata()`, `createMetadata()`, `previewImage()`.
-  - OG/Twitter previews live in `public/assets/img/previews/*.webp`.
-  - `global.webp` is the fallback; override per page with `createMetadata({ preview: '/assets/...' })`.
-  - Metadata exposes `alternates.canonical` and `alternates.languages` based on current locale.
-- `src/configs/env.ts` — runtime env validation. Import via `process.env`; `validateEnv()` is invoked from `instrumentation.ts` at startup.
-- `src/configs/routes.ts` — typed route helpers (`routes.template({ id: 1 })`).
-- `src/configs/featureFlags.ts` — `featureFlags.isEnabled(flag)`.
+- `src/configs/project/` — name, locales, sitemap, robots (`as const satisfies ProjectConfig`).
+- `src/configs/constants/urls.ts` — website + API URLs from env.
+- `src/configs/metadata/` — `getBaseMetadata(path)`, `createMetadata({ path, preview, ... })`.
+  - **Always pass `path`** for non-home pages — it builds the canonical + hreflang URLs.
+  - OG/Twitter images come from the generated `opengraph-image.tsx`; per-page override via `createMetadata({ preview })`.
+- `src/configs/env.ts` — Zod v4 env validation (`z.url()`), run from `instrumentation.ts`.
+- `src/configs/routes.ts` — typed route helpers (`routes.template()`).
+- `src/configs/featureFlags.ts` — `featureFlags.isEnabled('demoBanner')` (live example in DemoBanner).
 
 ### State Management
 
-- Redux Toolkit (`src/store/`) — global UI state. Slices under `src/store/slices/` (see `src/store/slices/README.md` for the template).
-- Typed hooks (`useAppDispatch`, `useAppSelector`, `useAppStore`) live in `@/store/hooks` — import from there, never from `@/store`, to avoid a circular import when slices themselves reference `RootState`.
-- TanStack React Query — server state + API caching. Use `STALE_TIMES` from `@/lib/queryClient`.
-- React Query DevTools are wired in `ClientProviders` (dev only).
+- Redux Toolkit — client-global UI state. Live example: `src/store/slices/uiSlice.ts` (registered in `src/store/index.ts`, consumed by `DemoBanner` via `useAppSelector`/`useAppDispatch`).
+- Typed hooks live in `@/store/hooks` — import from there, never from `@/store` (circular-import guard).
+- TanStack React Query — server state. DevTools wired in `ClientProviders` (dev only).
 
 ### Security
 
-- **CSP** is set per-request in `proxy.ts` with a fresh nonce (`x-nonce` header). Inline scripts (JSON-LD, etc.) **must** read the nonce via `headers()` and pass it through.
-- Set `CSP_STRICT_STYLES=true` to switch `style-src` to nonce-based CSP (drops `'unsafe-inline'`). Roll out in `Content-Security-Policy-Report-Only` first.
-- Cross-origin isolation headers (`COOP`, `CORP`) + hardened `Permissions-Policy` are set in `next.config.ts`.
-- Rate limiting (middleware): `createRateLimit` from `@/lib/rateLimit`. In-memory backend (suitable for long-running Node.js servers/VPS/Docker); swap for a Redis-backed implementation when deploying to serverless platforms.
-- Rate limiting (Server Actions): `withActionRateLimit` from `@/lib/rateLimitAction`.
-- Never trust client IPs from `x-forwarded-for` without knowing the hosting provider's proxy chain — set `TRUSTED_PROXY_HOPS` to match your reverse-proxy depth.
-- Error reporting abstraction: `src/lib/errorReporting.ts`. Replace the body to wire a real reporter (Sentry / Datadog / Rollbar / …).
-- Cookies: use `customCookieStorage` from `@/services/storage` — automatic `SameSite=Lax` + `Secure` on HTTPS. For auth tokens prefer server-side cookies via `cookies()` with `httpOnly`.
-
-### Error Handling
-
-- `ErrorBoundary` component in `src/components/layouts/ErrorBoundary.tsx`.
-- `[locale]/error.tsx` — locale-scoped boundary (client component, has i18n).
-- `global-error.tsx` — root fallback (no i18n).
+- **CSP nonce contract**: `proxy.ts` puts `x-nonce` + the CSP header on the **request** (via `new NextRequest(request, { headers })` into the intl middleware) so `headers()` in RSC sees the nonce AND Next can nonce its own bootstrap scripts (`strict-dynamic`); the CSP is then mirrored on the response. Never set these only on the response — production hydration breaks.
+- Middleware rate limiting covers **pages only** (matcher excludes `/api`); API routes rate-limit themselves via `withApiHandler` + `createApiRateLimit`, Server Actions via `withActionRateLimit`.
+- Set `TRUSTED_PROXY_HOPS` to match the reverse-proxy depth before trusting `x-forwarded-for`.
+- `.env.development` / `.env.production` are committed (no secrets); `.env*.local` is gitignored — real values go there. `dev/build/start` use Next's native env loading (no dotenv-cli) so `.env.local` correctly overrides.
 
 ### Code Style
 
-- Imports: external → `@/…` aliases → relative. ESLint auto-sorts.
-- All comments and commit messages in English.
-- Minimal comments — only where intent is non-obvious.
+- Imports: external → `@/…` aliases → relative. ESLint auto-sorts. The `import` plugin instance comes from `eslint-config-next` — never re-register it.
+- All comments and commit messages in English; commits are Conventional Commits (commitlint enforces in commit-msg hook).
 - Prefer `type` imports: `import { type Foo } from '…'`.
 
 ### Testing
 
-- Unit: **Vitest** + **React Testing Library**. Place `*.test.ts(x)` next to the source file.
-- `pnpm test` (run), `pnpm test:watch`, `pnpm test:coverage`.
+- Unit: **Vitest 4** + **React Testing Library**. Place `*.test.ts(x)` next to the source file.
+- Tests are typechecked separately: `pnpm typecheck:test` (tsconfig.test.json).
+- Coverage thresholds in `vitest.config.ts` are a ratchet — raise, never lower.
+- Reference tests: `src/lib/rateLimit.test.ts`, `errors.test.ts`, `assertSameOrigin.test.ts` (mocks `next/headers`), `src/hooks/useLocalStorage.test.ts`.
 
 ## Commands
 
@@ -167,23 +142,35 @@ pnpm dev               # Dev server (Turbopack)
 pnpm build             # Production build
 pnpm start             # Production server
 pnpm preview           # Build + start
-pnpm lint              # ESLint
+pnpm lint              # ESLint (--max-warnings 0, cached)
 pnpm lint:fix          # ESLint autofix
-pnpm lint:styles       # Stylelint
-pnpm lint:all          # ESLint + Stylelint + TypeCheck
-pnpm format            # Prettier
-pnpm typecheck         # TypeScript check
-pnpm test              # Vitest (unit)
-pnpm check:i18n        # Verify all locales have the same keys
-pnpm analyze           # Bundle analyzer (set ANALYZE=true)
-pnpm knip              # Find unused files / exports / deps
-pnpm clean             # Clean .next / dist
+pnpm lint:css          # Stylelint check (CI)
+pnpm lint:styles       # Stylelint autofix
+pnpm format            # Prettier write
+pnpm format:check      # Prettier check (CI)
+pnpm typecheck         # TypeScript (app)
+pnpm typecheck:test    # TypeScript (tests)
+pnpm test              # Vitest run
+pnpm test:coverage     # Vitest + coverage thresholds
+pnpm check             # All gates: lint + css + format + types + tests
+pnpm check:i18n        # Locale key parity
+pnpm knip              # Unused files/exports/deps (blocking in CI)
+pnpm analyze           # Bundle analyzer
+pnpm clean / clean:cache
+pnpm clean:demo        # Remove demo surface (destructive; --force to finalize in a git checkout)
 ```
+
+Git hooks (husky): pre-commit = lint-staged + i18n parity; commit-msg = commitlint; pre-push = typecheck + typecheck:test + test.
+Vercel (`vercel.json`) runs `lint + format:check + typecheck + build` on every push — a failure blocks the deploy.
+
+## Supply chain
+
+- `pnpm-workspace.yaml` sets `minimumReleaseAge: 4320` (3 days) — too-fresh versions fail install; lower the range floor instead of excluding packages.
+- GitHub Actions in `ci.yml` are SHA-pinned (`# vX` comment) — keep pins when updating.
+- The template repo stays demo-complete: test `clean:demo` only on a copy in /tmp.
 
 ## Performance
 
-- **React Compiler** (`reactCompiler: true` in `next.config.ts`) auto-memoizes components. Don't add `useMemo`/`useCallback` unless profiling shows you need them.
-- **Cache Components** (Next.js 16+): toggle `cacheComponents: true` in `next.config.ts` once every dynamic data access is wrapped in `<Suspense>`. Replaces the former `experimental.ppr`.
-- Always pass stable keys to lists; use `useMemo` only for expensive derivations the compiler can't prove pure.
-- Keep client-side state close to where it's used — split Client Components out of Server trees.
-- Measure bundle size with `ANALYZE=true pnpm build` (`@next/bundle-analyzer`).
+- **React Compiler** (`reactCompiler: true`, stable `babel-plugin-react-compiler@1`) auto-memoizes — don't add `useMemo`/`useCallback` unless profiling demands it.
+- **Cache Components** (Next 16): toggle `cacheComponents: true` once every dynamic access is Suspense-wrapped.
+- Measure bundle size with `pnpm analyze`.

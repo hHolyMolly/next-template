@@ -1,15 +1,99 @@
-/* Animations:
-   - Tailwind v3 projects should install the canonical `tailwindcss-animate`
-     plugin and add it to `tailwind.config.ts` → `plugins`.
-   - Tailwind v4 projects can instead `@import "tw-animate-css";` at the top
-     of this file, before any other rules.
-   shadcn/ui's animation utilities (`animate-in`, `animate-out`, etc.) come
-   from whichever of those two you choose.
-*/
+/* Tailwind CSS v4 — CSS-first configuration (no tailwind.config.ts).
+   Runtime token values live in vars.css; `@theme inline` maps them to
+   utilities. `tw-animate-css` provides shadcn/ui animation utilities
+   (animate-in, fade-in-0, zoom-in-95, …) used by Dialog. */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@theme inline {
+  --font-sans: var(--font-app), ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}
+
+@theme {
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
+  --animate-spinner: spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scale-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slide-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes spinner {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* Overrides Tailwind's built-in `container` utility (project-fixed width) */
+@utility container {
+  width: 100%;
+  max-width: 1230px;
+  margin-inline: auto;
+  padding-inline: 15px;
+}
+
+@utility transition-custom-all {
+  transition: all var(--transition-duration) var(--transition-timing);
+}
 
 @layer base {
   * {
@@ -18,25 +102,5 @@
 
   body {
     @apply bg-background text-foreground;
-  }
-}
-
-@layer utilities {
-  :root {
-    --transition-duration: 0.3s;
-    --transition-timing: ease;
-  }
-
-  .transition-custom-all {
-    transition: all var(--transition-duration) var(--transition-timing);
-  }
-}
-
-@layer components {
-  .container {
-    width: 100%;
-    max-width: 1230px;
-    margin: 0 auto;
-    padding: 0 15px;
   }
 }

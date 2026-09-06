@@ -4,13 +4,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  turbopack: {},
   poweredByHeader: false,
-  compress: true,
-  productionBrowserSourceMaps: false,
-  // Explicit trailing-slash policy prevents duplicate indexing (/path and /path/).
-  // Flip to `true` only if your legacy URLs already use trailing slashes.
-  trailingSlash: false,
 
   images: {
     // Serve modern formats when the browser advertises support.
@@ -21,8 +15,6 @@ const nextConfig: NextConfig = {
     // Explicit size buckets keep the srcset compact and predictable.
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // SVG rendering is disabled by default; opt in per-domain only after audit.
-    dangerouslyAllowSVG: false,
     remotePatterns: [
       // Add allowed image domains here:
       // { protocol: 'https', hostname: 'example.com', pathname: '/images/**' },

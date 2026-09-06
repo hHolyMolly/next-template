@@ -2,7 +2,6 @@ import { ImageResponse } from 'next/og';
 
 import { projectConfig } from '@/configs/project';
 
-export const runtime = 'edge';
 export const alt = 'Open Graph preview';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -11,7 +10,7 @@ export const contentType = 'image/png';
  * Default Open Graph image used by the root layout and any page that does
  * not override `preview`.
  *
- * Keep the implementation purely JSX + inline styles — edge runtime does
+ * Keep the implementation purely JSX + inline styles — the runtime does
  * not ship CSS. For per-page images, duplicate this file next to the page.
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image

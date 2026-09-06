@@ -6,7 +6,6 @@
 import { z } from 'zod';
 
 const urlSchema = z
-  .string()
   .url()
   .refine((v) => /^https?:\/\//.test(v), { message: 'URL must use http(s) protocol' });
 

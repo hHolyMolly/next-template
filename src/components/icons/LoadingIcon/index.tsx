@@ -5,6 +5,8 @@ type LoadingIconProps = {
   size?: number;
   strokeWidth?: number;
   color?: string;
+  /** Accessible name — pass a translated string (e.g. t('shared.loading')). */
+  label?: string;
 };
 
 const DELAY_CLASSES = [
@@ -19,13 +21,14 @@ function LoadingIcon({
   size = 20,
   strokeWidth = 3,
   color = 'currentColor',
+  label = 'Loading',
 }: LoadingIconProps) {
   return (
     <div
       className={cn('relative inline-block', className)}
       style={{ width: size, height: size }}
       role="status"
-      aria-label="Loading"
+      aria-label={label}
     >
       {Array.from({ length: 4 }, (_, idx) => (
         <div

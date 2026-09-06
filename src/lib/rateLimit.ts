@@ -84,6 +84,30 @@ export function createRateLimiter(config: RateLimitConfig) {
   };
 }
 
+/**
+ * Adapter for `withApiHandler`'s `rateLimit` option: resolves the client IP
+ * and returns the check result in the shape the handler wrapper expects.
+ *
+ * @example
+ * export const GET = withApiHandler({
+ *   rateLimit: createApiRateLimit({ limit: 60, windowSeconds: 60 }),
+ *   handler: async () => NextResponse.json({ ok: true }),
+ * });
+ */
+export function createApiRateLimit(config: RateLimitConfig) {
+  const check = createRateLimiter(config);
+
+  return async (request: NextRequest) => {
+    const result = await check(resolveClientIp(request));
+    return {
+      success: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: result.resetAt,
+    };
+  };
+}
+
 export function createRateLimit(config: RateLimitConfig) {
   const check = createRateLimiter(config);
 

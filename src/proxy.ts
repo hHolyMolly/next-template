@@ -8,13 +8,12 @@
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 
+import { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 
 import { urls } from '@/configs/constants/urls';
 import { createRateLimit, resolveClientIp } from '@/lib/rateLimit';
 import { routing } from '@/services/i18n/routing';
-
-import type { NextRequest } from 'next/server';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -22,15 +21,17 @@ const intlMiddleware = createMiddleware(routing);
  * Per-path rate limit overrides. The first match wins; the default budget
  * applies to everything else. Use `null` to opt a path out of rate-limiting
  * entirely (e.g. server-sent events, long-polling).
+ *
+ * NOTE: `config.matcher` below excludes `/api` — these rules only ever see
+ * page traffic. API routes rate-limit themselves via `withApiHandler`
+ * (src/lib/withApiHandler.ts), which is where per-endpoint budgets belong.
  */
 const RATE_LIMIT_RULES: ReadonlyArray<{
   pattern: RegExp;
   config: { limit: number; windowSeconds: number } | null;
 }> = [
-  // Mutating auth endpoints — strict budget to blunt credential stuffing.
-  { pattern: /^\/api\/auth\//, config: { limit: 10, windowSeconds: 60 } },
-  // Health/readiness probes must never rate-limit.
-  { pattern: /^\/api\/health(\/|$)/, config: null },
+  // Example: stricter budget for an expensive page.
+  // { pattern: /^\/search(\/|$)/, config: { limit: 30, windowSeconds: 60 } },
 ];
 
 const DEFAULT_RATE_LIMIT = { limit: 100, windowSeconds: 60 } as const;
@@ -100,8 +101,6 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const response = intlMiddleware(request);
-
   // Generate CSP nonce for inline scripts (JSON-LD, etc.).
   // 16 cryptographically random bytes → base64 (~22 chars). Avoids `Buffer`,
   // which is polyfilled in the Edge runtime, and gives full 128-bit entropy
@@ -152,14 +151,27 @@ export async function proxy(request: NextRequest) {
 
   const csp = directives.join('; ');
 
-  response.headers.set('x-nonce', nonce);
-
   // Enforce CSP in production; Report-Only mode lets you collect violations
   // without breaking the page while you tighten the policy.
   const cspHeader =
     TRUSTED_TYPES_MODE === 'report' || process.env.CSP_REPORT_ONLY === 'true'
       ? 'Content-Security-Policy-Report-Only'
       : 'Content-Security-Policy';
+
+  // The nonce and CSP MUST travel on the REQUEST headers:
+  // - `headers()` in Server Components reads request headers (`x-nonce`
+  //   in src/app/layout.tsx would be undefined otherwise);
+  // - Next.js extracts the nonce for its own bootstrap/hydration scripts
+  //   from the CSP request header — without it, `strict-dynamic` blocks
+  //   hydration in production.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+  requestHeaders.set(cspHeader, csp);
+
+  const response = intlMiddleware(new NextRequest(request, { headers: requestHeaders }));
+
+  // Mirror the CSP on the response so the browser actually enforces it.
+  response.headers.set('x-nonce', nonce);
   response.headers.set(cspHeader, csp);
 
   return response;

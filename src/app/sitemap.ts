@@ -11,9 +11,13 @@ import type { MetadataRoute } from 'next';
  * (no prefix) — mirror that here by pointing `x-default` at the unprefixed URL.
  */
 function makeAlternates(path: string): Record<string, string> {
-  const entries = projectConfig.i18n.locales.map(
-    (locale) => [locale, `${urls.website}/${locale}${path}`] as const,
-  );
+  const { locales, defaultLocale } = projectConfig.i18n;
+  const entries = locales.map((locale) => {
+    // Under `as-needed` the default locale is unprefixed — a prefixed URL
+    // (e.g. /en) would redirect, and sitemaps must not list redirecting URLs.
+    const prefix = locale === defaultLocale ? '' : `/${locale}`;
+    return [locale, `${urls.website}${prefix}${path}`] as const;
+  });
   return {
     ...Object.fromEntries(entries),
     'x-default': `${urls.website}${path}`,

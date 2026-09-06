@@ -22,7 +22,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       ...(await Promise.all(
         namespaces.map(async (ns) => {
           try {
-            const mod = await import(`../../../public/locales/${locale}/${ns}.json`);
+            const mod = await import(`../../messages/${locale}/${ns}.json`);
             return { [ns]: mod.default ?? mod };
           } catch (err) {
             logger.error(`Error loading ${ns} for ${locale}:`, err);

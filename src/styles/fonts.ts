@@ -6,7 +6,8 @@ import { Roboto } from 'next/font/google';
  * `next/font` requires the loader call to live at module scope with a literal
  * options object — so swapping fonts means editing this file. Downstream code
  * references only the generic `appFont` export and the CSS variable
- * `--font-sans` (declared below), so no other file needs to change when you
+ * `--font-app` (declared below; mapped to Tailwind's `--font-sans` token in
+ * tailwind.css `@theme inline`), so no other file needs to change when you
  * pick a different family.
  *
  * Keep the weight set small — each declared weight adds a network roundtrip
@@ -17,7 +18,7 @@ import { Roboto } from 'next/font/google';
 export const appFont = Roboto({
   subsets: ['latin', 'cyrillic'],
   weight: ['400', '500', '700'],
-  variable: '--font-sans',
+  variable: '--font-app',
   display: 'optional',
   adjustFontFallback: true,
 });

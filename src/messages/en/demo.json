@@ -1,0 +1,31 @@
+{
+  "badge_label": "Production Ready",
+  "title": "Next Template",
+  "subtitle": "Ship Faster, Scale Easier",
+  "description": "A pre-configured foundation with TypeScript, Tailwind CSS, i18n, and state management — so you can focus on building, not setting up.",
+  "github": "GitHub",
+  "documentation": "Documentation",
+  "footer": "Made by",
+  "copy_label": "Copy install command: {command}",
+
+  "banner_text": "This banner lives in Redux (uiSlice) — dismissing it dispatches an action.",
+  "banner_dismiss": "Dismiss",
+
+  "form_title": "Contact form",
+  "form_description": "React Hook Form + Zod on the client; the same schema is re-validated inside a rate-limited Server Action.",
+  "form_name": "Name",
+  "form_email": "Email",
+  "form_message": "Message",
+  "form_submit": "Send",
+  "form_sending": "Sending…",
+  "form_success": "Message sent — the Server Action validated and echoed it back.",
+  "form_error_name": "Name must be at least 2 characters",
+  "form_error_email": "Enter a valid email",
+  "form_error_message": "Message must be at least 10 characters",
+
+  "health_title": "API health",
+  "health_description": "TanStack Query with SSR prefetch + HydrationBoundary, reading /api/health.",
+  "health_ok": "Operational",
+  "health_error": "Unavailable",
+  "health_checked": "Checked at {time}"
+}

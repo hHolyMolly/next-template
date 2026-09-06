@@ -18,7 +18,7 @@ import { logger } from '@/utils/logger';
  * // src/app/api/echo/route.ts
  * export const POST = withApiHandler({
  *   cors: { origins: ['https://app.example.com'], methods: ['POST'] },
- *   rateLimit: createRateLimit({ limit: 20, windowSeconds: 60 }),
+ *   rateLimit: createApiRateLimit({ limit: 20, windowSeconds: 60 }),
  *   handler: async (req) => {
  *     const body = await req.json();
  *     if (!body.email) throw new ValidationError('email required', 'email');

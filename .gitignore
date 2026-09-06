@@ -19,6 +19,11 @@
 # production
 /build
 
+# env files — .env.development/.env.production are committed on purpose (no
+# secrets); local overrides with real values must never reach git
+.env
+.env*.local
+
 # misc
 .DS_Store
 *.pem

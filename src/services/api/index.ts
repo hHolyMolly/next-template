@@ -4,11 +4,4 @@ import { serverFetch, ServerFetchError } from '@/services/api/serverFetch';
 
 export { API_PATHS, API, request, isApiError, isAbortError, serverFetch, ServerFetchError };
 
-export {
-  todoKeys,
-  useTodos,
-  useTodo,
-  useCreateTodo,
-  type Todo,
-  type CreateTodoInput,
-} from '@/services/api/queries';
+export { healthQuery, type HealthResponse } from '@/services/api/queries';

@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 
+import uiReducer from '@/store/slices/uiSlice';
+
 export function makeStore() {
   return configureStore({
     reducer: {
-      // Add your slices here, e.g.: `user: userSlice`.
+      ui: uiReducer,
+      // Add more slices here, e.g.: `user: userSlice`.
     },
   });
 }

@@ -1,4 +1,6 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 pnpm exec lint-staged
+
+# i18n key parity — only when translation files change
+if git diff --cached --name-only --diff-filter=ACMR | grep -qE '^src/messages/'; then
+  pnpm check:i18n
+fi

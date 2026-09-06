@@ -21,7 +21,7 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     css: false,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['node_modules', '.next', 'e2e', 'tests-e2e'],
+    exclude: ['node_modules', '.next'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
@@ -33,6 +33,13 @@ export default defineConfig({
         'src/app/**/layout.tsx',
         'src/app/**/page.tsx',
       ],
+      // Ratchet baseline — raise as coverage grows, never lower.
+      thresholds: {
+        statements: 10,
+        branches: 10,
+        functions: 10,
+        lines: 10,
+      },
     },
   },
 });

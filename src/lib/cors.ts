@@ -1,5 +1,3 @@
-import type { NextResponse } from 'next/server';
-
 /**
  * CORS helper for Route Handlers.
  *
@@ -75,14 +73,5 @@ export function handlePreflight(request: Request, options: CorsOptions): Respons
   const maxAge = options.maxAge ?? 86_400;
   const response = new Response(null, { status: 204 });
   response.headers.set('Access-Control-Max-Age', String(maxAge));
-  return cors(response, request, options);
-}
-
-/** Attach CORS to an existing `NextResponse` (return it back for chaining). */
-export function withCors(
-  response: NextResponse,
-  request: Request,
-  options: CorsOptions,
-): NextResponse {
   return cors(response, request, options);
 }
