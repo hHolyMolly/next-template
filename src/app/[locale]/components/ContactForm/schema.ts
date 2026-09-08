@@ -24,3 +24,15 @@ export function createContactSchema(messages: ContactSchemaMessages) {
 }
 
 export type ContactFormValues = z.infer<ReturnType<typeof createContactSchema>>;
+
+/**
+ * What the client actually POSTs: the form values plus anti-bot metadata.
+ * Both extras are spoofable by a determined attacker — the honeypot targets
+ * the naive form-spam bots that make up most of the noise.
+ */
+export type ContactSubmission = ContactFormValues & {
+  /** Honeypot — rendered invisibly; humans never fill it. */
+  company?: string;
+  /** Milliseconds between form mount and submit (min-fill-time check). */
+  elapsedMs?: number;
+};

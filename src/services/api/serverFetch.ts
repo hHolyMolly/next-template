@@ -48,10 +48,11 @@ export class ServerFetchError extends AppError {
 
 /**
  * Typed server-side fetch with JSON parsing, timeout, and Next.js cache tags.
+ * JSON-only: non-JSON responses throw (see below); 204 resolves to undefined.
  *
  * @example
  * const users = await serverFetch<User[]>('/api/users', {
- *   next: { revalidate: 60, tags: ['users'] },
+ *   next: { revalidate: REVALIDATE.standard, tags: [CACHE_TAGS.users] },
  * });
  */
 export async function serverFetch<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
@@ -99,11 +100,23 @@ export async function serverFetch<T>(path: string, options: ServerFetchOptions =
       });
     }
 
-    const contentType = response.headers.get('content-type') ?? '';
-    if (contentType.includes('application/json')) {
-      return (await response.json()) as T;
+    // Empty success (DELETE and friends) — nothing to parse.
+    if (response.status === 204) {
+      return undefined as T;
     }
-    return (await response.text()) as unknown as T;
+
+    // JSON only, on purpose: a non-JSON 200 is almost always an HTML error
+    // page from a misconfigured proxy/CDN — handing it to a caller typed
+    // as T would crash somewhere far away (often at hydration). Fail HERE
+    // with a clear error instead.
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      throw new ServerFetchError(
+        `serverFetch expected JSON but got "${contentType || 'no content-type'}"`,
+        { status: response.status, url },
+      );
+    }
+    return (await response.json()) as T;
   } catch (err) {
     // A caller-initiated abort (navigation, unmount) is intentional — don't
     // log it as a network failure.

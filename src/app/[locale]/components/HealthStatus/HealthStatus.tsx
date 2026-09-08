@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 
 import { Card } from '@/app/[locale]/components/Demo/components/Card';
 import { cn } from '@/lib/cn';
+import { isWaitingFor } from '@/lib/queryState';
 import { healthQuery } from '@/services/api/queries';
 
 /**
@@ -18,8 +19,12 @@ export function HealthStatus() {
   // Renders the same on server and client: projectConfig pins timeZone
   // ('UTC'), so useFormatter can't cause a hydration mismatch here.
   const format = useFormatter();
-  const { data, isPending, isError, dataUpdatedAt } = useQuery(healthQuery);
+  const query = useQuery(healthQuery);
+  const { data, isError, dataUpdatedAt } = query;
 
+  // isWaitingFor, not isPending: a disabled/skipToken query is pending
+  // forever — this only shows the placeholder while a fetch is in flight.
+  const isPending = isWaitingFor(query);
   const ok = data?.status === 'ok';
 
   return (

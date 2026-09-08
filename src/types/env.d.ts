@@ -40,6 +40,9 @@ declare global {
       /** Comma-separated IPs that bypass rate limiting */
       readonly RATE_LIMIT_BYPASS_IPS?: string;
 
+      /** Shared secret for the /api/revalidate webhook (unset → 501) */
+      readonly REVALIDATE_SECRET?: string;
+
       /** 'true' → enable @next/bundle-analyzer during build */
       readonly ANALYZE?: string;
 

@@ -74,6 +74,11 @@ jobs:
       - name: Knip (unused code/deps)
         run: pnpm knip
 
+      # Advisory only (|| true): a brand-new upstream advisory must not block
+      # unrelated PRs, but vulnerabilities stay visible in every run's log.
+      - name: Audit dependencies (advisory)
+        run: pnpm audit --audit-level=high || true
+
       - name: Build
         run: pnpm build
         env:

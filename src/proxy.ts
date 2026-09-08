@@ -126,7 +126,12 @@ function buildCsp(nonce: string): string {
   // features still emit unnoticed inline styles (loading UI, image placeholders).
   const strictStyles = process.env.CSP_STRICT_STYLES === 'true';
   const styleSrc = strictStyles
-    ? `style-src 'self' 'nonce-${nonce}'`
+    ? // `style-src-attr 'unsafe-inline'` must stay even in strict mode:
+      // Radix Popper / floating-ui position popovers via inline `style`
+      // ATTRIBUTES (not <style> tags) — without this carve-out every
+      // dropdown/tooltip renders at 0,0. `style-src-elem` (the tags) is
+      // what the nonce actually locks down. Verified in production use.
+      `style-src-elem 'self' 'nonce-${nonce}'; style-src-attr 'unsafe-inline'; style-src 'self' 'nonce-${nonce}'`
     : // 'unsafe-inline' is required because Next.js injects inline styles for:
       // - Loading indicators and Suspense fallbacks
       // - next/image placeholder and optimization styles

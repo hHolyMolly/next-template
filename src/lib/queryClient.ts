@@ -24,6 +24,16 @@ function makeQueryClient() {
         gcTime: 5 * 60 * 1000,
         refetchOnWindowFocus: false,
         retry: 1,
+        // TanStack's default networkMode 'online' PAUSES requests while the
+        // browser thinks it's offline — the promise neither resolves nor
+        // rejects, so screens hold skeletons forever and submits spin
+        // silently. 'always' lets the request fail fast (every error path
+        // already handles it) and `refetchOnReconnect` recovers when the
+        // network returns.
+        networkMode: 'always',
+      },
+      mutations: {
+        networkMode: 'always',
       },
     },
   });

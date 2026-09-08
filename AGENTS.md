@@ -58,8 +58,8 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
   - `Button` defaults to `type="button"` (except `asChild`); use `VisuallyHidden` for all sr-only text.
 - Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders, ErrorBoundary, ErrorState).
 - Icons → `src/components/icons/`. `LoadingIcon` takes a `label` prop for its accessible name.
-- Page-specific/demo components → co-located at `src/app/[locale]/components/`.
-- **Folder convention**: a component gets a folder only when it has sibling files (schema, actions, data); single-file components are flat files (`layouts/Header.tsx`, not `Header/index.tsx`).
+- Page-specific/demo components → co-located at `src/app/[locale]/components/`. A component is PROMOTED to `src/components/` only when a **second** route needs it — never preemptively.
+- **Folder convention**: a module WITH a test (or sibling files: schema, actions, data) lives in a folder named after it — `Button/{Button.tsx, Button.test.tsx, index.ts}`. The `index.ts` ONLY re-exports (named exports, no `export *`, types via `export type`); implementation never lives in an index file. Single-file modules stay flat (`layouts/Header.tsx`). Consumer imports don't change — `@/components/UI/Button` resolves through the folder index.
 - **Named exports** everywhere in layouts and `[locale]/components`; no mixed client/server barrels — import components by their full path.
 
 ### API
@@ -68,7 +68,10 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 - **All client API I/O goes through TanStack Query.** Define queries with `queryOptions()` in `src/services/api/queries.ts` — one definition serves `useQuery` on the client and `prefetchQuery` on the server. SSR flow: prefetch in a Server Component + `<HydrationBoundary state={dehydrate(qc)}>` (live example: `[locale]/page.tsx` → `HealthStatus`).
 - Reuse `STALE_TIMES` from `@/lib/queryClient`.
 - URL building goes through `resolveApiUrl()` and timeouts through `DEFAULT_TIMEOUT_MS` — both in `src/services/api/paths.ts`, shared by axios, `serverFetch` and queries.
-- Axios instance (`src/services/api/instance.ts`) and `serverFetch` (`src/services/api/serverFetch.ts`) are the transport layer for real backends; interceptors must never log raw response bodies. `ServerFetchError` extends `AppError`, so upstream statuses survive `toErrorResponse`.
+- Axios instance (`src/services/api/instance.ts`) and `serverFetch` (`src/services/api/serverFetch.ts`) are the transport layer for real backends; interceptors must never log raw response bodies. `ServerFetchError` extends `AppError`, so upstream statuses survive `toErrorResponse`. `serverFetch` is JSON-only — a non-JSON 200 (proxy error page) throws instead of leaking into a `T`-typed caller.
+- **ISR cache policy** lives in `src/services/api/cache.ts`: named `REVALIDATE` windows + `CACHE_TAGS` (collections as constants, per-entity tags as builders). Never inline a raw `revalidate` number or bare tag string. On-demand invalidation: `POST /api/revalidate` (secret-guarded; 501 when `REVALIDATE_SECRET` is unset).
+- When the API layer grows, split per domain: `services/api/<domain>/{keys,queries,mutations}.ts`. Keys/contract modules must be PLAIN modules — never `'use client'` (a client module imported by a Server Component resolves to a client-reference proxy and the prefetch silently does nothing).
+- Query-side helpers in `src/lib`: `isWaitingFor(query)` instead of `isPending` for placeholders (skipToken queries are pending forever), `patchCache(label, fn)` around every cache write in mutation callbacks, `withMinDelay(promise)` to floor perceived submit duration.
 
 ### Forms
 
@@ -79,7 +82,7 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 ### Server Actions
 
 - Co-locate actions with their feature (`.../ContactForm/actions.ts`); files start with `'use server'`.
-- The canonical mutation pipeline (see `submitContact`): `withServerAction` → `assertSameOrigin()` → `withActionRateLimit` → Zod re-validation → return data. **CSRF check runs BEFORE the rate limiter** so cross-site garbage can't burn a legitimate user's per-IP budget.
+- The canonical mutation pipeline (see `submitContact`): `withServerAction` → `assertSameOrigin()` → `withActionRateLimit` → honeypot + min-fill-time → Zod re-validation → return data. **CSRF check runs BEFORE the rate limiter** so cross-site garbage can't burn a legitimate user's per-IP budget. Bots caught by the honeypot get a SUCCESS-shaped response — an error would teach them what to fix.
 - `assertSameOrigin()` is **mandatory** for every mutation; `proxy.ts` does not see Server Actions. It throws a `ForbiddenError` with a constant message (the offending origin is logged, never reflected).
 - `withServerAction` returns a discriminated `ServerActionResult<T>` — actions never throw to the client, but Next control-flow errors (`redirect()`/`notFound()`, digest `NEXT_*`) are re-thrown.
 - The error envelope is `toErrorPayload()` (`@/lib/errors`) everywhere — Route Handlers, Server Actions, middleware 429. `details` is nested, never spread.
@@ -122,7 +125,7 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 
 - Redux Toolkit — client-global UI state. Live example: `src/store/slices/uiSlice.ts` (registered in `src/store/index.ts`, consumed by `DemoBanner` via `useAppSelector`/`useAppDispatch`).
 - Typed hooks live in `@/store/hooks` — import from there, never from `@/store` (circular-import guard).
-- TanStack React Query — server state. DevTools wired in `ClientProviders` (dev only).
+- TanStack React Query — server state. DevTools wired in `ClientProviders` (dev only). `networkMode: 'always'` is set globally — never revert to the default `'online'` (it pauses offline requests instead of failing them: eternal skeletons, silent submits).
 
 ### Security
 
@@ -130,6 +133,8 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 - Middleware rate limiting covers **pages only** (matcher excludes `/api`); API routes rate-limit themselves via `withApiHandler` + `createApiRateLimit`, Server Actions via `withActionRateLimit`.
 - Set `TRUSTED_PROXY_HOPS` to match the reverse-proxy depth before trusting `x-forwarded-for`. **In production, when no trustworthy client IP can be resolved, rate limiting is SKIPPED** (one-time warning) — never collapsed into a shared bucket (that would be a site-wide self-DoS). Configure the hops or limits silently don't apply.
 - `.env.development` / `.env.production` are committed (no secrets); `.env*.local` is gitignored — real values go there. `dev/build/start` use Next's native env loading (no dotenv-cli) so `.env.local` correctly overrides.
+- Public env is read ONLY as literal `process.env.NEXT_PUBLIC_X` (the bundler can't rewrite computed access). `pnpm build` ends with `scripts/check-public-env.mjs`, which fails the build if a set variable's value is absent from every client chunk — add new must-reach-the-client vars to the build script's argument list.
+- `CSP_STRICT_STYLES=true` keeps `style-src-attr 'unsafe-inline'` on purpose — Radix/floating-ui position popovers via inline style attributes; the nonce locks down `style-src-elem`.
 
 ### Code Style
 
@@ -171,6 +176,8 @@ pnpm clean:demo        # Remove demo surface (destructive; --force to finalize i
 
 Git hooks (husky): pre-commit = lint-staged + i18n parity; commit-msg = commitlint; pre-push = typecheck + typecheck:test + test.
 Vercel (`vercel.json`) runs `lint + format:check + typecheck + build` on every push — a failure blocks the deploy.
+
+Before claiming a change verified, follow `docs/verification-playbook.md`. Debugged a confusing symptom? Add it to `docs/gotchas.md` (symptom → cause → fix).
 
 ## Supply chain
 

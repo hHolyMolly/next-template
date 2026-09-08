@@ -1,10 +1,29 @@
+import os from 'node:os';
+
 import createNextIntlPlugin from 'next-intl/plugin';
 
 import type { NextConfig } from 'next';
 
+const isDev = process.env.NODE_ENV === 'development';
+
+/**
+ * Dev-only: allow opening the dev server from other devices on the LAN
+ * (phone, another laptop) without `/_next/*` requests being blocked.
+ * Computed from the machine's non-internal IPv4 addresses.
+ */
+function lanDevOrigins(): string[] {
+  if (!isDev) return [];
+  return Object.values(os.networkInterfaces())
+    .flat()
+    .filter((iface) => iface && iface.family === 'IPv4' && !iface.internal)
+    .map((iface) => (iface as os.NetworkInterfaceInfo).address);
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+
+  ...(isDev ? { allowedDevOrigins: lanDevOrigins() } : {}),
 
   images: {
     // Serve modern formats when the browser advertises support.
@@ -49,10 +68,18 @@ const nextConfig: NextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
-          },
+          // HSTS in production ONLY: Safari honours it on http://localhost
+          // and pins the origin — dev then collapses into TLS errors that
+          // look like a CSS bug (Chromium exempts localhost, so it "only
+          // breaks for one person on the team").
+          ...(isDev
+            ? []
+            : [
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=63072000; includeSubDomains; preload',
+                },
+              ]),
           // Cross-origin isolation — blocks cross-origin popups from sharing a
           // browsing context group. Required for SharedArrayBuffer / high-precision timers.
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },

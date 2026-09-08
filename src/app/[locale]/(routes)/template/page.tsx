@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { Container } from '@/components/layouts/Container';
+
 export { generateTemplateMetadata as generateMetadata } from '@/app/[locale]/(routes)/template/metadata';
 
 type TemplatePageProps = {
@@ -12,7 +14,11 @@ async function TemplatePage({ params }: TemplatePageProps) {
 
   const t = await getTranslations('metadata.template');
 
-  return <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>;
+  return (
+    <Container className="py-8">
+      <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+    </Container>
+  );
 }
 
 export default TemplatePage;

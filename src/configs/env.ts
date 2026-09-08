@@ -37,6 +37,12 @@ const envSchema = z.object({
     .refine((v) => !v || v.split(',').every((ip) => /^[0-9a-fA-F.:]{2,45}$/.test(ip.trim())), {
       message: 'RATE_LIMIT_BYPASS_IPS must be a comma-separated list of IPs',
     }),
+  REVALIDATE_SECRET: z
+    .string()
+    .optional()
+    .refine((v) => v === undefined || v === '' || v.length >= 16, {
+      message: 'REVALIDATE_SECRET must be at least 16 characters (or unset)',
+    }),
 
   CSP_REPORT_ONLY: optionalBool,
   CSP_STRICT_STYLES: optionalBool,

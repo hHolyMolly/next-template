@@ -72,6 +72,9 @@ importers:
       '@next/bundle-analyzer':
         specifier: 16.1.6
         version: 16.1.6
+      '@next/env':
+        specifier: 16.1.6
+        version: 16.1.6
       '@tailwindcss/postcss':
         specifier: ^4.3.0
         version: 4.3.3

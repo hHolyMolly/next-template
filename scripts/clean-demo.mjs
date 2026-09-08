@@ -181,6 +181,16 @@ if (!isGitCheckout || force) {
   delete pkg.license;
   if (pkg.scripts) {
     delete pkg.scripts['clean:demo'];
+    // The env-bundle guard fails on values no client code references. The
+    // demo pulls NEXT_PUBLIC_CLIENT_URL into the client bundle (queries →
+    // resolveApiUrl); the cleaned skeleton doesn't, so guard only what the
+    // skeleton's client actually reads. Re-add vars as your app grows.
+    if (pkg.scripts.build) {
+      pkg.scripts.build = pkg.scripts.build.replace(
+        /check-public-env\.mjs .*$/,
+        'check-public-env.mjs NEXT_PUBLIC_VITALS_ENDPOINT',
+      );
+    }
   }
   writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
   console.log('✓ cleaned package.json');
