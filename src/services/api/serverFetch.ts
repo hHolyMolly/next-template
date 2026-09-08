@@ -1,4 +1,5 @@
-import { urls } from '@/configs/constants/urls';
+import { AppError, type AppErrorCode } from '@/lib/errors';
+import { DEFAULT_TIMEOUT_MS, resolveApiUrl } from '@/services/api/paths';
 import { logger } from '@/utils/logger';
 
 /**
@@ -29,13 +30,17 @@ type ServerFetchOptions = Omit<RequestInit, 'body' | 'signal'> & {
   timeoutMs?: number;
 };
 
-export class ServerFetchError extends Error {
+/**
+ * Extends `AppError` so an upstream failure surfaced through a Route Handler
+ * keeps its real status instead of collapsing into a generic 500.
+ */
+export class ServerFetchError extends AppError {
   readonly status: number;
+  readonly code: AppErrorCode = 'INTERNAL';
   readonly url: string;
 
   constructor(message: string, init: { status: number; url: string }) {
     super(message);
-    this.name = 'ServerFetchError';
     this.status = init.status;
     this.url = init.url;
   }
@@ -52,23 +57,26 @@ export class ServerFetchError extends Error {
 export async function serverFetch<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
   const {
     json,
-    timeoutMs = 15_000,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
     headers: headersInit,
-    signal,
+    signal: callerSignal,
     body: rawBody,
     ...init
   } = options;
 
-  const base = urls.server.api ?? '';
-  const url = /^https?:\/\//.test(path) ? path : `${base}${path}`;
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort('timeout'), timeoutMs);
-
-  if (signal) {
-    if (signal.aborted) controller.abort(signal.reason);
-    else signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true });
+  if (json !== undefined && rawBody !== undefined) {
+    throw new Error('serverFetch: pass either `json` or `body`, not both');
   }
+
+  const url = resolveApiUrl(path);
+
+  // AbortSignal.any merges the caller's signal with the timeout — no manual
+  // listeners (which would leak on long-lived caller signals) and a proper
+  // `TimeoutError` DOMException instead of a string reason.
+  const signal = AbortSignal.any([
+    ...(callerSignal ? [callerSignal] : []),
+    AbortSignal.timeout(timeoutMs),
+  ]);
 
   const requestHeaders = new Headers(headersInit);
   const body: BodyInit | null | undefined = json !== undefined ? JSON.stringify(json) : rawBody;
@@ -81,7 +89,7 @@ export async function serverFetch<T>(path: string, options: ServerFetchOptions =
       ...init,
       ...(body !== undefined ? { body } : {}),
       headers: requestHeaders,
-      signal: controller.signal,
+      signal,
     });
 
     if (!response.ok) {
@@ -97,11 +105,12 @@ export async function serverFetch<T>(path: string, options: ServerFetchOptions =
     }
     return (await response.text()) as unknown as T;
   } catch (err) {
-    if (!(err instanceof ServerFetchError)) {
+    // A caller-initiated abort (navigation, unmount) is intentional — don't
+    // log it as a network failure.
+    const isCallerAbort = callerSignal?.aborted ?? false;
+    if (!(err instanceof ServerFetchError) && !isCallerAbort) {
       logger.error(`serverFetch network error: ${url}`, err);
     }
     throw err;
-  } finally {
-    clearTimeout(timeout);
   }
 }

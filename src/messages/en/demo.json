@@ -7,6 +7,7 @@
   "documentation": "Documentation",
   "footer": "Made by",
   "copy_label": "Copy install command: {command}",
+  "copy_done": "Copied to clipboard",
 
   "banner_text": "This banner lives in Redux (uiSlice) — dismissing it dispatches an action.",
   "banner_dismiss": "Dismiss",

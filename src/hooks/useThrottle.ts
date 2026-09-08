@@ -2,8 +2,14 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
+import { useLatestRef } from '@/hooks/useLatestRef';
+import { throttle, type Throttled } from '@/utils/throttle';
+
 /**
- * Throttle a callback to at most once per `delay` ms (leading + trailing edge).
+ * Throttle a callback to at most once per `delay` ms (leading + trailing
+ * edge). Thin React binding over `utils/throttle` — the returned function
+ * is stable across renders, reacts to `delay` changes, and clears the
+ * trailing timer on unmount.
  *
  * @example
  * const onScroll = useThrottle(() => setY(window.scrollY), 100);
@@ -13,38 +19,14 @@ export function useThrottle<Args extends unknown[]>(
   fn: (...args: Args) => void,
   delay: number,
 ): (...args: Args) => void {
-  const fnRef = useRef(fn);
-  const lastCall = useRef(0);
-  const trailing = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fnRef = useLatestRef(fn);
+  const throttledRef = useRef<Throttled<Args> | null>(null);
 
   useEffect(() => {
-    fnRef.current = fn;
-  }, [fn]);
+    const throttled = throttle((...args: Args) => fnRef.current(...args), delay);
+    throttledRef.current = throttled;
+    return () => throttled.cancel();
+  }, [delay, fnRef]);
 
-  useEffect(
-    () => () => {
-      if (trailing.current) clearTimeout(trailing.current);
-    },
-    [],
-  );
-
-  return useCallback(
-    (...args: Args) => {
-      const now = Date.now();
-      const remaining = delay - (now - lastCall.current);
-
-      if (remaining <= 0) {
-        lastCall.current = now;
-        fnRef.current(...args);
-        return;
-      }
-
-      if (trailing.current) clearTimeout(trailing.current);
-      trailing.current = setTimeout(() => {
-        lastCall.current = Date.now();
-        fnRef.current(...args);
-      }, remaining);
-    },
-    [delay],
-  );
+  return useCallback((...args: Args) => throttledRef.current?.(...args), []);
 }

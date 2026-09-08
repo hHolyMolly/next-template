@@ -1,6 +1,6 @@
 import { projectConfig } from '@/configs/project';
 
-export const namespaces = ['translations', 'metadata', 'demo'];
+export const namespaces = ['translations', 'metadata', 'demo'] as const;
 
 /**
  * Namespaces serialized into the client bundle via NextIntlClientProvider.

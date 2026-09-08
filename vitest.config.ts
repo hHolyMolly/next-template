@@ -39,6 +39,13 @@ export default defineConfig({
         branches: 10,
         functions: 10,
         lines: 10,
+        // The security-critical layer is held to a real bar.
+        'src/lib/**': {
+          statements: 70,
+          branches: 70,
+          functions: 70,
+          lines: 70,
+        },
       },
     },
   },

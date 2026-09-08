@@ -1,4 +1,5 @@
 import { validateEnv } from '@/configs/env';
+import { logger } from '@/utils/logger';
 
 import type { Instrumentation } from 'next';
 
@@ -23,10 +24,9 @@ export async function register() {
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation#onrequesterror-optional
  */
-export const onRequestError: Instrumentation.onRequestError = async (
-  _error,
-  _request,
-  _context,
-) => {
-  // no-op by default — e.g. Sentry.captureRequestError(error, request, context)
+export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
+  // Replace with your reporter, e.g. Sentry.captureRequestError(error, request, context).
+  // Until then, at least leave a trace in the server logs — a silent no-op
+  // here means production errors vanish without a line anywhere.
+  logger.error(`[${context.routerKind}] ${request.method} ${request.path}`, error);
 };

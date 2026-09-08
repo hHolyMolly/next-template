@@ -23,6 +23,12 @@ function DefaultFallback({ onReset }: { onReset: () => void }) {
 type ErrorBoundaryProps = {
   children: ReactNode;
   fallback?: ReactNode | ((error: Error, reset: () => void) => ReactNode);
+  /**
+   * When any value in this array changes, the boundary resets itself —
+   * e.g. pass `[userId]` so navigating to another user clears a stale
+   * error without a manual "try again" click.
+   */
+  resetKeys?: readonly unknown[];
 };
 
 type ErrorBoundaryState = {
@@ -33,6 +39,9 @@ type ErrorBoundaryState = {
 /**
  * Reusable error boundary for wrapping sections of a page.
  * Catches rendering errors and displays a fallback UI.
+ *
+ * The default fallback calls `useTranslations`, so mount this INSIDE
+ * `NextIntlClientProvider` (anywhere under the [locale] layout is fine).
  *
  * @example
  * <ErrorBoundary fallback={<p>Something went wrong</p>}>
@@ -63,6 +72,19 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     errorReporting.captureException(error, {
       ...(info.componentStack ? { componentStack: info.componentStack } : {}),
     });
+  }
+
+  componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    if (!this.state.hasError) return;
+    const { resetKeys } = this.props;
+    const prevKeys = prevProps.resetKeys;
+    if (!resetKeys || !prevKeys) return;
+    if (
+      resetKeys.length !== prevKeys.length ||
+      resetKeys.some((key, i) => !Object.is(key, prevKeys[i]))
+    ) {
+      this.handleReset();
+    }
   }
 
   handleReset = () => {

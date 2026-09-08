@@ -1,5 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
+
+import { errorReporting } from '@/lib/errorReporting';
+
 /**
  * Global error boundary — catches errors in root layout.
  *
@@ -7,16 +11,24 @@
  * When the root layout itself throws, Next.js replaces the entire page
  * with this component, so `<html>` and `<body>` tags are **required**.
  *
- * - i18n is unavailable (layout is broken) — text is hardcoded.
+ * - i18n is unavailable (layout is broken) — text is hardcoded and the
+ *   markup stays inline-styled: the app shell (Tailwind CSS included)
+ *   cannot be trusted at this point, so no shared ErrorState here.
  * - `reset()` re-renders the root layout segment to attempt recovery.
  */
 
-interface GlobalErrorProps {
+type GlobalErrorProps = {
   error: Error & { digest?: string };
   reset: () => void;
-}
+};
 
 function GlobalError({ error, reset }: GlobalErrorProps) {
+  // The worst failures land here — without this hook they'd be invisible
+  // to telemetry.
+  useEffect(() => {
+    errorReporting.captureException(error, { scope: 'global', digest: error.digest });
+  }, [error]);
+
   return (
     <html lang="en">
       <head />

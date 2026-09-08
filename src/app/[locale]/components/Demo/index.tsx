@@ -6,13 +6,13 @@
 
 import { useTranslations } from 'next-intl';
 
-import ContactForm from '@/app/[locale]/components/ContactForm';
-import Actions from '@/app/[locale]/components/Demo/components/Actions';
-import Badge from '@/app/[locale]/components/Demo/components/Badge';
-import CopyCommand from '@/app/[locale]/components/Demo/components/CopyCommand';
-import Footer from '@/app/[locale]/components/Demo/components/Footer';
-import Hero from '@/app/[locale]/components/Demo/components/Hero';
-import Stack from '@/app/[locale]/components/Demo/components/Stack';
+import { ContactForm } from '@/app/[locale]/components/ContactForm';
+import { Actions } from '@/app/[locale]/components/Demo/components/Actions';
+import { Badge } from '@/app/[locale]/components/Demo/components/Badge';
+import { CopyCommand } from '@/app/[locale]/components/Demo/components/CopyCommand';
+import { DemoFooter } from '@/app/[locale]/components/Demo/components/DemoFooter';
+import { Hero } from '@/app/[locale]/components/Demo/components/Hero';
+import { Stack } from '@/app/[locale]/components/Demo/components/Stack';
 import { actionLinks } from '@/app/[locale]/components/Demo/data/actions';
 import {
   INSTALL_COMMAND,
@@ -21,16 +21,16 @@ import {
   VERSION,
 } from '@/app/[locale]/components/Demo/data/constants';
 import { stack } from '@/app/[locale]/components/Demo/data/stack';
-import DemoBanner from '@/app/[locale]/components/DemoBanner';
-import HealthStatus from '@/app/[locale]/components/HealthStatus';
+import { DemoBanner } from '@/app/[locale]/components/DemoBanner';
+import { HealthStatus } from '@/app/[locale]/components/HealthStatus';
 
 import type { ReactNode } from 'react';
 
-interface DemoProps {
+type DemoProps = {
   languageSwitch?: ReactNode;
-}
+};
 
-export default function Demo({ languageSwitch }: DemoProps) {
+export function Demo({ languageSwitch }: DemoProps) {
   const t = useTranslations('demo');
 
   return (
@@ -59,7 +59,7 @@ export default function Demo({ languageSwitch }: DemoProps) {
         <Stack items={stack} />
       </div>
 
-      <Footer label={t('footer')} author={AUTHOR} authorUrl={AUTHOR_URL} />
+      <DemoFooter label={t('footer')} author={AUTHOR} authorUrl={AUTHOR_URL} />
     </section>
   );
 }

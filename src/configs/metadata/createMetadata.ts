@@ -1,4 +1,5 @@
-import getBaseMetadata from '@/configs/metadata/getBaseMetadata';
+import getBaseMetadata, { previewImage } from '@/configs/metadata/getBaseMetadata';
+import { isAbsoluteUrl } from '@/lib/origin';
 
 import type { Metadata } from 'next';
 
@@ -18,6 +19,10 @@ type MetadataOverrides = Partial<Metadata> & {
 /**
  * Create page metadata by merging overrides with the base metadata.
  *
+ * A top-level `title`/`description` flows into `openGraph`/`twitter` too —
+ * without that, every share card would show the site-wide title. Explicit
+ * `openGraph`/`twitter` overrides still win.
+ *
  * @example
  * return createMetadata({
  *   title: 'About Us',
@@ -32,23 +37,36 @@ async function createMetadata(overrides?: MetadataOverrides): Promise<Metadata> 
 
   let imageOverrides: { images: string[] } | undefined;
   if (preview) {
-    const { previewImage } = await import('@/configs/metadata/getBaseMetadata');
-    const imageUrl = preview.startsWith('http') ? preview : previewImage(preview);
+    const imageUrl = isAbsoluteUrl(preview) ? preview : previewImage(preview);
     imageOverrides = { images: [imageUrl] };
   }
+
+  const socialOverrides = {
+    ...(rest.title != null ? { title: rest.title } : {}),
+    ...(rest.description != null ? { description: rest.description } : {}),
+  };
 
   return {
     ...base,
     ...rest,
 
+    // Merge instead of replace — a page passing `alternates: { canonical }`
+    // must not silently drop the hreflang map built by the base.
+    alternates: {
+      ...base.alternates,
+      ...rest.alternates,
+    },
+
     openGraph: {
       ...base.openGraph,
+      ...socialOverrides,
       ...rest.openGraph,
       ...imageOverrides,
     },
 
     twitter: {
       ...base.twitter,
+      ...socialOverrides,
       ...rest.twitter,
       ...imageOverrides,
     },

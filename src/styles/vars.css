@@ -7,11 +7,11 @@
  * The tokens are mapped to utilities in tailwind.css (`@theme inline`).
  */
 :root {
-  --background: oklch(100% 0 none);
+  --background: oklch(100% 0 0deg);
   --foreground: oklch(20.79% 0.0399 265.7deg);
-  --card: oklch(100% 0 none);
+  --card: oklch(100% 0 0deg);
   --card-foreground: oklch(20.79% 0.0399 265.7deg);
-  --popover: oklch(100% 0 none);
+  --popover: oklch(100% 0 0deg);
   --popover-foreground: oklch(20.79% 0.0399 265.7deg);
   --primary: oklch(62.32% 0.1879 259.8deg);
   --primary-foreground: oklch(98.38% 0.0035 247.9deg);
@@ -22,7 +22,7 @@
   --accent: oklch(96.71% 0.0029 264.5deg);
   --accent-foreground: oklch(20.79% 0.0399 265.7deg);
   --destructive: oklch(63.68% 0.2078 25.3deg);
-  --destructive-foreground: oklch(98.48% 0 none);
+  --destructive-foreground: oklch(98.48% 0 0deg);
   --border: oklch(92.78% 0.0058 264.5deg);
   --input: oklch(92.78% 0.0058 264.5deg);
   --ring: oklch(62.32% 0.1879 259.8deg);

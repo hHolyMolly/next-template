@@ -41,11 +41,22 @@ function Button({
   variant,
   size,
   asChild = false,
+  type,
   ref,
   ...props
 }: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) {
   const Comp = asChild ? Slot : 'button';
-  return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+  return (
+    <Comp
+      className={cn(buttonVariants({ variant, size }), className)}
+      // Native buttons default to type="submit" — inside forms that turns
+      // every Cancel/Close into an accidental submit. Not set for asChild:
+      // the slotted child may not be a <button> at all.
+      {...(asChild ? {} : { type: type ?? 'button' })}
+      ref={ref}
+      {...props}
+    />
+  );
 }
 
 export { Button, buttonVariants };

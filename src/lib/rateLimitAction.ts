@@ -30,11 +30,17 @@ export function withActionRateLimit<Args extends unknown[], Return>(
   return async (...args: Args) => {
     const requestHeaders = await headers();
     const ip = resolveClientIp(requestHeaders);
-    const result = await check(ip);
 
-    if (!result.success) {
-      logger.warn(`[action] rate-limited ip=${ip} resetAt=${result.resetAt}`);
-      throw new RateLimitError('Too many requests, please try again later.');
+    // Identity unknown (no trusted proxy config) → skip rather than collapse
+    // every client into one shared bucket. See resolveClientIp docs.
+    if (ip !== null) {
+      const result = check(ip);
+
+      if (!result.success) {
+        // Truncated IP — enough to correlate abuse, not enough to be PII-hot.
+        logger.warn(`[action] rate-limited ip=${ip.slice(0, 12)}… resetAt=${result.resetAt}`);
+        throw new RateLimitError('Too many requests, please try again later.');
+      }
     }
 
     return action(...args);

@@ -1,67 +1,103 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useRef, useSyncExternalStore } from 'react';
 
 import { logger } from '@/utils/logger';
 
 type Setter<T> = (value: T | ((prev: T) => T)) => void;
 
+// Same-tab sync: the `storage` event only fires in OTHER tabs, so writes
+// notify every subscribed hook instance through this registry.
+const keyListeners = new Map<string, Set<() => void>>();
+
+// Snapshot cache keyed by raw string — `useSyncExternalStore` requires
+// `getSnapshot` to return a REFERENTIALLY stable value while the store is
+// unchanged (a fresh `JSON.parse` object every call would loop forever).
+const snapshotCache = new Map<string, { raw: string | null; value: unknown }>();
+
+function emit(key: string) {
+  keyListeners.get(key)?.forEach((cb) => cb());
+}
+
+function readSnapshot<T>(key: string, initialValue: T): T {
+  const raw = window.localStorage.getItem(key);
+  const cached = snapshotCache.get(key);
+  if (cached && cached.raw === raw) return cached.value as T;
+
+  let value: unknown = initialValue;
+  if (raw !== null) {
+    try {
+      value = JSON.parse(raw) as unknown;
+    } catch (err) {
+      logger.warn(`useLocalStorage: failed to parse "${key}"`, err);
+    }
+  }
+  snapshotCache.set(key, { raw, value });
+  return value as T;
+}
+
 /**
- * Reactive wrapper around `localStorage` with:
- * - SSR safety — returns `initialValue` on the server, re-reads on hydration.
- * - Cross-tab sync via the `storage` event.
+ * Reactive wrapper around `localStorage` built on `useSyncExternalStore`:
+ * - SSR-safe — renders `initialValue` on the server, reads storage on the
+ *   very first client render (no post-mount flash).
+ * - Same-tab sync — two components with the same key see each other's writes.
+ * - Cross-tab sync via the `storage` event, including removal/`clear()`.
  * - JSON serialization.
+ *
+ * `initialValue` is captured on first render — pass a literal freely, later
+ * changes to it are ignored (this is what makes object defaults safe).
  *
  * @example
  * const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
  */
 export function useLocalStorage<T>(key: string, initialValue: T): readonly [T, Setter<T>] {
-  const read = useCallback((): T => {
-    if (typeof window === 'undefined') return initialValue;
-    try {
-      const raw = window.localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as T) : initialValue;
-    } catch (err) {
-      logger.warn(`useLocalStorage: failed to read "${key}"`, err);
-      return initialValue;
-    }
-  }, [key, initialValue]);
+  const initialRef = useRef(initialValue);
 
-  const [value, setValue] = useState<T>(initialValue);
+  const subscribe = useCallback(
+    (callback: () => void) => {
+      let set = keyListeners.get(key);
+      if (!set) {
+        set = new Set();
+        keyListeners.set(key, set);
+      }
+      set.add(callback);
 
-  // Hydrate from localStorage after mount to avoid SSR mismatches.
-  useEffect(() => {
-    setValue(read());
-  }, [read]);
-
-  const set: Setter<T> = useCallback(
-    (v) => {
-      setValue((prev) => {
-        const next = typeof v === 'function' ? (v as (p: T) => T)(prev) : v;
-        try {
-          window.localStorage.setItem(key, JSON.stringify(next));
-        } catch (err) {
-          logger.warn(`useLocalStorage: failed to write "${key}"`, err);
+      const onStorage = (e: StorageEvent) => {
+        // `key === null` means storage.clear(); the storageArea guard skips
+        // sessionStorage events.
+        if (e.storageArea === window.localStorage && (e.key === key || e.key === null)) {
+          callback();
         }
-        return next;
-      });
+      };
+      window.addEventListener('storage', onStorage);
+
+      return () => {
+        set.delete(callback);
+        if (set.size === 0) keyListeners.delete(key);
+        window.removeEventListener('storage', onStorage);
+      };
     },
     [key],
   );
 
-  // Listen for changes from other tabs / windows.
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== key || e.newValue === null) return;
+  const getSnapshot = useCallback(() => readSnapshot(key, initialRef.current), [key]);
+  const getServerSnapshot = useCallback(() => initialRef.current, []);
+
+  const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const set: Setter<T> = useCallback(
+    (v) => {
+      const prev = readSnapshot(key, initialRef.current);
+      const next = typeof v === 'function' ? (v as (p: T) => T)(prev) : v;
       try {
-        setValue(JSON.parse(e.newValue) as T);
-      } catch {
-        // ignore malformed payloads
+        window.localStorage.setItem(key, JSON.stringify(next));
+      } catch (err) {
+        logger.warn(`useLocalStorage: failed to write "${key}"`, err);
       }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, [key]);
+      emit(key);
+    },
+    [key],
+  );
 
   return [value, set] as const;
 }

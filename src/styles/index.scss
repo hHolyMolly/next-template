@@ -1,10 +1,13 @@
 body {
-  font-family: var(--font-app), ui-sans-serif, system-ui, sans-serif;
+  // Single source of truth for the stack — defined in tailwind.css @theme.
+  font-family: var(--font-sans);
 }
 
 // Respect the user's OS-level motion preference.
-// Disables non-essential animations/transitions without breaking
-// required motion (e.g. spinner progress indicators).
+// Note: this is a blanket kill-switch — it shortens ALL animations and
+// transitions to 0.01ms, including "essential" motion like spinners
+// (they render as a static frame). Carve out exceptions per-selector
+// if some motion must survive.
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

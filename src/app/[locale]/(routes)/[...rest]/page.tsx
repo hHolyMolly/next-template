@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 
 export { generateNotFoundMetadata as generateMetadata } from '@/app/[locale]/not-found.metadata';
 
-function CatchAllPage() {
+// `never`: notFound() throws unconditionally — this page never renders.
+function CatchAllPage(): never {
   notFound();
 }
 

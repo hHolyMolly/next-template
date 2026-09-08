@@ -1,37 +1,30 @@
-# Place Redux Toolkit slices here
+# Redux Toolkit slices
 
-Example:
+`uiSlice.ts` is the canonical example — copy it when adding real slices
+(auth, cart, sidebar, …). The conventions it demonstrates:
 
-```ts
-// src/store/slices/auth.ts
-import { createSlice } from '@reduxjs/toolkit';
+- **File per slice**, named `<name>Slice.ts` (`authSlice.ts`).
+- **Selectors are colocated** with the slice — it's the only place that
+  knows the state shape:
 
-type AuthState = { userId: string | null };
-const initialState: AuthState = { userId: null };
+  ```ts
+  export const selectBannerDismissed = (state: { ui: UiState }) => state.ui.bannerDismissed;
+  ```
 
-const auth = createSlice({
-  name: 'auth',
-  initialState,
-  reducers: {
-    signedIn(state, action: { payload: string }) {
-      state.userId = action.payload;
-    },
-    signedOut(state) {
-      state.userId = null;
-    },
-  },
-});
+- **Register the reducer** in `src/store/index.ts`:
 
-export const { signedIn, signedOut } = auth.actions;
-export default auth.reducer;
-```
+  ```ts
+  import uiReducer from '@/store/slices/uiSlice';
+  // ...
+  reducer: { ui: uiReducer },
+  ```
 
-Then register in `src/store/index.ts`:
+- **Per-request store**: `makeStore()` creates a fresh store for every
+  request (see `ClientProviders`) — never keep a module-level store
+  instance, it would leak state between SSR requests.
 
-```ts
-import auth from '@/store/slices/auth';
-// ...
-reducer: { auth },
-```
+Typed hooks (`useAppDispatch`, `useAppSelector`) live in `@/store/hooks` —
+never import them from `@/store`.
 
-Typed hooks live in `@/store/hooks` — never import them from `@/store`.
+The living consumer of `uiSlice` is
+`src/app/[locale]/components/DemoBanner` (removed by `pnpm clean:demo`).

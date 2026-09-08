@@ -1,10 +1,11 @@
-interface FooterProps {
+type DemoFooterProps = {
   label: string;
   author: string;
   authorUrl: string;
-}
+};
 
-export default function Footer({ label, author, authorUrl }: FooterProps) {
+/** Named `DemoFooter` to avoid clashing with the app-level `layouts/Footer`. */
+export function DemoFooter({ label, author, authorUrl }: DemoFooterProps) {
   return (
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-slate-600 md:bottom-6">
       {label}{' '}

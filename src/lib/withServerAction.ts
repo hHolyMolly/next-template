@@ -1,4 +1,4 @@
-import { AppError } from '@/lib/errors';
+import { AppError, toErrorPayload } from '@/lib/errors';
 import { logger } from '@/utils/logger';
 
 /**
@@ -52,22 +52,22 @@ export function withServerAction<Args extends unknown[], T>(
       const data = await action(...args);
       return { success: true, data };
     } catch (err) {
-      if (err instanceof AppError) {
-        return {
-          success: false,
-          error: {
-            code: err.code,
-            message: err.message,
-            ...(err.details ? { details: err.details } : {}),
-          },
-        };
+      // Next.js signals redirect()/notFound()/forbidden() by THROWING —
+      // swallowing those errors would break control flow and surface a
+      // spurious error toast instead of navigating.
+      if (
+        err &&
+        typeof err === 'object' &&
+        'digest' in err &&
+        String((err as { digest: unknown }).digest).startsWith('NEXT_')
+      ) {
+        throw err;
       }
 
-      logger.error('Unhandled Server Action error', err);
-      return {
-        success: false,
-        error: { code: 'INTERNAL', message: 'Internal Server Error' },
-      };
+      if (!(err instanceof AppError)) {
+        logger.error('Unhandled Server Action error', err);
+      }
+      return { success: false, error: toErrorPayload(err) };
     }
   };
 }

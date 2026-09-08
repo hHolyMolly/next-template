@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { cors, handlePreflight } from '@/lib/cors';
+import { cors, handlePreflight, toMutableResponse } from '@/lib/cors';
 import { AppError, RateLimitError, ValidationError, toErrorResponse } from '@/lib/errors';
+import { rateLimitHeaders, type RateLimitResult } from '@/lib/rateLimit';
 import { logger } from '@/utils/logger';
 
 /**
@@ -10,7 +11,9 @@ import { logger } from '@/utils/logger';
  * Wires up three recurring concerns so handlers stay focused on business logic:
  *
  * 1. **CORS** — preflight + response headers when `cors` is provided.
- * 2. **Rate limiting** — runs before the handler; throws `RateLimitError`.
+ * 2. **Rate limiting** — runs before the handler; a blocked request gets a
+ *    429 with `Retry-After` + `X-RateLimit-*` headers (successful responses
+ *    carry the `X-RateLimit-*` headers too).
  * 3. **Error mapping** — any `AppError` becomes a structured JSON response,
  *    anything else is logged and turned into a sanitized 500.
  *
@@ -36,12 +39,7 @@ import { logger } from '@/utils/logger';
 
 type CorsOptions = Parameters<typeof cors>[2];
 
-type RateLimitCheck = (request: NextRequest) => Promise<{
-  success: boolean;
-  limit: number;
-  remaining: number;
-  reset: number;
-}>;
+type RateLimitCheck = (request: NextRequest) => RateLimitResult | Promise<RateLimitResult>;
 
 type Handler = (request: NextRequest) => Promise<Response> | Response;
 
@@ -53,61 +51,60 @@ type Options = {
 
 const log = logger.child('api');
 
-const RATE_LIMIT_HEADERS = ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'];
+const RATE_LIMIT_HEADER_NAMES = ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'];
 
-function attachCors(
-  response: Response,
-  request: NextRequest,
-  opts: CorsOptions | undefined,
-  exposeRate: boolean,
-): Response {
-  if (!opts) return response;
-  // When both CORS and rate limiting are enabled, make the `X-RateLimit-*`
-  // headers readable by cross-origin clients — otherwise the browser hides
-  // them even though the server sets them.
-  const merged: CorsOptions = exposeRate
-    ? {
-        ...opts,
-        exposed: Array.from(new Set([...(opts.exposed ?? []), ...RATE_LIMIT_HEADERS])),
-      }
-    : opts;
-  return cors(response, request, merged);
-}
-
-function attachRateHeaders(
-  response: Response,
-  rate: { limit: number; remaining: number; reset: number },
-): Response {
-  response.headers.set('X-RateLimit-Limit', String(rate.limit));
-  response.headers.set('X-RateLimit-Remaining', String(rate.remaining));
-  response.headers.set('X-RateLimit-Reset', String(rate.reset));
-  return response;
+function attachRateHeaders(response: Response, rate: RateLimitResult): Response {
+  const out = toMutableResponse(response);
+  for (const [key, value] of Object.entries(rateLimitHeaders(rate))) {
+    out.headers.set(key, value);
+  }
+  return out;
 }
 
 export function withApiHandler(options: Options) {
-  const { handler, cors: corsOpts, rateLimit } = options;
+  const { handler, rateLimit } = options;
+
+  // CORS options are static for the handler's lifetime — merge once, not
+  // per request. With rate limiting on, expose the X-RateLimit-* headers so
+  // cross-origin clients can actually read them.
+  const corsOpts: CorsOptions | undefined = options.cors
+    ? rateLimit
+      ? {
+          ...options.cors,
+          exposed: Array.from(
+            new Set([...(options.cors.exposed ?? []), ...RATE_LIMIT_HEADER_NAMES, 'Retry-After']),
+          ),
+        }
+      : options.cors
+    : undefined;
+
+  const applyCors = (response: Response, request: NextRequest): Response =>
+    corsOpts ? cors(response, request, corsOpts) : response;
 
   return async (request: NextRequest): Promise<Response> => {
-    try {
-      let rateInfo: { limit: number; remaining: number; reset: number } | undefined;
+    let rateInfo: RateLimitResult | undefined;
 
+    try {
       if (rateLimit) {
-        const result = await rateLimit(request);
-        rateInfo = { limit: result.limit, remaining: result.remaining, reset: result.reset };
-        if (!result.success) {
+        rateInfo = await rateLimit(request);
+        if (!rateInfo.success) {
           throw new RateLimitError('Rate limit exceeded');
         }
       }
 
-      const response = await handler(request);
-      if (rateInfo) attachRateHeaders(response, rateInfo);
-      return attachCors(response, request, corsOpts, Boolean(rateLimit));
+      let response = await handler(request);
+      if (rateInfo) response = attachRateHeaders(response, rateInfo);
+      return applyCors(response, request);
     } catch (err) {
       if (!(err instanceof AppError)) {
         log.error('Unhandled route handler error', err);
       }
-      const response = toErrorResponse(err);
-      return attachCors(response, request, corsOpts, Boolean(rateLimit));
+
+      let response = toErrorResponse(err);
+      // The 429 (and any error after a successful check) still reports the
+      // budget — clients need Retry-After exactly when they are blocked.
+      if (rateInfo) response = attachRateHeaders(response, rateInfo);
+      return applyCors(response, request);
     }
   };
 }
@@ -119,6 +116,9 @@ withApiHandler.preflight = (corsOpts: CorsOptions) => {
 /**
  * Lightweight runtime validator — use it inside a handler to produce a
  * `ValidationError` with a typed payload without pulling in zod.
+ *
+ * Note: rejects `undefined`, `null` and `''` only — `0`, `false` and `NaN`
+ * are considered present. Use zod for anything richer.
  *
  * @example
  * const email = required(body.email, 'email');

@@ -1,42 +1,24 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState, useCallback, useRef, useEffect } from 'react';
 
-import { cn } from '@/lib/cn';
+import { VisuallyHidden } from '@/components/UI';
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 
-interface CopyCommandProps {
+type CopyCommandProps = {
   command: string;
-}
+};
 
-export default function CopyCommand({ command }: CopyCommandProps) {
+export function CopyCommand({ command }: CopyCommandProps) {
   const t = useTranslations('demo');
-  const [copied, setCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(command);
-      setCopied(true);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* clipboard API not available */
-    }
-  }, [command]);
+  const { copied, copy } = useCopyToClipboard();
 
   return (
     <div className="mx-auto mb-8 max-w-[520px] md:mb-12">
       <button
         type="button"
-        onClick={handleCopy}
-        className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left font-mono text-sm text-slate-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] md:px-6 md:py-4"
+        onClick={() => void copy(command)}
+        className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left font-mono text-sm text-slate-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] md:px-6 md:py-4"
         aria-label={t('copy_label', { command })}
       >
         <span className="text-slate-500 select-none">$</span>
@@ -49,11 +31,11 @@ export default function CopyCommand({ command }: CopyCommandProps) {
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#22c55e"
+              stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={cn('text-green-500', 'animate-[scale-in_0.2s_ease-out]')}
+              className="animate-scale-in text-green-500"
               aria-hidden="true"
             >
               <polyline points="20 6 9 17 4 12" />
@@ -75,6 +57,9 @@ export default function CopyCommand({ command }: CopyCommandProps) {
             </svg>
           )}
         </span>
+
+        {/* Announce the state change to screen readers — the icon swap is silent. */}
+        <VisuallyHidden role="status">{copied ? t('copy_done') : ''}</VisuallyHidden>
       </button>
     </div>
   );

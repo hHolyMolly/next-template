@@ -6,34 +6,30 @@ import { namespaces } from '@/services/i18n/constants';
 import { routing } from '@/services/i18n/routing';
 import { logger } from '@/utils/logger';
 
-type TypeMessages = {
-  [key: string]: string | TypeMessages;
-};
+import type { Messages } from 'next-intl';
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
 
-  let messages: TypeMessages = {};
-
-  try {
-    messages = Object.assign(
-      {},
-      ...(await Promise.all(
-        namespaces.map(async (ns) => {
-          try {
-            const mod = await import(`../../messages/${locale}/${ns}.json`);
-            return { [ns]: mod.default ?? mod };
-          } catch (err) {
-            logger.error(`Error loading ${ns} for ${locale}:`, err);
-            return { [ns]: {} };
-          }
-        }),
-      )),
-    );
-  } catch (err) {
-    logger.error(`Failed to load messages for ${locale}`, err);
-  }
+  // Per-namespace try/catch is the only error handling needed — a missing
+  // file degrades to an empty namespace instead of crashing the request.
+  const messages = Object.assign(
+    {},
+    ...(await Promise.all(
+      namespaces.map(async (ns) => {
+        try {
+          const mod = (await import(`../../messages/${locale}/${ns}.json`)) as {
+            default?: Record<string, unknown>;
+          };
+          return { [ns]: mod.default ?? mod };
+        } catch (err) {
+          logger.error(`Error loading ${ns} for ${locale}:`, err);
+          return { [ns]: {} };
+        }
+      }),
+    )),
+  ) as Messages;
 
   return {
     locale,

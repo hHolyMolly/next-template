@@ -1,20 +1,24 @@
 'use client';
 
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { localeFlags } from '@/app/[locale]/components/LanguageSwitch/flags';
 import { cn } from '@/lib/cn';
 import { locales } from '@/services/i18n/constants';
 import { Link, usePathname } from '@/services/i18n/navigation';
 
-export default function LanguageSwitch() {
+// Module-level: the locale list is static config, no need to re-check per render.
+const hasMultipleLocales = locales.length > 1;
+
+export function LanguageSwitch() {
   const currentLocale = useLocale();
+  const t = useTranslations('translations.shared');
   const pathname = usePathname();
 
-  if (locales.length <= 1) return null;
+  if (!hasMultipleLocales) return null;
 
   return (
-    <div className="flex gap-2">
+    <nav aria-label={t('language')} className="flex gap-2">
       {locales.map((locale) => (
         <Link
           href={pathname}
@@ -26,12 +30,15 @@ export default function LanguageSwitch() {
               : 'text-slate-400 hover:bg-white/5 hover:text-white',
           )}
           key={locale}
-          aria-current={locale === currentLocale ? 'page' : undefined}
+          // 'true', not 'page': the link points at the SAME page in another
+          // locale, so "current page" would be misleading — this marks the
+          // currently selected option within the switcher.
+          aria-current={locale === currentLocale ? 'true' : undefined}
         >
           {localeFlags[locale]}
           {locale.toUpperCase()}
         </Link>
       ))}
-    </div>
+    </nav>
   );
 }

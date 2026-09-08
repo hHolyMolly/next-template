@@ -4,6 +4,10 @@
  * Use feature flags to safely roll out new functionality,
  * run A/B tests, or toggle experimental features.
  *
+ * Flags resolved from build-time constants (like `NODE_ENV`) are inlined by
+ * the bundler, so code behind a `false` flag is dead-code-eliminated from
+ * the production bundle.
+ *
  * For production, consider integrating with a service like LaunchDarkly,
  * Statsig, Unleash, or PostHog for dynamic feature flags.
  *
@@ -28,11 +32,11 @@ const flags = {
 export const featureFlags = {
   /** Check if a feature flag is enabled. */
   isEnabled(flag: FeatureFlagKey): boolean {
-    return flags[flag] ?? false;
+    return flags[flag];
   },
 
   /** Get all flag values (useful for analytics/debugging). */
   getAll(): Readonly<typeof flags> {
-    return flags;
+    return Object.freeze({ ...flags });
   },
 };

@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
+import { VisuallyHidden } from '@/components/UI/VisuallyHidden';
 import { cn } from '@/lib/cn';
 
 const Dialog = DialogPrimitive.Root;
@@ -31,6 +32,11 @@ function DialogOverlay({
   );
 }
 
+/**
+ * Pair with `<DialogDescription>` for an accessible description; if the
+ * dialog intentionally has none, silence the Radix warning explicitly:
+ * `<DialogContent aria-describedby={undefined}>`.
+ */
 function DialogContent({
   className,
   children,
@@ -53,16 +59,16 @@ function DialogContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <X className="h-4 w-4" />
-          <span className="sr-only">{t('close')}</span>
+        <DialogPrimitive.Close className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+          <X className="h-4 w-4" aria-hidden="true" />
+          <VisuallyHidden>{t('close')}</VisuallyHidden>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPortal>
   );
 }
 
-function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       className={cn('flex flex-col space-y-1.5 text-center sm:text-left', className)}
@@ -71,7 +77,7 @@ function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
   );
 }
 
-function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}

@@ -39,4 +39,54 @@ describe('useLocalStorage', () => {
 
     expect(result.current[0]).toBe(2);
   });
+
+  it('is stable with an object initialValue (no re-render loop)', () => {
+    // Passing a fresh object literal every render used to loop forever;
+    // the snapshot must stay referentially stable.
+    const { result, rerender } = renderHook(() => useLocalStorage('obj', { a: 1 }));
+
+    const first = result.current[0];
+    rerender();
+    expect(result.current[0]).toBe(first);
+  });
+
+  it('keeps two instances with the same key in sync (same tab)', () => {
+    const { result: a } = renderHook(() => useLocalStorage('shared', 0));
+    const { result: b } = renderHook(() => useLocalStorage('shared', 0));
+
+    act(() => {
+      a.current[1](7);
+    });
+
+    expect(b.current[0]).toBe(7);
+  });
+
+  it('reacts to cross-tab storage events, including removal', () => {
+    const { result } = renderHook(() => useLocalStorage('xtab', 'initial'));
+
+    act(() => {
+      window.localStorage.setItem('xtab', JSON.stringify('from-other-tab'));
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'xtab',
+          newValue: JSON.stringify('from-other-tab'),
+          storageArea: window.localStorage,
+        }),
+      );
+    });
+    expect(result.current[0]).toBe('from-other-tab');
+
+    act(() => {
+      window.localStorage.removeItem('xtab');
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'xtab',
+          newValue: null,
+          storageArea: window.localStorage,
+        }),
+      );
+    });
+    // Removal falls back to the initial value — not the stale one.
+    expect(result.current[0]).toBe('initial');
+  });
 });

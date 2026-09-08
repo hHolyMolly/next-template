@@ -26,7 +26,7 @@ input {
 }
 
 textarea {
-  resize: none;
+  resize: vertical;
 }
 
 input[type='number'] {

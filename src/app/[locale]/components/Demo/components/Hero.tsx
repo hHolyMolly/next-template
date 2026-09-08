@@ -1,10 +1,10 @@
-interface HeroProps {
+type HeroProps = {
   title: string;
   subtitle: string;
   description: string;
-}
+};
 
-export default function Hero({ title, subtitle, description }: HeroProps) {
+export function Hero({ title, subtitle, description }: HeroProps) {
   return (
     <>
       <h1 className="mb-4 text-[clamp(2rem,5vw,3.5rem)] leading-[1.2] font-extrabold tracking-[-0.02em] [text-wrap:balance] text-slate-50 md:mb-6">

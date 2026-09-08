@@ -8,7 +8,7 @@ type Logger = {
   warn: LogMethod;
   error: LogMethod;
   debug: LogMethod;
-  table: (data: unknown) => void;
+  table: (data: unknown, columns?: string[]) => void;
   group: (label?: string) => void;
   groupEnd: () => void;
   time: (label?: string) => void;
@@ -23,17 +23,26 @@ function createLogger(prefix: string): Logger {
   const tag = `[${prefix}]`;
 
   const devBind = (m: keyof Console): LogMethod =>
-    isDev ? (console[m] as (...args: unknown[]) => void).bind(console, tag) : noop;
+    isDev ? (console[m] as LogMethod).bind(console, tag) : noop;
 
-  const errorBind: LogMethod = console.error.bind(console, isDev ? tag : `[${prefix}:error]`);
+  // Kept in prod on purpose: warn carries operational signals (rate-limit
+  // identity missing, config fallbacks, i18n gaps) that must reach server
+  // logs, and error is critical for production debugging.
+  const alwaysBind = (m: 'warn' | 'error'): LogMethod =>
+    console[m].bind(console, isDev ? tag : `[${prefix}:${m}]`);
 
   return {
     log: devBind('log'),
     info: devBind('info'),
-    warn: devBind('warn'),
-    error: errorBind,
+    warn: alwaysBind('warn'),
+    error: alwaysBind('error'),
     debug: devBind('debug'),
-    table: isDev ? (console.table.bind(console) as (data: unknown) => void) : noop,
+    table: isDev
+      ? (data, columns) => {
+          console.log(tag);
+          console.table(data, columns);
+        }
+      : noop,
     group: isDev ? console.group.bind(console, tag) : noop,
     groupEnd: isDev ? console.groupEnd.bind(console) : noop,
     time: isDev ? console.time.bind(console) : noop,
@@ -44,9 +53,10 @@ function createLogger(prefix: string): Logger {
 
 /**
  * Dev-friendly logger.
- * - `log/info/warn/debug/table/group/time` — no-ops in production.
- * - `error` — always logged; critical for production debugging.
- * - `child('scope')` — namespaced sub-logger.
+ * - `log/info/debug/table/group/time` — no-ops in production.
+ * - `warn`/`error` — always logged; operational signals must survive prod.
+ * - `child('scope')` — namespaced sub-logger. Create it once at module
+ *   scope (`const apiLogger = logger.child('api')`), not per call.
  *
  * @example
  * logger.log('Data loaded', data);

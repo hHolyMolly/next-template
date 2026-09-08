@@ -16,7 +16,7 @@ export const localeFlags: Record<Locale, ReactNode> = {
       width="20"
       height="15"
       viewBox="0 0 60 30"
-      className="flex-shrink-0 overflow-hidden rounded-sm"
+      className="shrink-0 overflow-hidden rounded-sm"
       aria-hidden="true"
     >
       <rect width="60" height="30" fill="#012169" />
@@ -32,7 +32,7 @@ export const localeFlags: Record<Locale, ReactNode> = {
       width="20"
       height="15"
       viewBox="0 0 60 30"
-      className="flex-shrink-0 overflow-hidden rounded-sm"
+      className="shrink-0 overflow-hidden rounded-sm"
       aria-hidden="true"
     >
       <rect width="60" height="30" fill="#0039A6" />

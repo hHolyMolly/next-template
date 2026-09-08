@@ -15,11 +15,18 @@ import { withServerAction } from '@/lib/withServerAction';
  * Demo Server Action (removed by `pnpm clean:demo`) — the canonical mutation
  * pipeline: CSRF check → per-IP rate limit → server-side Zod re-validation →
  * typed `ServerActionResult` back to the client (never throws).
+ *
+ * Order matters: the CSRF check runs BEFORE the rate limiter so cross-site
+ * garbage can't burn a legitimate user's per-IP budget.
  */
-export const submitContact = withServerAction(
-  withActionRateLimit({ limit: 5, windowSeconds: 60 }, async (values: ContactFormValues) => {
-    await assertSameOrigin();
+export const submitContact = withServerAction(async (values: ContactFormValues) => {
+  await assertSameOrigin();
+  return limitedSubmit(values);
+});
 
+const limitedSubmit = withActionRateLimit(
+  { limit: 5, windowSeconds: 60 },
+  async (values: ContactFormValues) => {
     const t = await getTranslations('demo');
     const schema = createContactSchema({
       name: t('form_error_name'),
@@ -34,5 +41,5 @@ export const submitContact = withServerAction(
 
     // Replace with a real integration (email, DB, CRM, …) — the demo echoes back.
     return { name: parsed.data.name, receivedAt: new Date().toISOString() };
-  }),
+  },
 );

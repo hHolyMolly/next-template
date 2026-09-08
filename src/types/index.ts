@@ -1,8 +1,5 @@
 import type { projectConfig } from '@/configs/project';
 
-/** Async operation status */
-export type TypeStatus = 'loading' | 'loaded' | 'error';
-
 /** Supported locales — derived from projectConfig */
 export type Locale = (typeof projectConfig.i18n.locales)[number];
 

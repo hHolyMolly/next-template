@@ -1,16 +1,22 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { createMetadata } from '@/configs/metadata';
 
 import type { Metadata } from 'next';
 
-export async function generateHomeMetadata(): Promise<Metadata> {
+type MetadataProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateHomeMetadata({ params }: MetadataProps): Promise<Metadata> {
+  // Without this, generateMetadata opts the page out of static rendering.
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const t = await getTranslations('metadata.home');
 
-  const description = t('description');
-
   return createMetadata({
-    description,
+    description: t('description'),
     // preview: '/assets/img/previews/home.webp',
   });
 }

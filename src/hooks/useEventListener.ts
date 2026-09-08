@@ -1,6 +1,8 @@
 'use client';
 
-import { type RefObject, useEffect, useRef } from 'react';
+import { type RefObject, useEffect } from 'react';
+
+import { useLatestRef } from '@/hooks/useLatestRef';
 
 /**
  * Attach an event listener with automatic cleanup.
@@ -10,7 +12,9 @@ import { type RefObject, useEffect, useRef } from 'react';
  * 2. `useEventListener('keydown', fn, ref)` — listens on `ref.current`.
  * 3. `useEventListener('visibilitychange', fn, documentRef)` — on `document`.
  *
- * Always SSR-safe; does nothing on the server.
+ * `options` is read at attach time via a ref, so passing an inline object
+ * literal doesn't re-attach the listener every render. Only a change of
+ * `capture` re-attaches (it affects WHICH listener the browser removes).
  */
 export function useEventListener<K extends keyof WindowEventMap>(
   event: K,
@@ -36,19 +40,17 @@ export function useEventListener(
   target?: RefObject<EventTarget | null>,
   options?: AddEventListenerOptions | boolean,
 ): void {
-  const handlerRef = useRef(handler);
+  const handlerRef = useLatestRef(handler);
+  const optionsRef = useLatestRef(options);
+  const capture = typeof options === 'boolean' ? options : (options?.capture ?? false);
 
   useEffect(() => {
-    handlerRef.current = handler;
-  }, [handler]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
     const node: EventTarget | null = target ? target.current : window;
     if (!node) return;
 
     const listener = (e: Event) => handlerRef.current(e);
-    node.addEventListener(event, listener, options);
-    return () => node.removeEventListener(event, listener, options);
-  }, [event, target, options]);
+    const opts = optionsRef.current;
+    node.addEventListener(event, listener, opts);
+    return () => node.removeEventListener(event, listener, opts);
+  }, [event, target, capture, handlerRef, optionsRef]);
 }

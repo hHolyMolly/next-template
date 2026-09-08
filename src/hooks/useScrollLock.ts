@@ -1,57 +1,84 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+
+type BodyStyleSnapshot = {
+  overflow: string;
+  paddingRight: string;
+  position: string;
+  top: string;
+  left: string;
+  right: string;
+  width: string;
+};
+
+// Module-level lock counter: nested consumers (modal opening a drawer)
+// each take a lock; body styles are applied on the first and restored on
+// the last, so an inner unlock can't unfreeze the page early.
+let lockCount = 0;
+let savedStyles: BodyStyleSnapshot | null = null;
+let savedScrollY = 0;
+
+function applyLock() {
+  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+  savedScrollY = window.scrollY;
+
+  const { style } = document.body;
+  savedStyles = {
+    overflow: style.overflow,
+    paddingRight: style.paddingRight,
+    position: style.position,
+    top: style.top,
+    left: style.left,
+    right: style.right,
+    width: style.width,
+  };
+
+  // iOS Safari requires position: fixed to prevent background scroll
+  style.overflow = 'hidden';
+  style.position = 'fixed';
+  style.top = `-${savedScrollY}px`;
+  style.left = '0';
+  style.right = '0';
+  style.width = '100%';
+
+  if (scrollbarWidth > 0) {
+    style.paddingRight = `${scrollbarWidth}px`;
+  }
+}
+
+function releaseLock() {
+  if (!savedStyles) return;
+  Object.assign(document.body.style, savedStyles);
+  savedStyles = null;
+
+  // Restore scroll position after unlocking
+  window.scrollTo(0, savedScrollY);
+}
 
 /**
  * Hook for locking page scroll.
- * Handles scrollbar width compensation and iOS Safari quirks.
+ * Handles scrollbar width compensation, iOS Safari quirks, and nested
+ * consumers (reference-counted — the page unlocks when the LAST lock goes).
+ *
+ * Don't combine with Radix Dialog/Sheet — Radix manages body scroll itself
+ * and the two would fight over `document.body.style`.
  *
  * @example
  * useScrollLock(isModalOpen);
  */
 export function useScrollLock(isLocked: boolean): void {
-  const scrollYRef = useRef(0);
-
-  useEffect(() => {
+  // Layout effect: styles must apply before paint, or the page visibly
+  // jumps when the lock repositions the body.
+  useIsomorphicLayoutEffect(() => {
     if (!isLocked) return;
 
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    const scrollY = window.scrollY;
-    scrollYRef.current = scrollY;
-
-    const originalStyles = {
-      overflow: document.body.style.overflow,
-      paddingRight: document.body.style.paddingRight,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      left: document.body.style.left,
-      right: document.body.style.right,
-      width: document.body.style.width,
-    };
-
-    // iOS Safari requires position: fixed to prevent background scroll
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
+    lockCount += 1;
+    if (lockCount === 1) applyLock();
 
     return () => {
-      document.body.style.overflow = originalStyles.overflow;
-      document.body.style.paddingRight = originalStyles.paddingRight;
-      document.body.style.position = originalStyles.position;
-      document.body.style.top = originalStyles.top;
-      document.body.style.left = originalStyles.left;
-      document.body.style.right = originalStyles.right;
-      document.body.style.width = originalStyles.width;
-
-      // Restore scroll position after unlocking
-      window.scrollTo(0, scrollYRef.current);
+      lockCount -= 1;
+      if (lockCount === 0) releaseLock();
     };
   }, [isLocked]);
 }

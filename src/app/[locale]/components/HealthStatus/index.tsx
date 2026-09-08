@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useFormatter, useTranslations } from 'next-intl';
 
+import { Card } from '@/app/[locale]/components/Demo/components/Card';
 import { cn } from '@/lib/cn';
 import { healthQuery } from '@/services/api/queries';
 
@@ -11,20 +12,20 @@ import { healthQuery } from '@/services/api/queries';
  * home page prefetches on the server — on first paint the data comes from
  * the HydrationBoundary, not from a client-side fetch.
  */
-export default function HealthStatus() {
+export function HealthStatus() {
   const t = useTranslations('demo');
   const tShared = useTranslations('translations.shared');
+  // Renders the same on server and client: projectConfig pins timeZone
+  // ('UTC'), so useFormatter can't cause a hydration mismatch here.
   const format = useFormatter();
   const { data, isPending, isError, dataUpdatedAt } = useQuery(healthQuery);
 
   const ok = data?.status === 'ok';
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left">
-      <h2 className="mb-1 text-lg font-semibold text-slate-100">{t('health_title')}</h2>
-      <p className="mb-5 text-sm text-slate-400">{t('health_description')}</p>
-
-      <div className="flex items-center gap-3">
+    <Card title={t('health_title')} description={t('health_description')}>
+      {/* role=status announces the pending→ok/error transitions politely. */}
+      <div role="status" className="flex items-center gap-3">
         <span
           aria-hidden="true"
           className={cn(
@@ -50,6 +51,6 @@ export default function HealthStatus() {
           })}
         </p>
       )}
-    </div>
+    </Card>
   );
 }

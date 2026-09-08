@@ -1,9 +1,13 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 
 import { urls } from '@/configs/constants/urls';
+import { buildLocaleAlternates } from '@/configs/metadata/alternates';
 import { projectConfig } from '@/configs/project';
 
 import type { Metadata } from 'next';
+
+// urls.website already falls back to localhost — no extra guard needed here.
+const METADATA_BASE = new URL(urls.website);
 
 /**
  * Build a full preview image URL from a path in `public/`.
@@ -13,18 +17,6 @@ import type { Metadata } from 'next';
  */
 export function previewImage(path: string): string {
   return `${urls.website}${path}`;
-}
-
-/** Build `alternates.languages` for every configured locale. */
-function buildLanguageAlternates(path: string): Record<string, string> {
-  const { locales, defaultLocale } = projectConfig.i18n;
-  const entries: Record<string, string> = {};
-  for (const locale of locales) {
-    const prefix = locale === defaultLocale ? '' : `/${locale}`;
-    entries[locale] = `${urls.website}${prefix}${path === '/' ? '' : path}`;
-  }
-  entries['x-default'] = `${urls.website}${path === '/' ? '' : path}`;
-  return entries;
 }
 
 /**
@@ -39,17 +31,18 @@ async function getBaseMetadata(path = '/'): Promise<Metadata> {
 
   const title = t('title');
   const description = t('description');
-  const localizedPath = locale === projectConfig.i18n.defaultLocale ? path : `/${locale}${path}`;
-  const canonical = `${urls.website}${localizedPath === '/' ? '' : localizedPath}`;
+  const suffix = path === '/' ? '' : path;
+  const localePrefix = locale === projectConfig.i18n.defaultLocale ? '' : `/${locale}`;
+  const canonical = `${urls.website}${localePrefix}${suffix}`;
 
   return {
     title,
     description,
-    metadataBase: new URL(urls.website || 'http://localhost:3000'),
+    metadataBase: METADATA_BASE,
 
     alternates: {
       canonical,
-      languages: buildLanguageAlternates(path),
+      languages: buildLocaleAlternates(path),
     },
 
     // No static og/twitter images here — the generated `opengraph-image.tsx`

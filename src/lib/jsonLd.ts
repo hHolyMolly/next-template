@@ -13,10 +13,16 @@
  * />
  */
 export function jsonLd(data: Record<string, unknown>): string {
+  // Escape every character that could break out of the inline <script> —
+  // `<` alone still allows `</script>`-free tricks via `-->` in legacy
+  // parsing modes, so escape the full trio.
   return JSON.stringify({
     '@context': 'https://schema.org',
     ...data,
-  }).replace(/</g, '\\u003c');
+  })
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
 }
 
 /**

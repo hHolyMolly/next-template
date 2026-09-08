@@ -1,3 +1,4 @@
+import { VisuallyHidden } from '@/components/UI/VisuallyHidden';
 import { cn } from '@/lib/cn';
 
 type LoadingIconProps = {
@@ -28,23 +29,23 @@ function LoadingIcon({
       className={cn('relative inline-block', className)}
       style={{ width: size, height: size }}
       role="status"
-      aria-label={label}
     >
-      {Array.from({ length: 4 }, (_, idx) => (
+      {DELAY_CLASSES.map((delayClass) => (
         <div
-          className={cn(
-            'absolute block animate-spinner rounded-full border-solid',
-            DELAY_CLASSES[idx],
-          )}
+          className={cn('absolute block animate-spinner rounded-full border-solid', delayClass)}
           style={{
             width: size,
             height: size,
             borderWidth: strokeWidth,
             borderColor: `${color} transparent transparent transparent`,
           }}
-          key={`loading-icon_${idx}`}
+          aria-hidden="true"
+          key={delayClass}
         />
       ))}
+      {/* Real text beats aria-label: it survives translation tooling and
+          text-to-speech quirks around unlabeled live regions. */}
+      <VisuallyHidden>{label}</VisuallyHidden>
     </div>
   );
 }

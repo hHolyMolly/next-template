@@ -55,16 +55,20 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 - **UI components** → `src/components/UI/` — based on **shadcn/ui** (new-york style).
   - Available: Button, Input, FormField, Dialog, Skeleton, Sonner (toast), VisuallyHidden.
   - Toast notifications use `sonner` — call `toast()` from `sonner` (see ContactForm for live usage).
-- Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders, ErrorBoundary).
+  - `Button` defaults to `type="button"` (except `asChild`); use `VisuallyHidden` for all sr-only text.
+- Layout components → `src/components/layouts/` (Header, Footer, Container, ClientProviders, ErrorBoundary, ErrorState).
 - Icons → `src/components/icons/`. `LoadingIcon` takes a `label` prop for its accessible name.
 - Page-specific/demo components → co-located at `src/app/[locale]/components/`.
+- **Folder convention**: a component gets a folder only when it has sibling files (schema, actions, data); single-file components are flat files (`layouts/Header.tsx`, not `Header/index.tsx`).
+- **Named exports** everywhere in layouts and `[locale]/components`; no mixed client/server barrels — import components by their full path.
 
 ### API
 
 - **Route Handlers** wrap in `withApiHandler` (`@/lib/withApiHandler`): CORS + rate limit (`createApiRateLimit` from `@/lib/rateLimit`) + `AppError` → JSON mapping. Live examples: `GET /api/health` (infra, never rate-limited), `POST /api/echo` (demo: Zod body validation + rate limit).
 - **All client API I/O goes through TanStack Query.** Define queries with `queryOptions()` in `src/services/api/queries.ts` — one definition serves `useQuery` on the client and `prefetchQuery` on the server. SSR flow: prefetch in a Server Component + `<HydrationBoundary state={dehydrate(qc)}>` (live example: `[locale]/page.tsx` → `HealthStatus`).
 - Reuse `STALE_TIMES` from `@/lib/queryClient`.
-- Axios instance (`src/services/api/instance.ts`) and `serverFetch` (`src/services/api/serverFetch.ts`) are the transport layer for real backends; interceptors must never log raw response bodies.
+- URL building goes through `resolveApiUrl()` and timeouts through `DEFAULT_TIMEOUT_MS` — both in `src/services/api/paths.ts`, shared by axios, `serverFetch` and queries.
+- Axios instance (`src/services/api/instance.ts`) and `serverFetch` (`src/services/api/serverFetch.ts`) are the transport layer for real backends; interceptors must never log raw response bodies. `ServerFetchError` extends `AppError`, so upstream statuses survive `toErrorResponse`.
 
 ### Forms
 
@@ -75,10 +79,10 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 ### Server Actions
 
 - Co-locate actions with their feature (`.../ContactForm/actions.ts`); files start with `'use server'`.
-- The canonical mutation pipeline (see `submitContact`):
-  `withServerAction(withActionRateLimit({...}, async (input) => { await assertSameOrigin(); ...validate with Zod...; return data; }))`
-- `assertSameOrigin()` is **mandatory** for every mutation; `proxy.ts` does not see Server Actions.
-- `withServerAction` returns a discriminated `ServerActionResult<T>` — actions never throw to the client.
+- The canonical mutation pipeline (see `submitContact`): `withServerAction` → `assertSameOrigin()` → `withActionRateLimit` → Zod re-validation → return data. **CSRF check runs BEFORE the rate limiter** so cross-site garbage can't burn a legitimate user's per-IP budget.
+- `assertSameOrigin()` is **mandatory** for every mutation; `proxy.ts` does not see Server Actions. It throws a `ForbiddenError` with a constant message (the offending origin is logged, never reflected).
+- `withServerAction` returns a discriminated `ServerActionResult<T>` — actions never throw to the client, but Next control-flow errors (`redirect()`/`notFound()`, digest `NEXT_*`) are re-thrown.
+- The error envelope is `toErrorPayload()` (`@/lib/errors`) everywhere — Route Handlers, Server Actions, middleware 429. `details` is nested, never spread.
 - Use `revalidatePath()` / `revalidateTag()` after real mutations.
 
 ### Types
@@ -89,11 +93,14 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 ### Hooks
 
 - Reusable hooks → `src/hooks/`, barrel in `src/hooks/index.ts`. All SSR-safe.
-- Available: `useMediaQuery`, `useDebounce`, `useThrottle`, `useClickOutside`, `useScrollLock`, `useToggle`, `useIsomorphicLayoutEffect`, `useEventListener`, `useLocalStorage`, `useIntersectionObserver`.
+- Available: `useMediaQuery`, `useDebounce`/`useDebouncedCallback`, `useThrottle`, `useClickOutside`, `useCopyToClipboard`, `useScrollLock`, `useToggle`, `useIsomorphicLayoutEffect`, `useEventListener`, `useLatestRef`, `useLocalStorage`, `useIntersectionObserver`.
+- `useLocalStorage` is `useSyncExternalStore`-based: same-tab + cross-tab sync, no hydration flash; `initialValue` is captured on first render (object literals are safe).
+- `useLatestRef` is the house pattern for "stable callback, fresh closure" — use it instead of hand-rolled `useRef`+`useEffect` mirrors.
+- Framework-free timing utils live in `src/utils/`: `debounce` (`.cancel()`/`.flush()`) and `throttle` (`.cancel()`); the hooks wrap them.
 
 ### Logging & Errors
 
-- Use `logger` from `@/utils/logger` (never `console.*`). `logger.child('scope')` returns a prefixed logger. Only `logger.error` survives production.
+- Use `logger` from `@/utils/logger` (never `console.*`). `logger.child('scope')` returns a prefixed logger (create it once at module scope). `logger.warn` **and** `logger.error` survive production — warn carries operational signals (rate-limit identity missing, config fallbacks); the rest are dev-only.
 - Error taxonomy: `AppError` subclasses in `@/lib/errors`; `toErrorResponse()` for handlers.
 - `errorReporting` (`@/lib/errorReporting`) is the reporter abstraction; `onRequestError` in `src/instrumentation.ts` is typed via `Instrumentation.onRequestError`.
 - `ErrorBoundary` renders a translated default fallback (`DefaultFallback`).
@@ -102,10 +109,12 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 
 - `src/configs/project/` — name, locales, sitemap, robots (`as const satisfies ProjectConfig`).
 - `src/configs/constants/urls.ts` — website + API URLs from env.
-- `src/configs/metadata/` — `getBaseMetadata(path)`, `createMetadata({ path, preview, ... })`.
+- `src/configs/metadata/` — `getBaseMetadata(path)`, `createMetadata({ path, preview, ... })`, `buildLocaleAlternates(path)` (the ONE hreflang rule — shared with `app/sitemap.ts`).
   - **Always pass `path`** for non-home pages — it builds the canonical + hreflang URLs.
+  - A page-level `title`/`description` propagates into `openGraph`/`twitter` automatically; explicit og/twitter overrides win.
   - OG/Twitter images come from the generated `opengraph-image.tsx`; per-page override via `createMetadata({ preview })`.
-- `src/configs/env.ts` — Zod v4 env validation (`z.url()`), run from `instrumentation.ts`.
+  - `generateMetadata` **and** every layout/page take `{ params }` and call `setRequestLocale(locale)` — skipping it drops the subtree out of static rendering.
+- `src/configs/env.ts` — Zod v4 env validation of ALL runtime env vars (URLs, CSP/TT toggles, proxy hops, port), run from `instrumentation.ts`. Edge-consumed vars are additionally sanitized in place in `proxy.ts`.
 - `src/configs/routes.ts` — typed route helpers (`routes.template()`).
 - `src/configs/featureFlags.ts` — `featureFlags.isEnabled('demoBanner')` (live example in DemoBanner).
 
@@ -119,7 +128,7 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 
 - **CSP nonce contract**: `proxy.ts` puts `x-nonce` + the CSP header on the **request** (via `new NextRequest(request, { headers })` into the intl middleware) so `headers()` in RSC sees the nonce AND Next can nonce its own bootstrap scripts (`strict-dynamic`); the CSP is then mirrored on the response. Never set these only on the response — production hydration breaks.
 - Middleware rate limiting covers **pages only** (matcher excludes `/api`); API routes rate-limit themselves via `withApiHandler` + `createApiRateLimit`, Server Actions via `withActionRateLimit`.
-- Set `TRUSTED_PROXY_HOPS` to match the reverse-proxy depth before trusting `x-forwarded-for`.
+- Set `TRUSTED_PROXY_HOPS` to match the reverse-proxy depth before trusting `x-forwarded-for`. **In production, when no trustworthy client IP can be resolved, rate limiting is SKIPPED** (one-time warning) — never collapsed into a shared bucket (that would be a site-wide self-DoS). Configure the hops or limits silently don't apply.
 - `.env.development` / `.env.production` are committed (no secrets); `.env*.local` is gitignored — real values go there. `dev/build/start` use Next's native env loading (no dotenv-cli) so `.env.local` correctly overrides.
 
 ### Code Style
@@ -132,8 +141,8 @@ Next.js 16 template (App Router, Turbopack) with TypeScript (strict), Tailwind C
 
 - Unit: **Vitest 4** + **React Testing Library**. Place `*.test.ts(x)` next to the source file.
 - Tests are typechecked separately: `pnpm typecheck:test` (tsconfig.test.json).
-- Coverage thresholds in `vitest.config.ts` are a ratchet — raise, never lower.
-- Reference tests: `src/lib/rateLimit.test.ts`, `errors.test.ts`, `assertSameOrigin.test.ts` (mocks `next/headers`), `src/hooks/useLocalStorage.test.ts`.
+- Coverage thresholds in `vitest.config.ts` are a ratchet — raise, never lower. `src/lib/**` is held to 70% (per-directory threshold).
+- Reference tests: `src/lib/rateLimit.test.ts`, `cors.test.ts`, `withApiHandler.test.ts`, `withServerAction.test.ts`, `assertSameOrigin.test.ts` (mocks `next/headers`), `src/configs/metadata/createMetadata.test.ts` (mocks `next-intl/server`), `src/hooks/useLocalStorage.test.ts`.
 
 ## Commands
 

@@ -45,27 +45,29 @@ export function WebVitals() {
 
     if (!VITALS_ENDPOINT) return;
 
-    const body = JSON.stringify({
-      name: metric.name,
-      value: metric.value,
-      rating: metric.rating,
-      id: metric.id,
-      delta: metric.delta,
-      navigationType: metric.navigationType,
-      page: typeof window !== 'undefined' ? window.location.pathname : undefined,
-    });
+    // Blob carries the Content-Type — a bare string beacon arrives as
+    // text/plain and most collectors reject it.
+    const body = new Blob(
+      [
+        JSON.stringify({
+          name: metric.name,
+          value: metric.value,
+          rating: metric.rating,
+          id: metric.id,
+          delta: metric.delta,
+          navigationType: metric.navigationType,
+          page: window.location.pathname,
+        }),
+      ],
+      { type: 'application/json' },
+    );
 
-    // `sendBeacon` is the recommended transport — it survives unload.
-    // Fall back to `fetch({ keepalive: true })` when unavailable.
-    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-      navigator.sendBeacon(VITALS_ENDPOINT, body);
-    } else if (typeof fetch !== 'undefined') {
-      void fetch(VITALS_ENDPOINT, {
-        method: 'POST',
-        body,
-        keepalive: true,
-        headers: { 'Content-Type': 'application/json' },
-      }).catch(() => {
+    // `sendBeacon` is the recommended transport — it survives unload. It
+    // returns false when the browser refuses (queue full) — fall back to
+    // `fetch({ keepalive: true })` so the metric isn't silently dropped.
+    const queued = navigator.sendBeacon?.(VITALS_ENDPOINT, body) ?? false;
+    if (!queued) {
+      void fetch(VITALS_ENDPOINT, { method: 'POST', body, keepalive: true }).catch(() => {
         // Swallow — losing a metric must never break the page.
       });
     }

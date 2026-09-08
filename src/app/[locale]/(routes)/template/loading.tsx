@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import { Skeleton } from '@/components/UI';
+import { Skeleton, VisuallyHidden } from '@/components/UI';
 
 /**
  * Route-level loading UI — streamed while the segment resolves.
@@ -12,13 +12,10 @@ function Loading() {
   const t = useTranslations('translations.shared');
 
   return (
-    <div
-      className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-8"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <span className="sr-only">{t('loading')}</span>
+    // role=status is an implicit polite live region — aria-live/aria-busy
+    // on top of it would be redundant.
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-8" role="status">
+      <VisuallyHidden>{t('loading')}</VisuallyHidden>
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-4 w-64" />
       <Skeleton className="h-4 w-56" />

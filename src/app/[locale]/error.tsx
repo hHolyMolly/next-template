@@ -1,8 +1,9 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useEffect } from 'react';
 
-import { Button } from '@/components/UI';
+import { ErrorState } from '@/components/layouts/ErrorState';
+import { errorReporting } from '@/lib/errorReporting';
 
 /**
  * Locale-level error boundary — catches runtime errors inside [locale] layout.
@@ -12,27 +13,17 @@ import { Button } from '@/components/UI';
  *              Does NOT navigate — simply retries rendering the failed segment.
  */
 
-interface ErrorPageProps {
+type ErrorPageProps = {
   error: Error & { digest?: string };
   reset: () => void;
-}
+};
 
 function ErrorPage({ error, reset }: ErrorPageProps) {
-  const t = useTranslations('translations.errors');
+  useEffect(() => {
+    errorReporting.captureException(error, { scope: 'locale-segment', digest: error.digest });
+  }, [error]);
 
-  return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
-      <h2 className="text-2xl font-semibold">{t('something_went_wrong')}</h2>
-
-      {process.env.NODE_ENV === 'development' && error.message && (
-        <pre className="max-w-[600px] overflow-auto rounded-lg bg-red-50 px-4 py-3 text-sm break-words whitespace-pre-wrap text-red-800">
-          {error.message}
-        </pre>
-      )}
-
-      <Button onClick={reset}>{t('try_again')}</Button>
-    </div>
-  );
+  return <ErrorState error={error} reset={reset} />;
 }
 
 export default ErrorPage;

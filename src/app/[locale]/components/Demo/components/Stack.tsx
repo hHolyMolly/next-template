@@ -1,10 +1,10 @@
 import type { StackItem } from '@/app/[locale]/components/Demo/types';
 
-interface StackProps {
+type StackProps = {
   items: StackItem[];
-}
+};
 
-export default function Stack({ items }: StackProps) {
+export function Stack({ items }: StackProps) {
   return (
     <div className="mx-auto flex max-w-[900px] flex-wrap justify-center gap-2 md:gap-3">
       {items.map(({ name, color, icon }) => (

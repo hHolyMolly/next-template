@@ -11,12 +11,17 @@
  * All API I/O in the app should go through TanStack Query — never fetch
  * directly from a component. That guarantees a single cache, automatic
  * deduplication, devtools insight, and consistent loading states.
+ *
+ * URL resolution goes through `resolveApiUrl` (paths.ts) — the same rule
+ * `serverFetch` uses. Note: SSR-prefetching your OWN /api routes is a
+ * self-fetch (an extra HTTP round-trip into the same server); prefer calling
+ * the underlying function directly when the data source lives in this app.
  */
 
 import { queryOptions } from '@tanstack/react-query';
 
-import { urls } from '@/configs/constants/urls';
 import { STALE_TIMES } from '@/lib/queryClient';
+import { resolveApiUrl } from '@/services/api/paths';
 
 // ---------- DTO ----------------------------------------------------------------
 
@@ -28,16 +33,10 @@ export type HealthResponse = {
 
 // ---------- Queries ------------------------------------------------------------
 
-/**
- * On the server (SSR prefetch) relative URLs don't resolve — use the
- * absolute site URL there and a same-origin relative path in the browser.
- */
-const apiBase = () => (typeof window === 'undefined' ? urls.website : '');
-
 export const healthQuery = queryOptions({
   queryKey: ['health'] as const,
   queryFn: async ({ signal }): Promise<HealthResponse> => {
-    const response = await fetch(`${apiBase()}/api/health`, { signal });
+    const response = await fetch(resolveApiUrl('/api/health'), { signal });
     if (!response.ok) {
       throw new Error(`Health check failed: ${response.status}`);
     }

@@ -1,18 +1,22 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { createMetadata } from '@/configs/metadata';
 
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 
-export async function generateTemplateMetadata(): Promise<Metadata> {
+type MetadataProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateTemplateMetadata({ params }: MetadataProps): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const t = await getTranslations('metadata.template');
 
-  const title = t('title');
-  const description = t('description');
-
   return createMetadata({
-    title,
-    description,
+    title: t('title'),
+    description: t('description'),
     path: '/template',
     // preview: '/assets/img/previews/template.webp',
   });
@@ -26,6 +30,7 @@ export async function generateTemplateMetadata(): Promise<Metadata> {
  *
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-viewport
  */
+// import type { Viewport } from 'next';
 // export function generateViewport(): Viewport {
 //   return {
 //     themeColor: [
@@ -35,4 +40,3 @@ export async function generateTemplateMetadata(): Promise<Metadata> {
 //     colorScheme: 'light dark',
 //   };
 // }
-export type { Viewport };

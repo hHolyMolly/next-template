@@ -96,7 +96,11 @@
 }
 
 @layer base {
-  * {
+  /* Pseudo-elements included — Tailwind v4 no longer applies the default
+     border color to ::before/::after via `*` alone. */
+  *,
+  ::before,
+  ::after {
     @apply border-border;
   }
 

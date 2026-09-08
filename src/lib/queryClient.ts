@@ -35,6 +35,11 @@ let browserQueryClient: QueryClient | undefined;
  * Returns a QueryClient instance.
  * On the server — deduplicates via React.cache() per request.
  * On the client — reuses the same singleton instance.
+ *
+ * `React.cache()` only works inside the React render path (Server
+ * Components, generateMetadata). Calling `getQueryClient()` from a Route
+ * Handler or Server Action creates a fresh client per call — fine for
+ * one-off prefetching, but don't expect cross-call sharing there.
  */
 const getServerQueryClient = cache(() => makeQueryClient());
 

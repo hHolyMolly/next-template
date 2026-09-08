@@ -1,13 +1,19 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import Footer from '@/components/layouts/Footer';
-import Header from '@/components/layouts/Header';
+import { Footer } from '@/components/layouts/Footer';
+import { Header } from '@/components/layouts/Header';
 
 type RoutesLayoutProps = {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 };
 
-async function RoutesLayout({ children }: RoutesLayoutProps) {
+async function RoutesLayout({ children, params }: RoutesLayoutProps) {
+  // Every layout/page in the tree must call this, or the whole subtree
+  // drops out of static rendering (next-intl requirement).
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const t = await getTranslations('translations.shared');
 
   return (

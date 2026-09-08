@@ -29,15 +29,19 @@ function Input({
 }: InputProps) {
   const reactId = React.useId();
   const inputId = id ?? reactId;
-  const hintId = hint ? `${inputId}-hint` : undefined;
+  // Only reference elements that actually render — error hides the hint,
+  // and a dangling id in aria-describedby is an a11y defect.
   const errorId = error ? `${inputId}-error` : undefined;
+  const hintId = hint && !error ? `${inputId}-hint` : undefined;
 
   const describedBy = [ariaDescribedBy, errorId, hintId].filter(Boolean).join(' ') || undefined;
 
   return (
     <div className={cn('flex flex-col gap-1.5', containerClassName)}>
+      {/* No hardcoded label color — it inherits, so the field works on dark
+          surfaces too (set a text color on `containerClassName`). */}
       {label ? (
-        <label htmlFor={inputId} className="text-sm font-medium text-foreground">
+        <label htmlFor={inputId} className="text-sm font-medium">
           {label}
         </label>
       ) : null}
@@ -56,8 +60,10 @@ function Input({
         {...props}
       />
 
+      {/* No role="alert": aria-invalid + aria-describedby already announce
+          the message — an alert on top of that reads it twice. */}
       {error ? (
-        <p id={errorId} role="alert" className="text-xs text-destructive">
+        <p id={errorId} className="text-xs text-destructive">
           {error}
         </p>
       ) : hint ? (

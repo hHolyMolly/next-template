@@ -82,20 +82,33 @@ export class RateLimitError extends AppError {
  * Handler. `AppError` subclasses keep their status/code/details; unknown
  * errors collapse to `500 INTERNAL` without leaking stack traces.
  */
-export function toErrorResponse(error: unknown): Response {
+export type ErrorPayload = {
+  code: AppErrorCode;
+  message: string;
+  details?: Readonly<Record<string, unknown>>;
+};
+
+/**
+ * The single client-facing error envelope — shared by Route Handlers
+ * (`toErrorResponse`), Server Actions (`withServerAction`) and the
+ * middleware 429. `details` is nested (never spread) so caller-controlled
+ * keys cannot shadow `code`/`message`.
+ */
+export function toErrorPayload(error: unknown): ErrorPayload {
   if (error instanceof AppError) {
-    return Response.json(
-      {
-        error: { code: error.code, message: error.message, ...(error.details ?? {}) },
-      },
-      { status: error.status },
-    );
+    return {
+      code: error.code,
+      message: error.message,
+      ...(error.details ? { details: error.details } : {}),
+    };
   }
 
-  return Response.json(
-    { error: { code: 'INTERNAL' as AppErrorCode, message: 'Internal Server Error' } },
-    { status: 500 },
-  );
+  return { code: 'INTERNAL', message: 'Internal Server Error' };
+}
+
+export function toErrorResponse(error: unknown): Response {
+  const status = error instanceof AppError ? error.status : 500;
+  return Response.json({ error: toErrorPayload(error) }, { status });
 }
 
 /** Type guard for narrowing `catch (err)` to AppError. */
