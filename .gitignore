@@ -44,3 +44,6 @@ next-env.d.ts
 # lint caches
 .eslintcache
 .stylelintcache
+
+# vitest 5 reporter artifacts
+.vitest/

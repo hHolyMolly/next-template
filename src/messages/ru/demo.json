@@ -8,10 +8,8 @@
   "footer": "Сделано",
   "copy_label": "Скопировать команду установки: {command}",
   "copy_done": "Скопировано в буфер обмена",
-
   "banner_text": "Этот баннер живёт в Redux (uiSlice) — закрытие диспатчит экшен.",
   "banner_dismiss": "Скрыть",
-
   "form_title": "Форма обратной связи",
   "form_description": "React Hook Form + Zod на клиенте; та же схема повторно валидируется в Server Action с rate-limit.",
   "form_name": "Имя",
@@ -23,9 +21,8 @@
   "form_error_name": "Имя должно быть не короче 2 символов",
   "form_error_email": "Введите корректный email",
   "form_error_message": "Сообщение должно быть не короче 10 символов",
-
   "health_title": "Статус API",
-  "health_description": "TanStack Query с SSR-префетчем + HydrationBoundary, читает /api/health.",
+  "health_description": "Потоковый SSR с TanStack Query: серверный prefetch без HTTP → HydrationBoundary → useSuspenseQuery; повторные запросы идут в /api/health.",
   "health_ok": "Работает",
   "health_error": "Недоступен",
   "health_checked": "Проверено в {time}"

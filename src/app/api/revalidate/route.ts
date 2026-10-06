@@ -1,25 +1,32 @@
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { timingSafeEqual } from 'node:crypto';
 
-import { AppError, ForbiddenError, ValidationError } from '@/lib/errors';
-import { NextResponse, withApiHandler } from '@/lib/withApiHandler';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { NextResponse } from 'next/server';
+
+import { projectConfig } from '@/configs/project';
+import { ForbiddenError, NotImplementedError, ValidationError } from '@/lib/errors';
+import { createApiRateLimit } from '@/lib/rateLimit';
+import { withApiHandler } from '@/lib/withApiHandler';
 
 /**
  * On-demand ISR webhook — point your CMS/backend at it after a publish:
  *
- *   POST /api/revalidate?secret=…&tag=posts
- *   POST /api/revalidate?secret=…  body: { "tags": ["post:hello"], "paths": ["/blog"] }
+ *   POST /api/revalidate?tag=posts            -H 'x-revalidate-secret: …'
+ *   POST /api/revalidate  body: { "tags": ["post:hello"], "paths": ["/blog"] }
  *
  * Security model: the shared secret IS the authentication.
+ * - Sent ONLY via the `x-revalidate-secret` header — never in the query
+ *   string (query strings land in access logs, proxies and browser history).
  * - `REVALIDATE_SECRET` unset → 501, so a fresh clone can't be abused.
- * - Wrong secret → 403 with a constant message.
+ * - Wrong secret → 403 with a constant message; constant-time comparison.
+ * - Rate-limited like any other endpoint (a publish hook never bursts).
  * Tags come from `CACHE_TAGS` (src/services/api/cache.ts) — keep the two
  * in sync when adding resources.
+ *
+ * Paths are app-relative (`/blog`) and revalidated for EVERY locale: pages
+ * live under `/[locale]/…`, so a bare `revalidatePath('/blog')` would miss
+ * both the unprefixed default locale and the prefixed ones.
  */
-
-class NotConfiguredError extends AppError {
-  readonly status = 501;
-  readonly code = 'INTERNAL';
-}
 
 type RevalidateBody = {
   tags?: string[];
@@ -41,16 +48,30 @@ async function readTargets(request: Request): Promise<RevalidateBody> {
   };
 }
 
+function secretMatches(provided: string | null, expected: string): boolean {
+  if (!provided) return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  // Length leaks nothing useful here (the secret is ≥16 random chars), but
+  // `timingSafeEqual` requires equal lengths, so guard it.
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/** `/blog` → `/[locale]/blog` (one dynamic route covers every locale). */
+function localizedPagePath(path: string): string {
+  const suffix = path === '/' ? '' : path;
+  return `/[locale]${suffix}`;
+}
+
 export const POST = withApiHandler({
+  rateLimit: createApiRateLimit({ limit: 30, windowSeconds: 60 }),
   handler: async (request) => {
     const secret = process.env.REVALIDATE_SECRET;
     if (!secret) {
-      throw new NotConfiguredError('Revalidation is not configured');
+      throw new NotImplementedError('Revalidation is not configured');
     }
 
-    const provided =
-      new URL(request.url).searchParams.get('secret') ?? request.headers.get('x-revalidate-secret');
-    if (provided !== secret) {
+    if (!secretMatches(request.headers.get('x-revalidate-secret'), secret)) {
       // Same 403 body for missing and wrong — don't leak which it was.
       throw new ForbiddenError('Invalid revalidation secret');
     }
@@ -59,12 +80,18 @@ export const POST = withApiHandler({
     if (!tags.length && !paths.length) {
       throw new ValidationError('Provide at least one tag or path');
     }
+    if (paths.some((p) => !p.startsWith('/'))) {
+      throw new ValidationError('Paths must be app-relative and start with "/"', 'paths');
+    }
 
     // Next 16 requires a cacheLife profile; 'max' = expire the tag now and
     // serve stale while the next request revalidates.
     for (const tag of tags) revalidateTag(tag, 'max');
-    for (const path of paths) revalidatePath(path);
+    for (const path of paths) revalidatePath(localizedPagePath(path), 'page');
 
-    return NextResponse.json({ revalidated: { tags, paths }, at: new Date().toISOString() });
+    return NextResponse.json({
+      revalidated: { tags, paths, locales: projectConfig.i18n.locales },
+      at: new Date().toISOString(),
+    });
   },
 });

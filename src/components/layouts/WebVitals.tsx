@@ -2,26 +2,20 @@
 
 import { useReportWebVitals } from 'next/web-vitals';
 
-import { errorReporting } from '@/lib/errorReporting';
 import { logger } from '@/utils/logger';
 
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
  * Endpoint that receives beacon payloads. Set it via
- * `NEXT_PUBLIC_VITALS_ENDPOINT` (e.g. `/api/vitals` or a 3rd-party URL).
- * When unset, metrics are only logged in development.
+ * `NEXT_PUBLIC_VITALS_ENDPOINT` — an absolute http(s) URL (env validation
+ * rejects relative paths), e.g. your own `/api/vitals` Route Handler as
+ * `https://example.com/api/vitals` or a 3rd-party collector. When unset,
+ * metrics are only logged in development. Each payload carries the web.dev
+ * `rating` ('good' | 'needs-improvement' | 'poor') — alert on 'poor' in the
+ * collector, not in the browser.
  */
 const VITALS_ENDPOINT = process.env.NEXT_PUBLIC_VITALS_ENDPOINT;
-
-/**
- * Rating thresholds from web.dev — surface regressions to the error
- * reporter so a real alerting pipeline can act on them.
- */
-function reportPoorMetric(name: string, value: number, rating: string) {
-  if (rating !== 'poor') return;
-  errorReporting.captureMessage(`web-vital:${name} poor (${Math.round(value)})`, 'warning');
-}
 
 /**
  * Reports Core Web Vitals metrics.
@@ -40,8 +34,6 @@ export function WebVitals() {
         id: metric.id,
       });
     }
-
-    reportPoorMetric(metric.name, metric.value, metric.rating);
 
     if (!VITALS_ENDPOINT) return;
 

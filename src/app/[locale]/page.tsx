@@ -2,7 +2,8 @@ import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { setRequestLocale } from 'next-intl/server';
 
 import { Demo } from '@/app/[locale]/components/Demo';
-import { LanguageSwitch } from '@/app/[locale]/components/LanguageSwitch';
+import { getHealth } from '@/app/api/health/getHealth';
+import { LanguageSwitch } from '@/components/layouts/LanguageSwitch';
 import { getQueryClient } from '@/lib/queryClient';
 import { healthQuery } from '@/services/api/queries';
 
@@ -16,18 +17,19 @@ async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  // SSR prefetch: HealthStatus (client) reads this from the hydrated cache
-  // instead of fetching after mount. `prefetchQuery` never throws — on
-  // failure the client simply refetches. Fired without await: TanStack v5
-  // dehydrates pending promises, so blocking TTFB on a self-fetch here
-  // would only slow the page down.
+  // SSR prefetch, streamed: the SAME query key the client uses, but the
+  // server calls the data function directly (`getHealth()`) — never a
+  // self-fetch into its own /api route. Fired without `await` on purpose:
+  // the query client dehydrates PENDING queries (see lib/queryClient), so
+  // the promise streams in the RSC payload and `HealthStatus` resolves it
+  // through `useSuspenseQuery`. `prefetchQuery` never throws.
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(healthQuery);
+  void queryClient.prefetchQuery({ ...healthQuery, queryFn: getHealth });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <main id="main-content">
-        <Demo languageSwitch={<LanguageSwitch />} />
+        <Demo languageSwitch={<LanguageSwitch variant="inverse" />} />
       </main>
     </HydrationBoundary>
   );

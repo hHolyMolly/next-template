@@ -1,19 +1,39 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import createMetadata from '@/configs/metadata/createMetadata';
+import { createMetadata } from '@/configs/metadata/createMetadata';
 
 vi.mock('next-intl/server', () => ({
   getTranslations: () =>
-    Promise.resolve((key: string) => (key === 'title' ? 'Global Title' : 'Global Description')),
+    Promise.resolve((key: string) => {
+      const messages: Record<string, string> = {
+        title: 'Global Title',
+        title_template: '%s | Global Title',
+        description: 'Global Description',
+      };
+      return messages[key] ?? key;
+    }),
   getLocale: () => Promise.resolve('en'),
 }));
 
 describe('createMetadata', () => {
   it('falls back to the global title/description everywhere', async () => {
     const meta = await createMetadata();
-    expect(meta.title).toBe('Global Title');
+    // The template lives on the ROOT layout (getBaseMetadata); a page without
+    // its own title opts out of it so the home page is not "Site | Site".
+    expect(meta.title).toEqual({ absolute: 'Global Title' });
     expect(meta.openGraph?.title).toBe('Global Title');
     expect(meta.twitter?.title).toBe('Global Title');
+  });
+
+  it('keeps a page title as a plain string so the parent template applies', async () => {
+    const meta = await createMetadata({ title: 'Page Title', path: '/page' });
+    expect(meta.title).toBe('Page Title');
+  });
+
+  it('builds the canonical from the shared hreflang rule', async () => {
+    const meta = await createMetadata({ path: '/about' });
+    expect(meta.alternates?.canonical).toBe(meta.alternates?.languages?.en);
+    expect(meta.alternates?.languages?.['x-default']).toMatch(/\/about$/);
   });
 
   it('propagates a page title/description into og AND twitter', async () => {

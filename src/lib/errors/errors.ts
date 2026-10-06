@@ -27,6 +27,7 @@ export type AppErrorCode =
   | 'FORBIDDEN'
   | 'CONFLICT'
   | 'RATE_LIMITED'
+  | 'NOT_IMPLEMENTED'
   | 'INTERNAL';
 
 export abstract class AppError extends Error {
@@ -77,11 +78,13 @@ export class RateLimitError extends AppError {
   readonly code = 'RATE_LIMITED';
 }
 
-/**
- * Convert any caught value into a typed `Response` suitable for a Route
- * Handler. `AppError` subclasses keep their status/code/details; unknown
- * errors collapse to `500 INTERNAL` without leaking stack traces.
- */
+/** A feature that exists but is not configured on this deployment (e.g. no secret set). */
+export class NotImplementedError extends AppError {
+  readonly status = 501;
+  readonly code = 'NOT_IMPLEMENTED';
+}
+
+/** The client-facing error envelope (see `toErrorPayload`). */
 export type ErrorPayload = {
   code: AppErrorCode;
   message: string;
@@ -106,12 +109,12 @@ export function toErrorPayload(error: unknown): ErrorPayload {
   return { code: 'INTERNAL', message: 'Internal Server Error' };
 }
 
+/**
+ * Convert any caught value into a typed `Response` suitable for a Route
+ * Handler. `AppError` subclasses keep their status/code/details; unknown
+ * errors collapse to `500 INTERNAL` without leaking stack traces.
+ */
 export function toErrorResponse(error: unknown): Response {
   const status = error instanceof AppError ? error.status : 500;
   return Response.json({ error: toErrorPayload(error) }, { status });
-}
-
-/** Type guard for narrowing `catch (err)` to AppError. */
-export function isAppError(error: unknown): error is AppError {
-  return error instanceof AppError;
 }

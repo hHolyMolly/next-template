@@ -19,7 +19,7 @@ declare global {
       /** Server API URL (for SSR requests) */
       readonly NEXT_PUBLIC_SERVER_URL?: string;
 
-      /** Web Vitals beacon endpoint (src/lib/webVitals.tsx) */
+      /** Web Vitals beacon endpoint (src/components/layouts/WebVitals.tsx) */
       readonly NEXT_PUBLIC_VITALS_ENDPOINT?: string;
 
       /** 'true' → send Content-Security-Policy-Report-Only instead of enforcing */
@@ -42,12 +42,6 @@ declare global {
 
       /** Shared secret for the /api/revalidate webhook (unset → 501) */
       readonly REVALIDATE_SECRET?: string;
-
-      /** 'true' → enable @next/bundle-analyzer during build */
-      readonly ANALYZE?: string;
-
-      /** Port used by `next dev` / `next start` */
-      readonly PORT?: string;
     }
   }
 }

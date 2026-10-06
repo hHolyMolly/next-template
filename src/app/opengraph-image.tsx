@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { getTranslations } from 'next-intl/server';
 
 import { projectConfig } from '@/configs/project';
 
@@ -8,14 +9,21 @@ export const contentType = 'image/png';
 
 /**
  * Default Open Graph image used by the root layout and any page that does
- * not override `preview`.
+ * not override `preview`. Copy comes from the default locale's
+ * `metadata.global` namespace (this route has no locale segment), colors
+ * from `projectConfig.theme`.
  *
  * Keep the implementation purely JSX + inline styles — the runtime does
  * not ship CSS. For per-page images, duplicate this file next to the page.
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image
  */
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const t = await getTranslations({
+    locale: projectConfig.i18n.defaultLocale,
+    namespace: 'metadata.global',
+  });
+
   return new ImageResponse(
     <div
       style={{
@@ -26,22 +34,25 @@ export default function OpengraphImage() {
         justifyContent: 'center',
         alignItems: 'flex-start',
         padding: '80px',
-        background: 'linear-gradient(135deg, #0b0b0d 0%, #1a1d24 100%)',
-        color: 'white',
+        background: `linear-gradient(135deg, ${projectConfig.theme.brand} 0%, #1a1d24 100%)`,
+        color: projectConfig.theme.onBrand,
         fontFamily: 'sans-serif',
       }}
     >
       <div style={{ fontSize: 28, opacity: 0.7, marginBottom: 24 }}>{projectConfig.name}</div>
       <div
         style={{
-          fontSize: 72,
+          fontSize: 56,
           fontWeight: 700,
-          lineHeight: 1.1,
+          lineHeight: 1.15,
           letterSpacing: '-0.02em',
-          maxWidth: 960,
+          maxWidth: 1000,
         }}
       >
-        A production-ready Next.js starter
+        {t('title')}
+      </div>
+      <div style={{ fontSize: 28, opacity: 0.8, marginTop: 24, maxWidth: 1000, lineHeight: 1.4 }}>
+        {t('description')}
       </div>
     </div>,
     size,

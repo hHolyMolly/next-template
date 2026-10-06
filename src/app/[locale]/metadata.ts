@@ -9,7 +9,7 @@ type MetadataProps = {
 };
 
 export async function generateHomeMetadata({ params }: MetadataProps): Promise<Metadata> {
-  // Without this, generateMetadata opts the page out of static rendering.
+  // next-intl requirement for generateMetadata (see [locale]/layout.tsx).
   const { locale } = await params;
   setRequestLocale(locale);
 

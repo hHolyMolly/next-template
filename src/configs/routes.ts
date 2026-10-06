@@ -11,11 +11,9 @@
  * routes.template();           // '/template'
  * routes.item({ id: '42' });   // '/items/42'
  */
-const routes = {
+export const routes = {
   home: () => '/' as const,
   template: () => '/template' as const,
   // Example of a dynamic route (uncomment and adapt):
   // item: ({ id }: { id: string | number }) => `/items/${id}` as const,
 } as const;
-
-export default routes;

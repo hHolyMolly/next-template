@@ -20,16 +20,13 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    dismissBanner(state) {
-      state.bannerDismissed = true;
-    },
     setBannerDismissed(state, action: PayloadAction<boolean>) {
       state.bannerDismissed = action.payload;
     },
   },
 });
 
-export const { dismissBanner, setBannerDismissed } = uiSlice.actions;
+export const { setBannerDismissed } = uiSlice.actions;
 
 /** Selector kept next to the slice — the only place that knows the shape. */
 export const selectBannerDismissed = (state: { ui: UiState }) => state.ui.bannerDismissed;

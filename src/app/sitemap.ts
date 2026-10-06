@@ -16,9 +16,14 @@ type Page = {
  * alternates without extra boilerplate.
  */
 const pages: readonly Page[] = [
+  { path: '/template', priority: 0.8, changeFrequency: 'monthly' },
   // { path: '/about',   priority: 0.8, changeFrequency: 'monthly' },
   // { path: '/contact', priority: 0.6, changeFrequency: 'yearly' },
 ];
+
+// Stamped once per server process (≈ per deploy), not per request — a
+// `lastModified` that changes on every crawl carries no information.
+const lastModified = new Date();
 
 /**
  * Generates `sitemap.xml` based on project configuration.
@@ -34,11 +39,9 @@ const pages: readonly Page[] = [
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!projectConfig.sitemap) return [];
 
-  const now = new Date();
-
   const root: MetadataRoute.Sitemap[number] = {
     url: urls.website,
-    lastModified: now,
+    lastModified,
     changeFrequency: 'weekly',
     priority: 1,
     alternates: { languages: buildLocaleAlternates('/') },
@@ -46,7 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const extra: MetadataRoute.Sitemap = pages.map((page) => ({
     url: `${urls.website}${page.path}`,
-    lastModified: now,
+    lastModified,
     ...(page.changeFrequency ? { changeFrequency: page.changeFrequency } : {}),
     ...(page.priority !== undefined ? { priority: page.priority } : {}),
     alternates: { languages: buildLocaleAlternates(page.path) },

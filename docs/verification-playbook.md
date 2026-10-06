@@ -7,9 +7,7 @@ CSP, caching, and status-code behavior.
 ## Gates (fast, run always)
 
 ```bash
-pnpm check          # lint + stylelint + prettier + typecheck (+tests) + vitest
-pnpm knip           # unused files/exports/deps
-pnpm check:i18n     # locale key parity
+pnpm check          # lint + stylelint + prettier + typecheck + typecheck:test + vitest + i18n + knip
 pnpm build          # includes scripts/check-public-env.mjs afterwards
 ```
 
@@ -24,14 +22,19 @@ pre-push = typecheck + typecheck:test + test.
 lsof -nP -iTCP:3100 -sTCP:LISTEN
 pkill -f next-server
 
+# Build against the LOCAL origin so canonical/hreflang/sitemap point at the
+# server you are testing (the committed .env.production value is the demo site).
+NEXT_PUBLIC_CLIENT_URL=http://localhost:3100 pnpm build
 PORT=3100 pnpm start &
 ```
 
 **Status codes** (404 must be a real 404, metadata routes must not bounce
-through the locale redirect):
+through the locale redirect). Note: the 404 body is an empty shell + RSC
+payload — Next renders not-found UI on the client, so check its markup
+(Header, `<main id="main-content">`, Footer) in the browser, not with curl:
 
 ```bash
-for p / /ru /template /nonexistent /manifest.webmanifest /sitemap.xml /robots.txt /api/health; do
+for p in / /ru /template /nonexistent /manifest.webmanifest /sitemap.xml /robots.txt /api/health; do
   curl -s -o /dev/null -w "%{http_code} $p\n" "http://localhost:3100$p"
 done
 ```
@@ -55,13 +58,18 @@ for i in $(seq 1 21); do
     -H 'content-type: application/json' -H 'x-real-ip: 7.7.7.7' -d '{"message":"hi"}'
 done
 grep -i 'HTTP/\|retry-after\|x-ratelimit' /tmp/h.txt   # expect 429 + full header set
+# A 2xx must carry X-RateLimit-* but NO Retry-After:
+curl -s -D- -o /dev/null -X POST localhost:3100/api/echo -H 'content-type: application/json' \
+  -H 'x-real-ip: 8.8.8.8' -d '{"message":"hi"}' | grep -i 'retry-after' && echo 'FAIL: Retry-After on 2xx'
 ```
 
 **Revalidate webhook** — unset secret must answer 501 (abuse-proof clone):
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' -X POST 'localhost:3100/api/revalidate?tag=posts'          # 501 (no secret configured)
-# with REVALIDATE_SECRET set: wrong secret → 403, correct + no targets → 400, correct + tag → 200
+# with REVALIDATE_SECRET set (header ONLY — a ?secret= query param is ignored):
+#   -H 'x-revalidate-secret: wrong' → 403 · correct + no targets → 400 · correct + ?tag=posts → 200
+#   paths are app-relative ('/blog') and revalidated for every locale
 ```
 
 **Error envelope** — validation errors nest details:
@@ -82,11 +90,23 @@ with a `loading.tsx`, open it in a browser, and confirm the skeleton is
 REPLACED by content with zero CSP violations in the console. Remove the
 delay afterwards.
 
-**OG tags** — per-page titles must reach the share cards:
+**Titles / OG tags** — the title template and per-page titles must reach
+the document and the share cards; robots must not block `/_next/`:
 
 ```bash
+curl -s localhost:3100/template | grep -o '<title>[^<]*</title>'            # Template Page | Next Template
 curl -s localhost:3100/template | grep -o '<meta property="og:title"[^>]*>'
+curl -s localhost:3100/robots.txt                                           # no /_next/ disallow
 ```
+
+**Streaming SSR + hydration (browser)** — open `/`: the health widget must
+show "Operational" with NO `/api/health` request in the Network tab after
+hydration and NO React #418/#423 hydration error in the console.
+
+**CSS layering + font (browser)** — on any page run in the console:
+`getComputedStyle(document.body).fontFamily` must start with Roboto;
+`getComputedStyle(document.querySelector('input')).borderRadius` must not
+be `0px`; links styled with `text-*` must not inherit the parent color.
 
 ## Template integrity
 
@@ -94,5 +114,5 @@ curl -s localhost:3100/template | grep -o '<meta property="og:title"[^>]*>'
 
 ```bash
 cp -R . /tmp/clean-test && cd /tmp/clean-test
-pnpm clean:demo --force && pnpm typecheck && pnpm test && pnpm build
+pnpm clean:demo --force && pnpm check && pnpm build   # language switcher must still be in the Header
 ```

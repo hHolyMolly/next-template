@@ -19,8 +19,19 @@ function emit(key: string) {
   keyListeners.get(key)?.forEach((cb) => cb());
 }
 
+function readRaw(key: string): string | null {
+  // Reads can throw too (Safari lockdown mode, sandboxed iframes, blocked
+  // site data) — a SecurityError during render would take the tree down.
+  try {
+    return window.localStorage.getItem(key);
+  } catch (err) {
+    logger.warn(`useLocalStorage: failed to read "${key}"`, err);
+    return null;
+  }
+}
+
 function readSnapshot<T>(key: string, initialValue: T): T {
-  const raw = window.localStorage.getItem(key);
+  const raw = readRaw(key);
   const cached = snapshotCache.get(key);
   if (cached && cached.raw === raw) return cached.value as T;
 
@@ -38,8 +49,11 @@ function readSnapshot<T>(key: string, initialValue: T): T {
 
 /**
  * Reactive wrapper around `localStorage` built on `useSyncExternalStore`:
- * - SSR-safe — renders `initialValue` on the server, reads storage on the
- *   very first client render (no post-mount flash).
+ * - SSR-safe — renders `initialValue` on the server and during hydration
+ *   (React uses `getServerSnapshot` until hydration completes), then
+ *   switches to the stored value. Components mounted AFTER hydration read
+ *   storage on their first render; components in the initial HTML may show
+ *   `initialValue` for one frame — gate on a mounted flag if that matters.
  * - Same-tab sync — two components with the same key see each other's writes.
  * - Cross-tab sync via the `storage` event, including removal/`clear()`.
  * - JSON serialization.

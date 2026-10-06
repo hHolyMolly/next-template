@@ -1,3 +1,12 @@
 # Supply-chain protection: only install package versions published at least
 # 3 days ago (4320 min). Bypass for a hotfix: pnpm add <pkg> --config.minimum-release-age=0
 minimumReleaseAge: 4320
+
+# pnpm 10 blocks install scripts unless allow-listed. Only native/binary
+# packages that genuinely need a build step belong here — audit before adding.
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - sharp
+  - unrs-resolver

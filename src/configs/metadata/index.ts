@@ -1,5 +1,2 @@
-import createMetadata from '@/configs/metadata/createMetadata';
-import getBaseMetadata from '@/configs/metadata/getBaseMetadata';
-
-export { previewImage } from '@/configs/metadata/getBaseMetadata';
-export { createMetadata, getBaseMetadata };
+export { createMetadata } from '@/configs/metadata/createMetadata';
+export { getBaseMetadata } from '@/configs/metadata/getBaseMetadata';

@@ -1,4 +1,3 @@
-/// <reference types="vitest" />
 import { fileURLToPath, URL } from 'node:url';
 
 import react from '@vitejs/plugin-react';
@@ -34,11 +33,12 @@ export default defineConfig({
         'src/app/**/page.tsx',
       ],
       // Ratchet baseline — raise as coverage grows, never lower.
+      // (v2.3.0 measured 44/50/36/45 — floors sit ~5pp below.)
       thresholds: {
-        statements: 10,
-        branches: 10,
-        functions: 10,
-        lines: 10,
+        statements: 40,
+        branches: 45,
+        functions: 30,
+        lines: 40,
         // The security-critical layer is held to a real bar.
         'src/lib/**': {
           statements: 70,

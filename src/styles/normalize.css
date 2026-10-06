@@ -1,53 +1,59 @@
 /**
  * Minimal CSS reset — complements Tailwind Preflight.
- * Only includes rules NOT covered by @tailwind base.
+ * Only includes rules NOT covered by Preflight.
+ *
+ * Everything lives in `@layer base` ON PURPOSE: unlayered CSS beats every
+ * cascade layer, so an unlayered `a { color: inherit }` or
+ * `input { border-radius: 0 }` here would silently override Tailwind
+ * utilities (`text-primary`, `rounded-md`) on every element it matches.
  */
+@layer base {
+  html {
+    overscroll-behavior: none;
+  }
 
-html {
-  overscroll-behavior: none;
-}
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 
-* {
-  -webkit-tap-highlight-color: transparent;
-}
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
 
-:focus:not(:focus-visible) {
-  outline: none;
-}
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+  }
 
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
+  input {
+    border-radius: 0;
+  }
 
-input {
-  border-radius: 0;
-}
+  textarea {
+    resize: vertical;
+  }
 
-textarea {
-  resize: vertical;
-}
+  input[type='number'] {
+    appearance: textfield;
+  }
 
-input[type='number'] {
-  appearance: textfield;
-}
+  input::-ms-clear {
+    display: none;
+  }
 
-input::-ms-clear {
-  display: none;
-}
+  button::-moz-focus-inner {
+    padding: 0;
+    border: 0;
+  }
 
-button::-moz-focus-inner {
-  padding: 0;
-  border: 0;
-}
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-img {
-  vertical-align: top;
-  user-select: none;
+  img {
+    vertical-align: top;
+    user-select: none;
+  }
 }

@@ -25,8 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  // Single light theme by design (no dark mode) — keep in sync with manifest.ts
-  themeColor: '#ffffff',
+  // Single light theme by design (no dark mode); shared with manifest.ts.
+  themeColor: projectConfig.theme.background,
 };
 
 async function RootLayout({ children }: RootLayoutProps) {
@@ -34,13 +34,13 @@ async function RootLayout({ children }: RootLayoutProps) {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
-    <html lang={locale}>
+    // The next/font variable MUST sit on <html>: Tailwind resolves
+    // `--font-sans: var(--font-app)` on :root, and a custom property is
+    // substituted where it is DEFINED — on <body> the reference is invalid
+    // at :root and the whole stack falls back to the system font.
+    // No preconnect to fonts.gstatic.com: next/font self-hosts at build time.
+    <html lang={locale} className={appFont.variable}>
       <head>
-        {/* Speed up `next/font/google` loads by establishing the TLS handshake
-            to fonts.gstatic.com as early as possible. `dns-prefetch` falls back
-            for browsers that ignore preconnect (mostly noop on modern ones). */}
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <script
           nonce={nonce}
           type="application/ld+json"
@@ -48,7 +48,7 @@ async function RootLayout({ children }: RootLayoutProps) {
           dangerouslySetInnerHTML={{ __html: websiteJsonLd(projectConfig.name, urls.website) }}
         />
       </head>
-      <body className={appFont.variable}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -130,24 +130,7 @@ const nextConfig: NextConfig = {
 
 const withNextIntl = createNextIntlPlugin('./src/services/i18n/request.ts');
 
-/**
- * Enable bundle analysis with:
- *   ANALYZE=true pnpm build
- * `@next/bundle-analyzer` is loaded on demand to avoid paying for it in CI.
- */
-async function withAnalyzer(cfg: NextConfig): Promise<NextConfig> {
-  if (process.env.ANALYZE !== 'true') return cfg;
-  try {
-    const mod = await import('@next/bundle-analyzer');
-    return mod.default({ enabled: true })(cfg);
-  } catch {
-    console.warn('[next.config] @next/bundle-analyzer not installed — skipping');
-    return cfg;
-  }
-}
-
-const config = withNextIntl(nextConfig);
-
-export default async function nextConfigFactory(): Promise<NextConfig> {
-  return withAnalyzer(config);
-}
+// Bundle analysis: `pnpm analyze` → `next experimental-analyze` (Turbopack
+// output, i.e. what actually ships). `@next/bundle-analyzer` is webpack-only
+// and would measure a bundle this project never builds.
+export default withNextIntl(nextConfig);

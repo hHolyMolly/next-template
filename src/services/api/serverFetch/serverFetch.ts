@@ -1,5 +1,7 @@
+import 'server-only';
+
 import { AppError, type AppErrorCode } from '@/lib/errors';
-import { DEFAULT_TIMEOUT_MS, resolveApiUrl } from '@/services/api/paths';
+import { DEFAULT_TIMEOUT_MS, resolveApiUrl } from '@/services/api/http';
 import { logger } from '@/utils/logger';
 
 /**
@@ -9,8 +11,8 @@ import { logger } from '@/utils/logger';
  * Use this in Server Components and Route Handlers when you want caching,
  * tag-based revalidation, or `cache: 'force-cache' | 'no-store'`.
  *
- * Use the axios `request()` helper in `instance.ts` only for client-side
- * calls or when you specifically need interceptors.
+ * Use the axios `request()` helper in `instance.ts` for client-side calls
+ * (TanStack queries) or when you specifically need interceptors.
  */
 type ServerFetchOptions = Omit<RequestInit, 'body' | 'signal'> & {
   /** Raw body — forwarded unchanged. Use `json` instead for typed payloads. */
@@ -30,28 +32,56 @@ type ServerFetchOptions = Omit<RequestInit, 'body' | 'signal'> & {
   timeoutMs?: number;
 };
 
+/** Map an upstream HTTP status onto the app's error taxonomy. */
+function codeForStatus(status: number): AppErrorCode {
+  switch (status) {
+    case 400:
+      return 'VALIDATION';
+    case 401:
+      return 'UNAUTHORIZED';
+    case 403:
+      return 'FORBIDDEN';
+    case 404:
+      return 'NOT_FOUND';
+    case 409:
+      return 'CONFLICT';
+    case 429:
+      return 'RATE_LIMITED';
+    default:
+      return 'INTERNAL';
+  }
+}
+
 /**
  * Extends `AppError` so an upstream failure surfaced through a Route Handler
- * keeps its real status instead of collapsing into a generic 500.
+ * keeps its real status and a matching `code` instead of collapsing into a
+ * generic 500.
  */
 export class ServerFetchError extends AppError {
   readonly status: number;
-  readonly code: AppErrorCode = 'INTERNAL';
+  readonly code: AppErrorCode;
   readonly url: string;
 
   constructor(message: string, init: { status: number; url: string }) {
     super(message);
     this.status = init.status;
+    this.code = codeForStatus(init.status);
     this.url = init.url;
   }
 }
+
+const JSON_CONTENT_TYPE = /^application\/(?:[\w.+-]+\+)?json\b/i;
 
 /**
  * Typed server-side fetch with JSON parsing, timeout, and Next.js cache tags.
  * JSON-only: non-JSON responses throw (see below); 204 resolves to undefined.
  *
+ * Paths resolve against the external backend (`resolveApiUrl`). For one of
+ * this app's own routes pass an absolute URL (`resolveAppUrl('/api/…')`) —
+ * absolute URLs pass through untouched.
+ *
  * @example
- * const users = await serverFetch<User[]>('/api/users', {
+ * const users = await serverFetch<User[]>('/users', {
  *   next: { revalidate: REVALIDATE.standard, tags: [CACHE_TAGS.users] },
  * });
  */
@@ -108,12 +138,14 @@ export async function serverFetch<T>(path: string, options: ServerFetchOptions =
     // JSON only, on purpose: a non-JSON 200 is almost always an HTML error
     // page from a misconfigured proxy/CDN — handing it to a caller typed
     // as T would crash somewhere far away (often at hydration). Fail HERE
-    // with a clear error instead.
+    // with a clear error. Reported as 502 (bad upstream), NOT the upstream's
+    // 200 — otherwise `toErrorResponse` would send an error body with a
+    // success status. `application/problem+json` and friends are accepted.
     const contentType = response.headers.get('content-type') ?? '';
-    if (!contentType.includes('application/json')) {
+    if (!JSON_CONTENT_TYPE.test(contentType)) {
       throw new ServerFetchError(
         `serverFetch expected JSON but got "${contentType || 'no content-type'}"`,
-        { status: response.status, url },
+        { status: 502, url },
       );
     }
     return (await response.json()) as T;

@@ -1,1 +1,1 @@
-export { default } from '@/configs/metadata/createMetadata/createMetadata';
+export { createMetadata } from '@/configs/metadata/createMetadata/createMetadata';

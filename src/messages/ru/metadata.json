@@ -1,6 +1,7 @@
 {
   "global": {
     "title": "Next Template",
+    "title_template": "%s | Next Template",
     "description": "Настроенная основа с TypeScript, Tailwind CSS, i18n и управлением состоянием — чтобы вы могли сосредоточиться на продукте, а не на настройке."
   },
 

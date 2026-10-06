@@ -1,7 +1,6 @@
-body {
-  // Single source of truth for the stack — defined in tailwind.css @theme.
-  font-family: var(--font-sans);
-}
+// Font family: Preflight sets `html { font-family: var(--default-font-family) }`
+// which resolves to `--font-sans` → `--font-app` (next/font variable placed on
+// <html> in app/layout.tsx). No body rule needed here.
 
 // Respect the user's OS-level motion preference.
 // Note: this is a blanket kill-switch — it shortens ALL animations and

@@ -1,5 +1,5 @@
 import { validateEnv } from '@/configs/env';
-import { logger } from '@/utils/logger';
+import { errorReporting } from '@/lib/errorReporting';
 
 import type { Instrumentation } from 'next';
 
@@ -18,15 +18,18 @@ export async function register() {
 }
 
 /**
- * Server-side error hook — receives every unhandled error from Server
- * Components, Server Actions and Route Handlers. Forward to your error
- * reporter of choice (Sentry / Datadog / Rollbar / etc.).
+ * Server-side error hook — receives unhandled errors from Server Components,
+ * Server Actions and Route Handlers that no wrapper caught (`withApiHandler`
+ * / `withServerAction` report their own catches). Everything funnels into
+ * `errorReporting` — swap the reporter there, not here.
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation#onrequesterror-optional
  */
 export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
-  // Replace with your reporter, e.g. Sentry.captureRequestError(error, request, context).
-  // Until then, at least leave a trace in the server logs — a silent no-op
-  // here means production errors vanish without a line anywhere.
-  logger.error(`[${context.routerKind}] ${request.method} ${request.path}`, error);
+  const err = error instanceof Error ? error : new Error(String(error));
+  errorReporting.captureException(err, {
+    routerKind: context.routerKind,
+    method: request.method,
+    path: request.path,
+  });
 };

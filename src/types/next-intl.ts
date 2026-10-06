@@ -1,9 +1,8 @@
 /**
  * Dynamic message types for next-intl.
  *
- * TypeScript cannot synchronously read JSON files from `public/`, so we
- * derive the message shape from the default locale's JSON files imported
- * via the `@public/*` alias (see `tsconfig.json`).
+ * The message shape is derived from the default locale's JSON files in
+ * `src/messages/en` (type-only imports — nothing lands in a bundle).
  *
  * Adding a namespace:
  * 1. Create `src/messages/{locale}/{namespace}.json`.

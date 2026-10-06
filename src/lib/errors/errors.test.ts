@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
   ConflictError,
   ForbiddenError,
-  isAppError,
   NotFoundError,
   RateLimitError,
+  NotImplementedError,
   toErrorPayload,
   toErrorResponse,
   UnauthorizedError,
@@ -65,10 +65,10 @@ describe('toErrorPayload', () => {
   });
 });
 
-describe('isAppError', () => {
-  it('narrows AppError instances only', () => {
-    expect(isAppError(new ValidationError('x'))).toBe(true);
-    expect(isAppError(new Error('x'))).toBe(false);
-    expect(isAppError('string')).toBe(false);
+describe('NotImplementedError', () => {
+  it('maps to 501 NOT_IMPLEMENTED', () => {
+    const err = new NotImplementedError('not configured');
+    expect(err.status).toBe(501);
+    expect(toErrorPayload(err)).toEqual({ code: 'NOT_IMPLEMENTED', message: 'not configured' });
   });
 });

@@ -5,9 +5,9 @@ import dynamic from 'next/dynamic';
 import { useState, type ReactNode } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 
+import { WebVitals } from '@/components/layouts/WebVitals';
 import { Toaster } from '@/components/UI/Sonner';
 import { getQueryClient } from '@/lib/queryClient';
-import { WebVitals } from '@/lib/webVitals';
 import { makeStore, type AppStore } from '@/store';
 
 type ClientProvidersProps = {

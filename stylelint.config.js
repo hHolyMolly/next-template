@@ -34,5 +34,5 @@ export default {
     'declaration-empty-line-before': null,
     'scss/dollar-variable-empty-line-before': null,
   },
-  ignoreFiles: ['node_modules/**', '.next/**', 'build/**', 'dist/**'],
+  ignoreFiles: ['node_modules/**', '.next/**', 'build/**'],
 };

@@ -1,9 +1,10 @@
 /**
  * Next.js 16 Middleware (proxy convention).
  *
- * In Next.js 16, `proxy.ts` replaces the legacy `middleware.ts`.
- * The exported function name must match the filename (`proxy`),
- * and `config.matcher` controls which routes are intercepted.
+ * In Next.js 16, `proxy.ts` replaces the legacy `middleware.ts` and always
+ * runs on the Node.js runtime. The exported function name must match the
+ * filename (`proxy`), and `config.matcher` controls which routes are
+ * intercepted.
  *
  * Composition: rate limit (pages only) → CSP nonce onto REQUEST headers →
  * next-intl routing → CSP mirrored onto the response.
@@ -16,7 +17,12 @@ import createMiddleware from 'next-intl/middleware';
 
 import { urls } from '@/configs/constants/urls';
 import { normalizeOrigin } from '@/lib/origin';
-import { createRateLimiter, rateLimitResponse, resolveClientIp } from '@/lib/rateLimit';
+import {
+  checkIdentity,
+  createRateLimiter,
+  rateLimitResponse,
+  type RateLimitConfig,
+} from '@/lib/rateLimit';
 import { routing } from '@/services/i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
@@ -27,49 +33,29 @@ const intlMiddleware = createMiddleware(routing);
  * entirely (e.g. server-sent events, long-polling).
  *
  * NOTE: `config.matcher` below excludes `/api` — these rules only ever see
- * page traffic. API routes rate-limit themselves via `withApiHandler`
- * (src/lib/withApiHandler.ts), which is where per-endpoint budgets belong.
+ * page traffic (including Server Action POSTs, which target the page URL).
+ * API routes rate-limit themselves via `withApiHandler`
+ * (src/lib/withApiHandler/), which is where per-endpoint budgets belong.
+ * Bypass IPs (`RATE_LIMIT_BYPASS_IPS`) are honoured inside `checkIdentity`.
  */
-const RATE_LIMIT_RULES: ReadonlyArray<{
-  pattern: RegExp;
-  config: { limit: number; windowSeconds: number } | null;
-}> = [
+const RATE_LIMIT_RULES: ReadonlyArray<{ pattern: RegExp; config: RateLimitConfig | null }> = [
   // Example: stricter budget for an expensive page.
   // { pattern: /^\/search(\/|$)/, config: { limit: 30, windowSeconds: 60 } },
 ];
 
-const DEFAULT_RATE_LIMIT = { limit: 100, windowSeconds: 60 } as const;
+const DEFAULT_RATE_LIMIT: RateLimitConfig = { limit: 100, windowSeconds: 60 };
 
-// Bounded: keyed by distinct configs from the static rules above, not by
-// request data — at most RATE_LIMIT_RULES.length + 1 entries ever exist.
-const limiters = new Map<string, ReturnType<typeof createRateLimiter>>();
-function getLimiter(cfg: { limit: number; windowSeconds: number }) {
-  const key = `${cfg.limit}:${cfg.windowSeconds}`;
-  let limiter = limiters.get(key);
-  if (!limiter) {
-    limiter = createRateLimiter(cfg);
-    limiters.set(key, limiter);
+// One limiter PER RULE (index-aligned), never per config shape — two rules
+// with equal numbers must not share a bucket. Bounded: rules.length + 1.
+const ruleLimiters: ReadonlyArray<ReturnType<typeof createRateLimiter> | null> =
+  RATE_LIMIT_RULES.map((rule) => (rule.config ? createRateLimiter(rule.config) : null));
+const defaultLimiter = createRateLimiter(DEFAULT_RATE_LIMIT);
+
+function pickLimiter(pathname: string) {
+  for (const [index, rule] of RATE_LIMIT_RULES.entries()) {
+    if (rule.pattern.test(pathname)) return ruleLimiters[index] ?? null;
   }
-  return limiter;
-}
-
-/**
- * IPs that should bypass the rate limiter (monitoring, internal cron, dev).
- * Populate via `RATE_LIMIT_BYPASS_IPS` env — comma-separated list.
- * Bypass only works when `TRUSTED_PROXY_HOPS` is set correctly.
- */
-const BYPASS_IPS: ReadonlySet<string> = new Set(
-  (process.env.RATE_LIMIT_BYPASS_IPS ?? '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean),
-);
-
-function pickRateLimit(pathname: string) {
-  for (const rule of RATE_LIMIT_RULES) {
-    if (rule.pattern.test(pathname)) return rule.config;
-  }
-  return DEFAULT_RATE_LIMIT;
+  return defaultLimiter;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -85,12 +71,21 @@ const ALLOWED_CONNECT = [urls.server.api, process.env.NEXT_PUBLIC_VITALS_ENDPOIN
 const ALLOWED_IMG: string[] = []; // e.g. 'https://images.unsplash.com'
 const ALLOWED_FONT = ['https://fonts.gstatic.com'];
 
-// CSP violation reporting endpoint. Validated here because middleware runs in
-// the Edge runtime where `validateEnv()` (instrumentation) never executes —
-// a malformed value would corrupt the whole CSP header.
-const CSP_REPORT_URI = normalizeOrigin(process.env.CSP_REPORT_URI ?? '')
-  ? (process.env.CSP_REPORT_URI as string)
-  : '';
+// CSP violation reporting endpoint. Parsed here (not just validated) because
+// this module is evaluated at module scope, possibly before `validateEnv()`
+// — and the NORMALIZED `href` is what goes into the header: a raw value
+// containing `;` would inject extra CSP directives.
+const CSP_REPORT_URI = parseReportUri(process.env.CSP_REPORT_URI);
+
+function parseReportUri(value: string | undefined): string {
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    return /^https?:$/.test(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+}
 
 // Trusted Types locks down DOM sink injection (innerHTML etc.). Roll out via
 // `TRUSTED_TYPES_MODE=report` first. Unknown values fall back to 'off' — a
@@ -116,7 +111,7 @@ const TRUSTED_TYPES_DIRECTIVES = [
  * effectively dynamic — a statically cached HTML shell would carry a stale
  * nonce. Keep this in mind before enabling `cacheComponents`.
  */
-function buildCsp(nonce: string): string {
+function buildCsp(nonce: string, options: { https: boolean }): string {
   const connectSrc = ["'self'", ...ALLOWED_CONNECT].join(' ');
   const imgSrc = ["'self'", 'data:', ...ALLOWED_IMG].join(' ');
   const fontSrc = ["'self'", ...ALLOWED_FONT].join(' ');
@@ -150,7 +145,10 @@ function buildCsp(nonce: string): string {
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
-    'upgrade-insecure-requests',
+    // Only when the page itself is served over HTTPS. On a plain-http origin
+    // (local `pnpm start`, dev) browsers upgrade every same-origin fetch and
+    // Link prefetch to https:// → ERR_SSL_PROTOCOL_ERROR, broken navigation.
+    ...(options.https ? ['upgrade-insecure-requests'] : []),
   ];
 
   // In `enforce` mode Trusted Types join the main policy. In `report` mode
@@ -173,27 +171,30 @@ function buildCsp(nonce: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  const rateLimitConfig = pickRateLimit(pathname);
-
-  if (rateLimitConfig) {
-    // `null` = identity unknown (no trusted proxy config) → skip limiting;
-    // one shared bucket would rate-limit the whole site as a single client.
-    const ip = resolveClientIp(request);
-    if (ip !== null && !BYPASS_IPS.has(ip)) {
-      const result = getLimiter(rateLimitConfig)(ip);
-      if (!result.success) return rateLimitResponse(result);
+  // Server Action POSTs hit the page URL and pass through here too — they
+  // consume this per-IP page budget AND their own `withActionRateLimit`
+  // budget. Don't short-circuit on the `next-action` header: it is
+  // client-controlled. Identity unknown → `checkIdentity` skips (one shared
+  // bucket would rate-limit the whole site as a single client).
+  const limiter = pickLimiter(request.nextUrl.pathname);
+  if (limiter) {
+    const outcome = checkIdentity(request, limiter, { scope: 'page' });
+    if (outcome.kind === 'checked' && !outcome.result.success) {
+      return rateLimitResponse(outcome.result);
     }
   }
 
   // Generate CSP nonce for inline scripts (JSON-LD, etc.).
-  // 16 cryptographically random bytes → base64 (~22 chars). Avoids `Buffer`,
-  // which is polyfilled in the Edge runtime, and gives full 128-bit entropy.
+  // 16 cryptographically random bytes → base64 (~22 chars), full 128-bit entropy.
   const nonceBytes = new Uint8Array(16);
   crypto.getRandomValues(nonceBytes);
   const nonce = btoa(String.fromCharCode(...nonceBytes));
 
-  const csp = buildCsp(nonce);
+  // Behind a TLS-terminating proxy the request URL is http — trust the
+  // forwarded protocol header the proxy sets.
+  const https =
+    request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https';
+  const csp = buildCsp(nonce, { https });
 
   // Report-Only mode lets you collect violations without breaking the page
   // while you tighten the policy.

@@ -8,6 +8,10 @@ updates:
       time: '06:00'
       timezone: Etc/UTC
     open-pull-requests-limit: 10
+    # Mirror pnpm's minimumReleaseAge (3 days) so Dependabot never proposes
+    # a version the lockfile refuses to install.
+    cooldown:
+      default-days: 3
     labels:
       - dependencies
     groups:
@@ -33,6 +37,8 @@ updates:
           - eslint
           - 'eslint-*'
           - '@typescript-eslint/*'
+        exclude-patterns:
+          - eslint-config-next # belongs to the `next` group
       testing:
         patterns:
           - vitest

@@ -59,6 +59,13 @@ Cause: report mode flipped the MAIN policy header to
 Fix: TT report directives go in a SEPARATE Report-Only header; the main CSP
 stays enforcing. Only `CSP_REPORT_ONLY=true` may change the main header.
 
+**Link prefetches / fetches fail with `ERR_SSL_PROTOCOL_ERROR` on a local
+`pnpm start` (http://localhost).**
+Cause: CSP `upgrade-insecure-requests` was sent unconditionally; the
+browser upgrades every same-origin request on an http page to https.
+Fix: the directive is added only when the request itself is HTTPS
+(`nextUrl.protocol` or `x-forwarded-proto`) — see `buildCsp` in `proxy.ts`.
+
 **HTTPS errors in dev for exactly one person on the team (Safari).**
 Cause: HSTS sent on http://localhost — Safari honours it and pins the
 origin; Chromium exempts localhost, so everyone else is fine.
@@ -77,7 +84,52 @@ Cause: a catch-all wrapper swallowed Next's control-flow errors —
 `redirect()`/`notFound()` THROW, with a `digest` starting `NEXT_`.
 Fix: re-throw them before generic error handling (see `withServerAction`).
 
+**Rate limiting looks like it works in the API but Server Actions are limited
+twice (page budget + action budget).**
+Cause: a Server Action is a POST to the page URL, so `proxy.ts` counts it
+against the per-IP PAGE budget as well as `withActionRateLimit`.
+Fix: nothing — by design (coarse floor + fine per-action budget). Do NOT
+short-circuit on the `next-action` header: it is client-controlled.
+
+**`/api/revalidate` returns 403 although the secret is right.**
+Cause: the secret was passed as `?secret=` — only the `x-revalidate-secret`
+header is accepted (query strings land in access logs).
+
+**`revalidatePath('/blog')` from the webhook changes nothing.**
+Cause: pages live under `/[locale]/…`; the bare path matches no route.
+Fix: the webhook revalidates `/[locale]<path>` with `type: 'page'`, which
+covers every locale (unprefixed default included).
+
 ## Data / React
+
+**The "SSR prefetch" demo works, but the client still fetches after mount.**
+Cause: TanStack's default `shouldDehydrateQuery` ships only `success`
+queries — an un-awaited `prefetchQuery` is still `pending` when
+`dehydrate()` runs and is silently dropped.
+Fix: `dehydrate.shouldDehydrateQuery` includes pending queries
+(`lib/queryClient`); the promise streams in the RSC payload.
+
+**React #418 "server rendered text didn't match" on a prefetched widget.**
+Cause: a pending-dehydrated query consumed with `useQuery` — the server
+rendered "Loading…", the streamed promise resolved before hydration, and
+the client rendered the data.
+Fix: `useSuspenseQuery` inside `<Suspense>` (both sides wait for the same
+promise); `ErrorBoundary` for the inline error state.
+
+**"A query that was dehydrated as pending ended up rejecting" /
+`⨯ Error: redacted` in the server log.**
+Cause: the server prefetch self-fetched `NEXT_PUBLIC_CLIENT_URL/api/…` —
+a different port (dev on 3200, URL says 3000) or the live demo site
+(`.env.production`) answered.
+Fix: server prefetches call the data function directly
+(`{ ...healthQuery, queryFn: getHealth }`); only the browser goes through
+the Route Handler.
+
+**Requests to own routes hit `https://backend/api/api/health`.**
+Cause: one resolver prefixed EVERY relative path with the backend base once
+`NEXT_PUBLIC_SERVER_URL` was set; axios does the same with `baseURL`.
+Fix: `resolveAppUrl()` (own routes, always absolute) vs `resolveApiUrl()`
+(backend) in `services/api/http.ts`.
 
 **A value set in env is `undefined` in the browser; every gate is green.**
 Cause: the bundler only rewrites literal `process.env.NEXT_PUBLIC_X` —
@@ -116,17 +168,54 @@ it. Known library caveat: react-hook-form and TanStack Table may need a
 `'use no memo'` directive on components the compiler mis-memoizes — prefer
 documenting the case here over sprinkling manual memoization.
 
+## CSS / fonts
+
+**Links inherit the parent color; inputs are square — the Tailwind classes
+are in the DOM but do nothing.**
+Cause: `normalize.css` was imported UNLAYERED. Unlayered CSS beats every
+cascade layer, so `a { color: inherit }` / `input { border-radius: 0 }`
+override `text-*` and `rounded-*` utilities regardless of specificity.
+Fix: the whole reset lives inside `@layer base`.
+
+**The next/font family never applies; the page renders in the system font.**
+Cause: the font variable class (`--font-app`) sat on `<body>` while
+Tailwind defines `--font-sans: var(--font-app)` on `:root`. A custom
+property is substituted where it is DEFINED, so at `:root` the reference
+was invalid and the stack collapsed to the fallback.
+Fix: put `appFont.variable` on `<html>` (= `:root`).
+
 ## Tooling
 
-**vitest 4 crashes on startup after an upgrade.**
-Cause: an old lockfile pins vite 5 as a transitive peer.
-Fix: explicit devDeps `vite@^7` + `@vitejs/plugin-react@^5` (v6 wants
-vite 8). Related: jsdom is pinned `^27` — 30 requires Node ≥ 24.15.
+**`pnpm typecheck:test` passes in seconds and never catches anything.**
+Cause: `tsconfig.test.json` overrode `include` but inherited `exclude`
+(`**/*.test.ts`) from the base config — the program contained two files.
+Fix: the test config sets its own `"exclude": ["node_modules"]`. Verify
+with `tsc -p tsconfig.test.json --showConfig | grep -c '\.test\.'`.
+
+**ESLint 10 install fails on peer dependencies.**
+Cause: `eslint-config-next` still depends on `eslint-plugin-react@7`,
+`eslint-plugin-import@2` and `eslint-plugin-jsx-a11y@6`, whose peer range
+tops out at ESLint 9.
+Fix: stay on ESLint 9; re-check with
+`pnpm view eslint-plugin-react@7 peerDependencies.eslint`.
+
+**vitest crashes on startup after an upgrade.**
+Cause: an old lockfile pins an older vite as a transitive peer.
+Fix: keep `vite`, `@vitejs/plugin-react` and `vitest` as explicit devDeps
+moving together (vitest 5 ↔ vite 8 ↔ plugin-react 6). Related: jsdom is
+pinned `^29` — 30 requires Node ≥ 24.15; bump both together.
 
 **Aliases don't resolve inside `*.test.tsx` only.**
 Cause: `vite-tsconfig-paths` reads the app tsconfig, which EXCLUDES tests.
 Fix: declare `resolve.alias` explicitly in `vitest.config.ts` (done) and
 typecheck tests with `tsconfig.test.json` (`pnpm typecheck:test`).
+
+**A server-only module explodes in a unit test ("cannot be imported from a
+Client Component").**
+Cause: `import 'server-only'` throws outside Next's RSC layer.
+Fix: `vitest.setup.ts` mocks `server-only`; add
+`// @vitest-environment node` to the test file so jsdom's `AbortSignal`
+doesn't fight Node's `fetch`.
 
 **`pnpm install` refuses a freshly released package version.**
 Cause: `minimumReleaseAge: 4320` (3 days) in `pnpm-workspace.yaml` —

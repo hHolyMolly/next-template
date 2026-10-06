@@ -1,9 +1,9 @@
-import { NextResponse, type NextRequest } from 'next/server';
-
 import { cors, handlePreflight, toMutableResponse } from '@/lib/cors';
-import { AppError, RateLimitError, ValidationError, toErrorResponse } from '@/lib/errors';
+import { errorReporting } from '@/lib/errorReporting';
+import { AppError, RateLimitError, toErrorResponse } from '@/lib/errors';
 import { rateLimitHeaders, type RateLimitResult } from '@/lib/rateLimit';
-import { logger } from '@/utils/logger';
+
+import type { NextRequest } from 'next/server';
 
 /**
  * Type-safe wrapper for Route Handlers.
@@ -13,7 +13,9 @@ import { logger } from '@/utils/logger';
  * 1. **CORS** — preflight + response headers when `cors` is provided.
  * 2. **Rate limiting** — runs before the handler; a blocked request gets a
  *    429 with `Retry-After` + `X-RateLimit-*` headers (successful responses
- *    carry the `X-RateLimit-*` headers too).
+ *    carry the `X-RateLimit-*` headers too, never `Retry-After`). When no
+ *    client identity can be resolved the check is skipped and no budget
+ *    headers are sent.
  * 3. **Error mapping** — any `AppError` becomes a structured JSON response,
  *    anything else is logged and turned into a sanitized 500.
  *
@@ -49,11 +51,13 @@ type Options = {
   rateLimit?: RateLimitCheck;
 };
 
-const log = logger.child('api');
-
 const RATE_LIMIT_HEADER_NAMES = ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'];
 
 function attachRateHeaders(response: Response, rate: RateLimitResult): Response {
+  // `resetAt: 0` = the limiter skipped this request (identity unknown) —
+  // advertising a budget that was never enforced would be misleading.
+  if (rate.resetAt === 0) return response;
+
   const out = toMutableResponse(response);
   for (const [key, value] of Object.entries(rateLimitHeaders(rate))) {
     out.headers.set(key, value);
@@ -97,7 +101,11 @@ export function withApiHandler(options: Options) {
       return applyCors(response, request);
     } catch (err) {
       if (!(err instanceof AppError)) {
-        log.error('Unhandled route handler error', err);
+        errorReporting.captureException(err instanceof Error ? err : new Error(String(err)), {
+          source: 'route-handler',
+          method: request.method,
+          path: request.nextUrl.pathname,
+        });
       }
 
       let response = toErrorResponse(err);
@@ -112,23 +120,3 @@ export function withApiHandler(options: Options) {
 withApiHandler.preflight = (corsOpts: CorsOptions) => {
   return (request: NextRequest): Response => handlePreflight(request, corsOpts);
 };
-
-/**
- * Lightweight runtime validator — use it inside a handler to produce a
- * `ValidationError` with a typed payload without pulling in zod.
- *
- * Note: rejects `undefined`, `null` and `''` only — `0`, `false` and `NaN`
- * are considered present. Use zod for anything richer.
- *
- * @example
- * const email = required(body.email, 'email');
- */
-export function required<T>(value: T | undefined | null, field: string): T {
-  if (value === undefined || value === null || value === '') {
-    throw new ValidationError(`${field} is required`, field);
-  }
-  return value;
-}
-
-/** Re-export for convenience — most handlers want `NextResponse.json`. */
-export { NextResponse };

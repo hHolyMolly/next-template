@@ -19,6 +19,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...(await Promise.all(
       namespaces.map(async (ns) => {
         try {
+          // Relative on purpose: the bundler needs a static prefix to build
+          // the dynamic-import chunk map; an alias here would not resolve.
           const mod = (await import(`../../messages/${locale}/${ns}.json`)) as {
             default?: Record<string, unknown>;
           };
@@ -41,7 +43,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
     // Handle missing translation keys gracefully.
     onError(error) {
-      // Suppress known missing-key warnings in development.
+      // A missing key is an operational signal — logged in every environment.
       if (error.code === 'MISSING_MESSAGE') {
         logger.warn(`Missing i18n key: ${error.message}`);
         return;

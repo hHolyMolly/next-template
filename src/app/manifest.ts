@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server';
+
 import { projectConfig } from '@/configs/project';
 
 import type { MetadataRoute } from 'next';
@@ -5,19 +7,27 @@ import type { MetadataRoute } from 'next';
 export const dynamic = 'force-static';
 
 /**
- * Web App Manifest.
+ * Web App Manifest. Texts come from the default locale's `metadata.global`
+ * namespace (the manifest route has no locale segment); colors from
+ * `projectConfig.theme`.
+ *
  * Replace icons once the brand assets are available — keep at least 192px
  * and 512px PNGs in `public/assets/icons/`.
  */
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const t = await getTranslations({
+    locale: projectConfig.i18n.defaultLocale,
+    namespace: 'metadata.global',
+  });
+
   return {
-    name: projectConfig.name,
-    short_name: projectConfig.name,
-    description: 'Production-ready Next.js starter',
+    name: t('title'),
+    short_name: t('title'),
+    description: t('description'),
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#0b0b0d',
+    background_color: projectConfig.theme.background,
+    theme_color: projectConfig.theme.background,
     icons: [
       {
         src: '/favicon.ico',

@@ -18,6 +18,13 @@ export type ProjectConfig = {
     timeZone?: string;
   };
 
+  /** Brand colors for metadata surfaces (viewport, manifest, generated images). */
+  theme: {
+    background: string;
+    brand: string;
+    onBrand: string;
+  };
+
   /** Generate sitemap.xml */
   sitemap: boolean;
 

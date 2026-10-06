@@ -7,6 +7,7 @@
 //   --force  run the finalization step even inside a git checkout
 //            (by default it only runs for degit clones, i.e. no .git)
 
+import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 
@@ -18,7 +19,8 @@ const projectName = args[0] ?? basename(resolve(ROOT));
 // ---------- 1. Remove demo files/dirs ----------------------------------------
 
 const demoPaths = [
-  // Demo, LanguageSwitch, ContactForm (+ Server Action), HealthStatus, DemoBanner
+  // Demo, ContactForm (+ Server Action), HealthStatus, DemoBanner.
+  // (LanguageSwitch lives in src/components/layouts and stays — the Header uses it.)
   'src/app/[locale]/components',
   // Demo-flavored home metadata (the skeleton page defines its own)
   'src/app/[locale]/metadata.ts',
@@ -54,24 +56,35 @@ if (existsSync(localesDir)) {
 // the skip-link from the group layout. No regex surgery on user code — the
 // whole file is replaced, which cannot produce broken syntax.
 const skeletonPath = join(ROOT, 'src/app/[locale]/(routes)/page.tsx');
-const skeleton = `import { getTranslations } from 'next-intl/server';
+const skeleton = `import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { Container } from '@/components/layouts/Container';
 import { createMetadata } from '@/configs/metadata';
 import { projectConfig } from '@/configs/project';
 
 import type { Metadata } from 'next';
 
-export async function generateMetadata(): Promise<Metadata> {
+type HomePageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: HomePageProps): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const t = await getTranslations('metadata.home');
 
   return createMetadata({ description: t('description') });
 }
 
-function HomePage() {
+async function HomePage({ params }: HomePageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   return (
-    <section className="container flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+    <Container className="flex min-h-[60vh] flex-col items-center justify-center gap-3 py-8 text-center">
       <h1 className="text-4xl font-bold tracking-tight">{projectConfig.name}</h1>
-    </section>
+    </Container>
   );
 }
 
@@ -110,19 +123,20 @@ if (existsSync(i18nConstants)) {
 // ---------- 3b. Widen knip ignores -------------------------------------------
 
 // The demo consumed parts of the library surface (server-action toolkit,
-// feature flags, store hooks, @hookform/resolvers). After removal they are
-// intentionally unused until the project grows into them — tell knip so the
-// gate stays green. Delete these entries once you consume the modules.
+// feature flags, store hooks, the axios transport, @hookform/resolvers).
+// After removal they are intentionally unused until the project grows into
+// them — tell knip so the gate stays green. Delete these entries once you
+// consume the modules.
 const knipPath = join(ROOT, 'knip.json');
 if (existsSync(knipPath)) {
   const knip = JSON.parse(readFileSync(knipPath, 'utf8'));
   const addIgnore = [
     'src/configs/featureFlags.ts',
-    'src/lib/rateLimitAction.ts',
-    'src/lib/withServerAction.ts',
+    'src/lib/withServerAction/**',
+    'src/services/api/**',
     'src/store/**',
   ];
-  const addIgnoreDeps = ['@hookform/resolvers'];
+  const addIgnoreDeps = ['@hookform/resolvers', 'axios'];
   knip.ignore = Array.from(new Set([...(knip.ignore ?? []), ...addIgnore]));
   knip.ignoreDependencies = Array.from(
     new Set([...(knip.ignoreDependencies ?? []), ...addIgnoreDeps]),
@@ -131,26 +145,42 @@ if (existsSync(knipPath)) {
   console.log('✓ widened knip.json ignores for the now-unconsumed library surface');
 }
 
-// ---------- 4. Reset the demo deploy URL -------------------------------------
-
-const envProd = join(ROOT, '.env.production');
-if (existsSync(envProd)) {
-  const src = readFileSync(envProd, 'utf8');
-  const next = src.replace(
-    /^NEXT_PUBLIC_CLIENT_URL=.*$/m,
-    'NEXT_PUBLIC_CLIENT_URL=https://example.com',
-  );
-  if (next !== src) {
-    writeFileSync(envProd, next);
-    console.log('✓ reset NEXT_PUBLIC_CLIENT_URL in .env.production (set your real domain!)');
-  }
-}
-
-// ---------- 5. Template finalization -----------------------------------------
+// ---------- 4. Template finalization -----------------------------------------
 
 const isGitCheckout = existsSync(join(ROOT, '.git'));
 
 if (!isGitCheckout || force) {
+  // Reset the demo deploy URL.
+  const envProd = join(ROOT, '.env.production');
+  if (existsSync(envProd)) {
+    const src = readFileSync(envProd, 'utf8');
+    const next = src.replace(
+      /^NEXT_PUBLIC_CLIENT_URL=.*$/m,
+      'NEXT_PUBLIC_CLIENT_URL=https://example.com',
+    );
+    if (next !== src) {
+      writeFileSync(envProd, next);
+      console.log('✓ reset NEXT_PUBLIC_CLIENT_URL in .env.production (set your real domain!)');
+    }
+  }
+
+  // Demo branding in the SEO namespace → project name (descriptions are
+  // yours to rewrite — grep "metadata.json").
+  if (existsSync(localesDir)) {
+    for (const locale of readdirSync(localesDir)) {
+      const file = join(localesDir, locale, 'metadata.json');
+      if (!existsSync(file)) continue;
+      const before = readFileSync(file, 'utf8');
+      const after = before.replaceAll('Next Template', projectName);
+      if (before !== after) {
+        writeFileSync(file, after);
+        console.log(
+          `✓ renamed Next Template → ${projectName} in src/messages/${locale}/metadata.json`,
+        );
+      }
+    }
+  }
+
   for (const file of ['LICENSE']) {
     const abs = join(ROOT, file);
     if (existsSync(abs)) {
@@ -159,7 +189,7 @@ if (!isGitCheckout || force) {
     }
   }
 
-  const filesToRename = ['src/configs/project/index.ts'];
+  const filesToRename = ['src/configs/project.ts'];
   for (const rel of filesToRename) {
     const abs = join(ROOT, rel);
     if (existsSync(abs)) {
@@ -182,13 +212,13 @@ if (!isGitCheckout || force) {
   if (pkg.scripts) {
     delete pkg.scripts['clean:demo'];
     // The env-bundle guard fails on values no client code references. The
-    // demo pulls NEXT_PUBLIC_CLIENT_URL into the client bundle (queries →
-    // resolveApiUrl); the cleaned skeleton doesn't, so guard only what the
-    // skeleton's client actually reads. Re-add vars as your app grows.
+    // demo pulls NEXT_PUBLIC_CLIENT_URL into the client bundle (healthQuery →
+    // resolveAppUrl → urls); the cleaned skeleton doesn't, so guard only what
+    // the skeleton's client actually reads. Re-add vars as your app grows.
     if (pkg.scripts.build) {
       pkg.scripts.build = pkg.scripts.build.replace(
         /check-public-env\.mjs .*$/,
-        'check-public-env.mjs NEXT_PUBLIC_VITALS_ENDPOINT',
+        'check-public-env.mjs NEXT_PUBLIC_VITALS_ENDPOINT NEXT_PUBLIC_SERVER_URL',
       );
     }
   }
@@ -210,6 +240,26 @@ if (!isGitCheckout || force) {
 } else {
   console.log('\nℹ Git checkout detected — finalization (rename/LICENSE) skipped.');
   console.log('  Re-run with --force to finalize: pnpm clean:demo my-app --force');
+}
+
+// ---------- 5. Re-format rewritten files ------------------------------------
+
+// JSON.stringify output is not Prettier output (array layout differs) — the
+// cleaned project must pass `pnpm format:check` out of the box.
+const touched = [
+  'knip.json',
+  'package.json',
+  'src/types/next-intl.ts',
+  'src/services/i18n/constants.ts',
+].filter((f) => existsSync(join(ROOT, f)));
+try {
+  execSync(`pnpm exec prettier --write ${touched.map((f) => JSON.stringify(f)).join(' ')}`, {
+    cwd: ROOT,
+    stdio: 'ignore',
+  });
+  console.log(`✓ formatted ${touched.join(', ')}`);
+} catch {
+  console.log('ℹ prettier not available — run `pnpm format` once dependencies are installed.');
 }
 
 console.log(`\n✅ Project "${projectName}" cleaned. Run: pnpm dev\n`);

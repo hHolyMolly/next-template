@@ -20,9 +20,10 @@ const SITE_ORIGIN = normalizeOrigin(urls.website) ?? 'http://localhost:3000';
  *    `NEXT_PUBLIC_CLIENT_URL` — same-site browsers set one of these for
  *    state-changing requests.
  *
- * Next.js 16 Server Actions already include an action-id secret, but this
- * helper adds defense-in-depth and is mandatory for plain Route Handlers
- * that perform mutations.
+ * Next.js already rejects Server Action POSTs whose `Origin` doesn't match
+ * the `Host` (see `serverActions.allowedOrigins`); this helper adds
+ * defense-in-depth (Sec-Fetch-Site, the configured public URL as the
+ * source of truth) and is mandatory for plain Route Handlers that mutate.
  *
  * @throws {ForbiddenError} (HTTP 403) with a constant message — the
  * offending origin is logged server-side, never reflected to the client.

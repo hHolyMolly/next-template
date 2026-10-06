@@ -162,3 +162,58 @@ describe('rateLimitHeaders / rateLimitResponse', () => {
     expect(body.error.code).toBe('RATE_LIMITED');
   });
 });
+
+describe('checkIdentity', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  async function load() {
+    vi.resetModules();
+    const [{ checkIdentity, createRateLimiter }, { logger }] = await Promise.all([
+      import('@/lib/rateLimit'),
+      import('@/utils/logger'),
+    ]);
+    return { checkIdentity, createRateLimiter, logger };
+  }
+
+  it('runs the limiter for a resolved identity', async () => {
+    const { checkIdentity, createRateLimiter } = await load();
+    const check = createRateLimiter({ limit: 5, windowSeconds: 60 });
+    const req = new NextRequest('http://localhost/x', { headers: { 'x-real-ip': '1.1.1.1' } });
+
+    const outcome = checkIdentity(req, check, { scope: 'page' });
+    expect(outcome).toMatchObject({ kind: 'checked', ip: '1.1.1.1' });
+    if (outcome.kind === 'checked') expect(outcome.result.remaining).toBe(4);
+  });
+
+  it('skips with reason "bypass" for an explicit bypass set', async () => {
+    const { checkIdentity, createRateLimiter } = await load();
+    const check = createRateLimiter({ limit: 1, windowSeconds: 60 });
+    const req = new NextRequest('http://localhost/x', { headers: { 'x-real-ip': '7.7.7.7' } });
+
+    const outcome = checkIdentity(req, check, { scope: 'api', bypass: new Set(['7.7.7.7']) });
+    expect(outcome).toEqual({ kind: 'skipped', reason: 'bypass' });
+  });
+
+  it('warns once PER SCOPE when identity is unknown in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const { checkIdentity, createRateLimiter, logger } = await load();
+    const warn = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const check = createRateLimiter({ limit: 1, windowSeconds: 60 });
+    const req = new NextRequest('http://localhost/x');
+
+    expect(checkIdentity(req, check, { scope: 'page' })).toEqual({
+      kind: 'skipped',
+      reason: 'no-identity',
+    });
+    checkIdentity(req, check, { scope: 'page' });
+    checkIdentity(req, check, { scope: 'api' });
+    checkIdentity(req, check, { scope: 'api' });
+
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenNthCalledWith(1, expect.stringContaining('[page]'));
+    expect(warn).toHaveBeenNthCalledWith(2, expect.stringContaining('[api]'));
+  });
+});

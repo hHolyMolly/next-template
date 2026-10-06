@@ -18,7 +18,10 @@ async function LocaleLayout({ children, params }: LocaleLayoutProps) {
     notFound();
   }
 
-  // Synchronous — enables static rendering for everything below.
+  // Required by next-intl for every layout/page/generateMetadata in the
+  // tree (it makes the locale available without reading request state).
+  // Note: pages are rendered per request anyway — the per-request CSP
+  // nonce (proxy.ts) makes every matched route dynamic by design.
   setRequestLocale(locale);
 
   // Ship only client-side namespaces — server-only ones (metadata) would

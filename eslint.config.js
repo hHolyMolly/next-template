@@ -1,5 +1,4 @@
 import tanstackQuery from '@tanstack/eslint-plugin-query';
-import nextConfig from 'eslint-config-next';
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import nextTypescript from 'eslint-config-next/typescript';
 import eslintConfigPrettier from 'eslint-config-prettier';
@@ -9,7 +8,7 @@ import unusedImports from 'eslint-plugin-unused-imports';
 // adding `jsxA11y.flatConfigs.recommended` causes a "Cannot redefine plugin" error.
 
 const eslintConfig = [
-  ...nextConfig,
+  // core-web-vitals already includes the base `eslint-config-next` preset.
   ...nextCoreWebVitals,
   ...nextTypescript,
   ...tanstackQuery.configs['flat/recommended'],
@@ -123,16 +122,6 @@ const eslintConfig = [
     ],
     rules: {
       'import/no-anonymous-default-export': 'off',
-    },
-  },
-  {
-    // next/font/google injects its own <link rel="preconnect" …> tags. The
-    // lint rule only pattern-matches on `fonts.googleapis.com`, which we do
-    // not add manually (we preconnect to `fonts.gstatic.com` — the asset
-    // origin — which is what actually speeds up font loads).
-    files: ['src/app/**/layout.tsx'],
-    rules: {
-      '@next/next/google-font-preconnect': 'off',
     },
   },
   eslintConfigPrettier,

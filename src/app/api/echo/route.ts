@@ -1,8 +1,9 @@
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { ValidationError } from '@/lib/errors';
 import { createApiRateLimit } from '@/lib/rateLimit';
-import { NextResponse, withApiHandler } from '@/lib/withApiHandler';
+import { withApiHandler } from '@/lib/withApiHandler';
 
 /**
  * Demo Route Handler (removed by `pnpm clean:demo`).

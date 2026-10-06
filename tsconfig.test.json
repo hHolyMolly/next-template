@@ -1,14 +1,20 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
+    "types": ["vitest/globals", "node"],
+    "tsBuildInfoFile": "node_modules/.cache/tsc/tsconfig.test.tsbuildinfo"
   },
   "include": [
+    "next-env.d.ts",
+    "src/types/env.d.ts",
     "vitest.config.ts",
     "vitest.setup.ts",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx"
-  ]
+  ],
+  // The base config EXCLUDES test files; without overriding `exclude` here the
+  // inherited list wins and `typecheck:test` silently checks zero tests.
+  "exclude": ["node_modules"]
 }

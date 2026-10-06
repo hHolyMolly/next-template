@@ -21,28 +21,34 @@ export function previewImage(path: string): string {
 
 /**
  * Base metadata for all pages.
- * All texts (including titleTemplate) come from i18n JSON files.
+ * All texts (title, the `%s | Site` title template, description) come from
+ * the `metadata.global` namespace.
+ *
+ * `title` is a `{ default, template }` object: a page that passes a plain
+ * string `title` to `createMetadata` gets the template applied by Next
+ * ("Template Page | Next Template"); a page without one shows `default`.
  *
  * @param path Route-relative path (e.g. `/template`) used to build canonical
  *             + hreflang URLs. Defaults to `/` — override per page.
  */
-async function getBaseMetadata(path = '/'): Promise<Metadata> {
+export async function getBaseMetadata(path = '/'): Promise<Metadata> {
   const [t, locale] = await Promise.all([getTranslations('metadata.global'), getLocale()]);
 
   const title = t('title');
   const description = t('description');
-  const suffix = path === '/' ? '' : path;
-  const localePrefix = locale === projectConfig.i18n.defaultLocale ? '' : `/${locale}`;
-  const canonical = `${urls.website}${localePrefix}${suffix}`;
+  // The ONE hreflang rule also yields the canonical — no second copy of the
+  // "default locale is unprefixed" logic to drift.
+  const languages = buildLocaleAlternates(path);
+  const canonical = languages[locale] ?? languages['x-default'];
 
   return {
-    title,
+    title: { default: title, template: t('title_template') },
     description,
     metadataBase: METADATA_BASE,
 
     alternates: {
-      canonical,
-      languages: buildLocaleAlternates(path),
+      ...(canonical ? { canonical } : {}),
+      languages,
     },
 
     // No static og/twitter images here — the generated `opengraph-image.tsx`
@@ -50,7 +56,7 @@ async function getBaseMetadata(path = '/'): Promise<Metadata> {
     // `preview` option of `createMetadata`.
     openGraph: {
       type: 'website',
-      url: canonical,
+      ...(canonical ? { url: canonical } : {}),
       title,
       description,
       locale,
@@ -64,5 +70,3 @@ async function getBaseMetadata(path = '/'): Promise<Metadata> {
     },
   };
 }
-
-export default getBaseMetadata;

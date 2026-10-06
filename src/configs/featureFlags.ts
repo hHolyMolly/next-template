@@ -34,9 +34,4 @@ export const featureFlags = {
   isEnabled(flag: FeatureFlagKey): boolean {
     return flags[flag];
   },
-
-  /** Get all flag values (useful for analytics/debugging). */
-  getAll(): Readonly<typeof flags> {
-    return Object.freeze({ ...flags });
-  },
 };

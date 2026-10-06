@@ -1,5 +1,7 @@
-import { AppError, toErrorPayload } from '@/lib/errors';
-import { logger } from '@/utils/logger';
+import { unstable_rethrow } from 'next/navigation';
+
+import { errorReporting } from '@/lib/errorReporting';
+import { AppError, type ErrorPayload, toErrorPayload } from '@/lib/errors';
 
 /**
  * Discriminated result returned by every wrapped Server Action.
@@ -13,15 +15,7 @@ import { logger } from '@/utils/logger';
  * // result.data is fully typed here
  */
 export type ServerActionResult<T> =
-  | { success: true; data: T }
-  | {
-      success: false;
-      error: {
-        code: string;
-        message: string;
-        details?: Readonly<Record<string, unknown>>;
-      };
-    };
+  { success: true; data: T } | { success: false; error: ErrorPayload };
 
 /**
  * Wrap a Server Action so it always returns a typed `ServerActionResult`
@@ -54,18 +48,14 @@ export function withServerAction<Args extends unknown[], T>(
     } catch (err) {
       // Next.js signals redirect()/notFound()/forbidden() by THROWING —
       // swallowing those errors would break control flow and surface a
-      // spurious error toast instead of navigating.
-      if (
-        err &&
-        typeof err === 'object' &&
-        'digest' in err &&
-        String((err as { digest: unknown }).digest).startsWith('NEXT_')
-      ) {
-        throw err;
-      }
+      // spurious error toast instead of navigating. `unstable_rethrow` is
+      // the official check (covers dynamic-usage/postpone signals too).
+      unstable_rethrow(err);
 
       if (!(err instanceof AppError)) {
-        logger.error('Unhandled Server Action error', err);
+        errorReporting.captureException(err instanceof Error ? err : new Error(String(err)), {
+          source: 'server-action',
+        });
       }
       return { success: false, error: toErrorPayload(err) };
     }

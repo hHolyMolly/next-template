@@ -1,6 +1,7 @@
 {
   "global": {
     "title": "Next Template",
+    "title_template": "%s | Next Template",
     "description": "A pre-configured foundation with TypeScript, Tailwind CSS, i18n, and state management — so you can focus on building, not setting up."
   },
 

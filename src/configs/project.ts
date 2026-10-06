@@ -19,6 +19,20 @@ export const projectConfig = {
     timeZone: 'UTC',
   },
 
+  /**
+   * Brand colors used OUTSIDE the CSS cascade — viewport `themeColor`, the
+   * web manifest and the generated icons/OG image (`next/og` ships no CSS).
+   * In-app colors stay in `src/styles/vars.css`.
+   */
+  theme: {
+    /** Page/browser-chrome background — single light theme by design. */
+    background: '#ffffff',
+    /** Dark brand surface for the app icon and share image. */
+    brand: '#0b0b0d',
+    /** Text on top of `brand`. */
+    onBrand: '#ffffff',
+  },
+
   /** Production flags. Disabled in dev to prevent crawling. */
   sitemap: process.env.NODE_ENV === 'production',
   robots: process.env.NODE_ENV === 'production',

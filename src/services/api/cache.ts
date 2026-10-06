@@ -5,7 +5,7 @@
  * has one answer per data category and invalidation is grep-able.
  *
  * @example
- * const posts = await serverFetch<Post[]>('/api/posts', {
+ * const posts = await serverFetch<Post[]>('/posts', {
  *   next: { revalidate: REVALIDATE.standard, tags: [CACHE_TAGS.posts] },
  * });
  *

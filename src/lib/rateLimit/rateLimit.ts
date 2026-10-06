@@ -3,12 +3,15 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { toErrorPayload, RateLimitError } from '@/lib/errors';
 import { logger } from '@/utils/logger';
 
-type RateLimitConfig = {
+export type RateLimitConfig = {
   /** Maximum number of requests within the window. */
   limit: number;
   /** Time window in seconds. */
   windowSeconds: number;
 };
+
+/** Where a limiter runs — used for per-scope warnings and log prefixes. */
+export type RateLimitScope = 'page' | 'api' | 'action';
 
 export type RateLimitResult = {
   success: boolean;
@@ -67,22 +70,60 @@ export function resolveClientIp(source: NextRequest | Headers): string | null {
   return null;
 }
 
-let warnedNoIdentity = false;
+/**
+ * IPs exempt from EVERY limiter (monitoring, internal cron, load tests).
+ * Populate via `RATE_LIMIT_BYPASS_IPS` — comma-separated. Only meaningful
+ * when `TRUSTED_PROXY_HOPS` is set correctly (otherwise identity is unknown
+ * and limiting is skipped anyway).
+ */
+const BYPASS_IPS: ReadonlySet<string> = new Set(
+  (process.env.RATE_LIMIT_BYPASS_IPS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
 
-/** One-time loud warning when rate limiting is skipped for lack of identity. */
-function warnNoIdentity(scope: string): void {
-  if (warnedNoIdentity) return;
-  warnedNoIdentity = true;
+const warnedScopes = new Set<RateLimitScope>();
+
+/** One loud warning PER SCOPE when rate limiting is skipped for lack of identity. */
+function warnNoIdentity(scope: RateLimitScope): void {
+  if (warnedScopes.has(scope)) return;
+  warnedScopes.add(scope);
   logger.warn(
     `[${scope}] client IP could not be resolved — rate limiting is SKIPPED. ` +
       'Set TRUSTED_PROXY_HOPS (see .env.example) to enable it in production.',
   );
 }
 
+export type IdentityCheck =
+  | { kind: 'skipped'; reason: 'no-identity' | 'bypass' }
+  | { kind: 'checked'; ip: string; result: RateLimitResult };
+
+/**
+ * The ONE identity rule shared by the middleware (`proxy.ts`), Route
+ * Handlers (`createApiRateLimit`) and Server Actions (`withActionRateLimit`):
+ * resolve the client IP → skip (identity unknown / bypass list) or run the
+ * limiter. Keeping it here means the three entry points can't drift.
+ */
+export function checkIdentity(
+  source: NextRequest | Headers,
+  check: (ip: string) => RateLimitResult,
+  options: { scope: RateLimitScope; bypass?: ReadonlySet<string> },
+): IdentityCheck {
+  const ip = resolveClientIp(source);
+  if (ip === null) {
+    warnNoIdentity(options.scope);
+    return { kind: 'skipped', reason: 'no-identity' };
+  }
+  if ((options.bypass ?? BYPASS_IPS).has(ip)) return { kind: 'skipped', reason: 'bypass' };
+  return { kind: 'checked', ip, result: check(ip) };
+}
+
 /**
  * Low-level limiter: check a single IP against the in-memory backend and
  * return the raw `RateLimitResult`. Used by middleware (`proxy.ts`), Route
- * Handlers (`createApiRateLimit`) and Server Actions (`rateLimitAction.ts`).
+ * Handlers (`createApiRateLimit`) and Server Actions (`rateLimitAction.ts`
+ * in this folder) — always through `checkIdentity`.
  *
  * The `Map`-backed backend works for long-running Node.js servers
  * (VPS, Docker, `next start`) but does NOT share state across serverless
@@ -111,28 +152,34 @@ export function createApiRateLimit(config: RateLimitConfig) {
   const check = createRateLimiter(config);
 
   return (request: NextRequest): RateLimitResult => {
-    const ip = resolveClientIp(request);
-    if (ip === null) {
-      warnNoIdentity('api');
-      return { success: true, limit: config.limit, remaining: config.limit, resetAt: 0 };
-    }
-    return check(ip);
+    const outcome = checkIdentity(request, check, { scope: 'api' });
+    // `resetAt: 0` marks "not checked" — `withApiHandler` omits the
+    // X-RateLimit-* headers for such results instead of advertising a
+    // budget that was never enforced.
+    return outcome.kind === 'checked'
+      ? outcome.result
+      : { success: true, limit: config.limit, remaining: config.limit, resetAt: 0 };
   };
 }
 
 /**
- * `Retry-After` + `X-RateLimit-*` headers for a rate-limited response.
+ * `X-RateLimit-*` budget headers (every checked response) plus
+ * `Retry-After` — only when the request was actually blocked; a 2xx
+ * carrying `Retry-After` confuses clients and proxies.
  * `X-RateLimit-Reset` is epoch SECONDS (the de-facto convention).
  */
 export function rateLimitHeaders(result: RateLimitResult): Record<string, string> {
-  const retryAfter = Math.max(1, Math.ceil((result.resetAt - Date.now()) / 1000));
-
-  return {
-    'Retry-After': String(retryAfter),
+  const headers: Record<string, string> = {
     'X-RateLimit-Limit': String(result.limit),
     'X-RateLimit-Remaining': String(result.remaining),
     'X-RateLimit-Reset': String(Math.ceil(result.resetAt / 1000)),
   };
+
+  if (!result.success) {
+    headers['Retry-After'] = String(Math.max(1, Math.ceil((result.resetAt - Date.now()) / 1000)));
+  }
+
+  return headers;
 }
 
 /** Build the middleware 429 response (same error envelope as the API layer). */

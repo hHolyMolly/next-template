@@ -3,11 +3,13 @@
  * Verify that all locales expose the same translation keys.
  *
  * - Reads every namespace from `src/messages/{locale}/*.json`.
- * - Compares key paths against the default locale defined in
- *   `src/services/i18n/constants.ts` (indirectly via project config).
- * - Exits with code 1 on any missing / extra keys.
+ * - Compares key paths against the reference locale: `en` when present
+ *   (the default locale in `src/configs/project.ts`), otherwise the first
+ *   directory. Override with `--reference=<locale>`.
+ * - Also reports namespace files that exist only outside the reference.
+ * - Exits with code 1 on any missing / extra keys or files.
  *
- * Usage: `pnpm check:i18n`
+ * Usage: `pnpm check:i18n [--reference=en]`
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -45,8 +47,13 @@ if (locales.length === 0) {
   process.exit(1);
 }
 
-// Namespaces are taken from the first locale (canonical reference).
-const [reference, ...others] = locales;
+const referenceArg = process.argv.find((a) => a.startsWith('--reference='))?.slice(12);
+const reference = referenceArg ?? (locales.includes('en') ? 'en' : locales[0]);
+if (!locales.includes(reference)) {
+  console.error(`Reference locale "${reference}" not found in ${localesDir}`);
+  process.exit(1);
+}
+const others = locales.filter((l) => l !== reference);
 const referenceDir = path.join(localesDir, reference);
 const namespaces = fs
   .readdirSync(referenceDir)
@@ -81,6 +88,19 @@ for (const ns of namespaces) {
       );
       hasErrors = true;
     }
+  }
+}
+
+// Files present in a non-reference locale only — a namespace nobody registered.
+for (const loc of others) {
+  const extraFiles = fs
+    .readdirSync(path.join(localesDir, loc))
+    .filter((f) => f.endsWith('.json') && !namespaces.includes(path.basename(f, '.json')));
+  if (extraFiles.length) {
+    console.error(
+      `✖ ${loc}/ — namespace files missing from ${reference}: ${extraFiles.join(', ')}`,
+    );
+    hasErrors = true;
   }
 }
 

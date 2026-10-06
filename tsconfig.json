@@ -16,6 +16,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./src/*"],
@@ -29,7 +30,6 @@
   },
   "include": [
     "next-env.d.ts",
-    "src/types/env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",

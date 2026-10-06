@@ -24,8 +24,9 @@ Only the `main` branch and the latest tagged release receive security fixes.
 
 In scope:
 
-- Code in this repository (`src/`, `proxy.ts`, middleware, server actions).
-- Default security headers, CSP, rate-limit, cookie defaults.
+- Code in this repository (`src/`, including the `proxy.ts` middleware, Route
+  Handlers and Server Actions).
+- Default security headers, CSP, rate limiting, the ISR webhook secret.
 
 Out of scope:
 

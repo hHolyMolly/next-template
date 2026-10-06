@@ -1,10 +1,15 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosError } from 'axios';
 
 import { urls } from '@/configs/constants/urls';
-import { DEFAULT_TIMEOUT_MS } from '@/services/api/paths';
+import { DEFAULT_TIMEOUT_MS } from '@/services/api/http';
 import { logger } from '@/utils/logger';
 
-const API: AxiosInstance = axios.create({
+/**
+ * Axios instance for the EXTERNAL backend (`baseURL` = `NEXT_PUBLIC_SERVER_URL/api`).
+ * Own routes must be passed as ABSOLUTE URLs (`resolveAppUrl()`), otherwise
+ * axios glues the relative path onto `baseURL`.
+ */
+export const API: AxiosInstance = axios.create({
   ...(urls.server.api ? { baseURL: urls.server.api } : {}),
   timeout: DEFAULT_TIMEOUT_MS,
   headers: { 'Content-Type': 'application/json' },
@@ -73,5 +78,3 @@ export function isApiError(error: unknown): error is AxiosError {
 export function isAbortError(error: unknown): boolean {
   return axios.isCancel(error);
 }
-
-export default API;

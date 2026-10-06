@@ -8,10 +8,8 @@
   "footer": "Made by",
   "copy_label": "Copy install command: {command}",
   "copy_done": "Copied to clipboard",
-
   "banner_text": "This banner lives in Redux (uiSlice) — dismissing it dispatches an action.",
   "banner_dismiss": "Dismiss",
-
   "form_title": "Contact form",
   "form_description": "React Hook Form + Zod on the client; the same schema is re-validated inside a rate-limited Server Action.",
   "form_name": "Name",
@@ -23,9 +21,8 @@
   "form_error_name": "Name must be at least 2 characters",
   "form_error_email": "Enter a valid email",
   "form_error_message": "Message must be at least 10 characters",
-
   "health_title": "API health",
-  "health_description": "TanStack Query with SSR prefetch + HydrationBoundary, reading /api/health.",
+  "health_description": "TanStack Query streaming SSR: in-process server prefetch → HydrationBoundary → useSuspenseQuery; refetches hit /api/health.",
   "health_ok": "Operational",
   "health_error": "Unavailable",
   "health_checked": "Checked at {time}"

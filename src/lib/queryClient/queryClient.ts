@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { defaultShouldDehydrateQuery, QueryClient } from '@tanstack/react-query';
 import { cache } from 'react';
 
 /**
@@ -34,6 +34,17 @@ function makeQueryClient() {
       },
       mutations: {
         networkMode: 'always',
+      },
+      dehydrate: {
+        // The default ships only `success` queries. A server prefetch that is
+        // fired without `await` (see [locale]/page.tsx) is still `pending`
+        // when `dehydrate()` runs and would be silently dropped — the client
+        // would refetch after mount and the "SSR prefetch" would be a no-op.
+        // Including pending queries streams the promise in the RSC payload
+        // and HydrationBoundary resolves it on the client. Rejections stay
+        // redacted (default `shouldRedactErrors`).
+        shouldDehydrateQuery: (query) =>
+          defaultShouldDehydrateQuery(query) || query.state.status === 'pending',
       },
     },
   });

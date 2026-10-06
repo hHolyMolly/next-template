@@ -6,7 +6,10 @@ import { ErrorState } from '@/components/layouts/ErrorState';
 import { errorReporting } from '@/lib/errorReporting';
 
 /**
- * Locale-level error boundary — catches runtime errors inside [locale] layout.
+ * Locale-level error boundary — catches runtime errors thrown by pages and
+ * nested layouts BELOW `[locale]/layout.tsx`. Errors inside that layout
+ * itself propagate to `app/global-error.tsx` (an error.tsx never catches
+ * its own sibling layout).
  *
  * `error` — the Error object thrown by a child component.
  * `reset()` — re-renders the error boundary's children to attempt recovery.

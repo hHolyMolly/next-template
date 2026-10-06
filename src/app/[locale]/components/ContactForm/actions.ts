@@ -8,7 +8,7 @@ import {
 } from '@/app/[locale]/components/ContactForm/schema';
 import { assertSameOrigin } from '@/lib/assertSameOrigin';
 import { ValidationError } from '@/lib/errors';
-import { withActionRateLimit } from '@/lib/rateLimitAction';
+import { withActionRateLimit } from '@/lib/rateLimit/rateLimitAction';
 import { withServerAction } from '@/lib/withServerAction';
 import { logger } from '@/utils/logger';
 

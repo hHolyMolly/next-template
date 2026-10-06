@@ -19,7 +19,8 @@
   "scss.validate": false,
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
   "tailwindCSS.includeLanguages": {
     "typescript": "javascript",
@@ -29,7 +30,6 @@
     "**/node_modules": true,
     "**/.next": true,
     "**/coverage": true,
-    "**/test-results": true,
     "**/pnpm-lock.yaml": true
   }
 }

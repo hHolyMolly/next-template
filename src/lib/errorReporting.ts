@@ -22,10 +22,14 @@ const log = logger.child('errorReporting');
  *
  * Swap the implementation (e.g. Sentry, Datadog, Rollbar) without touching
  * call sites: every consumer imports `errorReporting` and uses the same API.
+ * Server-side, `withApiHandler`, `withServerAction` and
+ * `instrumentation.onRequestError` all report through here too — so a real
+ * reporter is wired up in exactly ONE place.
  */
 export const errorReporting: Reporter = {
   captureException(error, context) {
-    log.error(error.message, context);
+    // The Error object itself (not just `.message`) — the stack is the point.
+    log.error(error, context);
   },
   captureMessage(message, level = 'info') {
     // Route to the matching logger method — only real errors should reach

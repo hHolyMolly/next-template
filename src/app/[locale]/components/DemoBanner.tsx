@@ -8,7 +8,7 @@ import { VisuallyHidden } from '@/components/UI';
 import { featureFlags } from '@/configs/featureFlags';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { dismissBanner, selectBannerDismissed, setBannerDismissed } from '@/store/slices/uiSlice';
+import { selectBannerDismissed, setBannerDismissed } from '@/store/slices/uiSlice';
 
 const STORAGE_KEY = 'demo-banner-dismissed';
 
@@ -33,7 +33,7 @@ export function DemoBanner() {
   if (!featureFlags.isEnabled('demoBanner') || dismissed) return null;
 
   const handleDismiss = () => {
-    dispatch(dismissBanner());
+    dispatch(setBannerDismissed(true));
     setStoredDismissed(true);
   };
 

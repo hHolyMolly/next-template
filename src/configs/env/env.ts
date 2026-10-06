@@ -3,19 +3,16 @@
  * Called at application startup (instrumentation.register) for early
  * problem detection.
  *
- * Note: `proxy.ts` runs in its own (Edge) runtime and reads several of these
- * variables at module scope BEFORE this validator runs — that's why the
- * middleware also sanitizes its inputs in place (whitelist for
- * TRUSTED_TYPES_MODE, URL-parse for CSP_REPORT_URI). This schema still
- * catches typos at boot instead of letting them silently degrade to
- * defaults in production.
+ * Note: `proxy.ts` reads several of these variables at module scope, which
+ * can happen before `register()` runs — that's why the middleware also
+ * sanitizes its inputs in place (whitelist for TRUSTED_TYPES_MODE, URL-parse
+ * for CSP_REPORT_URI). This schema still catches typos at boot instead of
+ * letting them silently degrade to defaults in production.
  */
 
 import { z } from 'zod';
 
-const urlSchema = z
-  .url()
-  .refine((v) => /^https?:\/\//.test(v), { message: 'URL must use http(s) protocol' });
+const urlSchema = z.url({ protocol: /^https?$/, error: 'URL must be absolute and use http(s)' });
 
 const optionalBool = z.enum(['true', 'false']).optional().or(z.literal(''));
 
@@ -48,14 +45,6 @@ const envSchema = z.object({
   CSP_STRICT_STYLES: optionalBool,
   CSP_REPORT_URI: urlSchema.optional().or(z.literal('')),
   TRUSTED_TYPES_MODE: z.enum(['off', 'report', 'enforce']).optional().or(z.literal('')),
-
-  ANALYZE: optionalBool,
-  PORT: z
-    .string()
-    .optional()
-    .refine((v) => v === undefined || v === '' || /^\d+$/.test(v), {
-      message: 'PORT must be a number',
-    }),
 });
 
 export function validateEnv(): void {
@@ -64,6 +53,6 @@ export function validateEnv(): void {
 
   const lines = result.error.issues.map((i) => `  - ${i.path.join('.') || '(root)'}: ${i.message}`);
   throw new Error(
-    `❌ Invalid environment variables:\n${lines.join('\n')}\n\nCreate .env.development from .env.example and fill in the values.`,
+    `❌ Invalid environment variables:\n${lines.join('\n')}\n\nPut real values into .env.local (see .env.example) — .env.development/.env.production are committed defaults.`,
   );
 }

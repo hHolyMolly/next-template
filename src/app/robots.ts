@@ -20,12 +20,10 @@ export default function robots(): MetadataRoute.Robots {
   }
 
   return {
-    rules: [
-      { userAgent: '*', allow: '/' },
-      // Block crawling of API routes and internal paths
-      { userAgent: '*', disallow: ['/api/', '/_next/'] },
-    ],
+    // One rule group per user agent. `/_next/` must stay crawlable —
+    // Googlebot needs the JS/CSS under it to render pages. `host` is a
+    // Yandex-only directive that has been deprecated; omitted on purpose.
+    rules: { userAgent: '*', allow: '/', disallow: ['/api/'] },
     ...(projectConfig.sitemap && { sitemap: `${urls.website}/sitemap.xml` }),
-    host: urls.website,
   };
 }

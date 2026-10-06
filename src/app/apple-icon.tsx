@@ -6,8 +6,9 @@ export const size = { width: 180, height: 180 };
 export const contentType = 'image/png';
 
 /**
- * Apple touch icon (home-screen on iOS/iPadOS). See `icon.tsx` for the
- * standard favicon. Replace with a static PNG once branding is final.
+ * Apple touch icon (home-screen on iOS/iPadOS). The standard favicon is the
+ * static `src/app/favicon.ico`. Replace with a static PNG once branding is
+ * final; colors come from `projectConfig.theme`.
  */
 export default function AppleIcon() {
   const initial = projectConfig.name?.[0]?.toUpperCase() ?? 'A';
@@ -20,8 +21,8 @@ export default function AppleIcon() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#0b0b0d',
-        color: '#ffffff',
+        background: projectConfig.theme.brand,
+        color: projectConfig.theme.onBrand,
         fontSize: 110,
         fontWeight: 700,
         letterSpacing: -4,

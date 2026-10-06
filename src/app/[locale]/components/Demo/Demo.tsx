@@ -13,13 +13,13 @@ import { CopyCommand } from '@/app/[locale]/components/Demo/components/CopyComma
 import { DemoFooter } from '@/app/[locale]/components/Demo/components/DemoFooter';
 import { Hero } from '@/app/[locale]/components/Demo/components/Hero';
 import { Stack } from '@/app/[locale]/components/Demo/components/Stack';
-import { actionLinks } from '@/app/[locale]/components/Demo/data/actions';
 import {
   INSTALL_COMMAND,
   AUTHOR,
   AUTHOR_URL,
   VERSION,
 } from '@/app/[locale]/components/Demo/data/constants';
+import { actionLinks } from '@/app/[locale]/components/Demo/data/links';
 import { stack } from '@/app/[locale]/components/Demo/data/stack';
 import { DemoBanner } from '@/app/[locale]/components/DemoBanner';
 import { HealthStatus } from '@/app/[locale]/components/HealthStatus';

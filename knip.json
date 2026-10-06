@@ -1,25 +1,20 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
     "src/app/**/{page,layout,loading,error,not-found,route,sitemap,robots,manifest,opengraph-image,twitter-image,icon,apple-icon,global-error,default,template}.{ts,tsx}",
     "src/services/i18n/request.ts"
   ],
-  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,js,mjs}"],
+  "project": ["src/**/*.{ts,tsx,css,scss,sass}", "scripts/**/*.{ts,js,mjs}"],
   "ignore": [
     "src/hooks/**",
     "src/components/UI/**",
     "src/components/icons/**",
     "src/components/layouts/ErrorBoundary.tsx",
     "src/lib/lazyLoad.tsx",
-    "src/services/api/**",
     "src/types/**",
-    "src/utils/**"
-  ],
-  "ignoreDependencies": [
-    "axios",
-    "eslint-import-resolver-typescript",
-    "tailwindcss",
-    "tw-animate-css"
+    "src/utils/**",
+    "src/services/api/cache.ts",
+    "src/services/api/paths.ts"
   ],
   "ignoreExportsUsedInFile": true,
   "rules": {
